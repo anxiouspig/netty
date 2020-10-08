@@ -30,11 +30,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
 /**
- * A random and sequential accessible sequence of zero or more bytes (octets).
- * This interface provides an abstract view for one or more primitive byte
- * arrays ({@code byte[]}) and {@linkplain ByteBuffer NIO buffers}.
+ * 由0或多个字节（八位字节）组成的随机和顺序访问序列。
+ * 这个接口为一个或多个原始字节数组提供一个抽象视图 ({@code byte[]}) 和 {@linkplain ByteBuffer NIO buffers}.
  *
- * <h3>Creation of a buffer</h3>
+ * <h3>创建一个缓冲数组</h3>
  *
  * It is recommended to create a new buffer using the helper methods in
  * {@link Unpooled} rather than calling an individual implementation's
@@ -43,7 +42,7 @@ import java.nio.charset.UnsupportedCharsetException;
  * <h3>Random Access Indexing</h3>
  *
  * Just like an ordinary primitive byte array, {@link ByteBuf} uses
- * <a href="http://en.wikipedia.org/wiki/Zero-based_numbering">zero-based indexing</a>.
+ * <a href="http://en.wikipedia.org/wiki/Zero-based_numbering"> zero-based indexing</a>.
  * It means the index of the first byte is always {@code 0} and the index of the last byte is
  * always {@link #capacity() capacity - 1}.  For example, to iterate all bytes of a buffer, you
  * can do the following, regardless of its internal implementation:

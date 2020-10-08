@@ -22,9 +22,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The {@link EventExecutorGroup} is responsible for providing the {@link EventExecutor}'s to use
- * via its {@link #next()} method. Besides this, it is also responsible for handling their
- * life-cycle and allows shutting them down in a global fashion.
+ * 这个 {@link EventExecutorGroup} 负责提供 {@link EventExecutor}'s 去使用
+ * 通过这个 {@link #next()} 方法. 除此之外, 也负责去处理他们的生命周期
+ * 允许在全局范围关闭他们.
  *
  */
 public interface EventExecutorGroup extends ScheduledExecutorService, Iterable<EventExecutor> {

@@ -32,11 +32,9 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 import static java.lang.Integer.MAX_VALUE;
 
 /**
- * {@link ChannelInboundHandlerAdapter} which decodes bytes in a stream-like fashion from one {@link ByteBuf} to an
- * other Message type.
+ * {@link ChannelInboundHandlerAdapter} 解码流样式的字节从一个 {@link ByteBuf} 到一种消息类型。
  *
- * For example here is an implementation which reads all readable bytes from
- * the input {@link ByteBuf} and create a new {@link ByteBuf}.
+ * 例如，这有一个从输入的 {@link ByteBuf} 读所有的可读字节的实现， 并创建一个新的 {@link ByteBuf}.
  *
  * <pre>
  *     public class SquareDecoder extends {@link ByteToMessageDecoder} {
@@ -48,34 +46,31 @@ import static java.lang.Integer.MAX_VALUE;
  *     }
  * </pre>
  *
- * <h3>Frame detection</h3>
+ * <h3>帧检测</h3>
  * <p>
- * Generally frame detection should be handled earlier in the pipeline by adding a
- * {@link DelimiterBasedFrameDecoder}, {@link FixedLengthFrameDecoder}, {@link LengthFieldBasedFrameDecoder},
- * or {@link LineBasedFrameDecoder}.
+ * 一般说来，帧检测应该在管道早起处理，通过添加一个 {@link DelimiterBasedFrameDecoder}, {@link FixedLengthFrameDecoder},
+ * {@link LengthFieldBasedFrameDecoder}, or {@link LineBasedFrameDecoder}.
  * <p>
- * If a custom frame decoder is required, then one needs to be careful when implementing
- * one with {@link ByteToMessageDecoder}. Ensure there are enough bytes in the buffer for a
- * complete frame by checking {@link ByteBuf#readableBytes()}. If there are not enough bytes
- * for a complete frame, return without modifying the reader index to allow more bytes to arrive.
+ * 如果需要自定义帧解码器, 那么在用 {@link ByteToMessageDecoder} 实现的时候就需要注意了.
+ * 通过检查 {@link ByteBuf#readableBytes()} 来确保缓冲区内有足够的字节来组成一个完整的帧.
+ * 如果没有足够的字节来组成一个完整的帧, 返回而不修改读索引来允许更多的字节到达。
  * <p>
- * To check for complete frames without modifying the reader index, use methods like {@link ByteBuf#getInt(int)}.
- * One <strong>MUST</strong> use the reader index when using methods like {@link ByteBuf#getInt(int)}.
- * For example calling <tt>in.getInt(0)</tt> is assuming the frame starts at the beginning of the buffer, which
- * is not always the case. Use <tt>in.getInt(in.readerIndex())</tt> instead.
- * <h3>Pitfalls</h3>
+ * 不修改读索引, 通过使用方法像 {@link ByteBuf#getInt(int)} 来检测完整的帧.
+ * 当使用方法像 {@link ByteBuf#getInt(int)} 必须使用读索引，但并不总是这样。
+ * 例如调用 <tt>in.getInt(0)</tt> 是假设帧开始于缓冲的开始, 应该使用 <tt>in.getInt(in.readerIndex())</tt> 代替。
+ * <h3>陷阱</h3>
  * <p>
- * Be aware that sub-classes of {@link ByteToMessageDecoder} <strong>MUST NOT</strong>
- * annotated with {@link @Sharable}.
+ * 请注意 {@link ByteToMessageDecoder} 的子类不能注解为 {@link @Sharable}.
  * <p>
- * Some methods such as {@link ByteBuf#readBytes(int)} will cause a memory leak if the returned buffer
- * is not released or added to the <tt>out</tt> {@link List}. Use derived buffers like {@link ByteBuf#readSlice(int)}
- * to avoid leaking memory.
+ * 一些方法例如 {@link ByteBuf#readBytes(int)} 可能会造成内存泄漏。 如果返回的缓冲没有释放掉的话
+ * 或者添加到输出 {@link List}. 使用派生缓冲器例如 {@link ByteBuf#readSlice(int)} 可以避免内存泄漏。
+
  */
+// 抽象方法，通过继承 通道入站处理适配器
 public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter {
 
     /**
-     * Cumulate {@link ByteBuf}s by merge them into one {@link ByteBuf}'s, using memory copies.
+     * 累积 {@link ByteBuf}s ，通过使用内存拷贝合并他们到 {@link ByteBuf}'s.
      */
     public static final Cumulator MERGE_CUMULATOR = new Cumulator() {
         @Override
@@ -545,13 +540,14 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
     }
 
     /**
-     * Cumulate {@link ByteBuf}s.
+     * 累积 {@link ByteBuf}s.
      */
     public interface Cumulator {
+        //
         /**
-         * Cumulate the given {@link ByteBuf}s and return the {@link ByteBuf} that holds the cumulated bytes.
-         * The implementation is responsible to correctly handle the life-cycle of the given {@link ByteBuf}s and so
-         * call {@link ByteBuf#release()} if a {@link ByteBuf} is fully consumed.
+         * 累积给定的 {@link ByteBuf}s 并返回含有累积数组的 {@link ByteBuf} .
+         * 实现负责去正确处理给定的 {@link ByteBuf}s 的生命周期，
+         * 调用 {@link ByteBuf#release()} 如果一个 {@link ByteBuf} 完全消费了.
          */
         ByteBuf cumulate(ByteBufAllocator alloc, ByteBuf cumulation, ByteBuf in);
     }
