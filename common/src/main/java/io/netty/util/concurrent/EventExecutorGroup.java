@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 public interface EventExecutorGroup extends ScheduledExecutorService, Iterable<EventExecutor> {
 
     /**
-     * Returns {@code true} if and only if all {@link EventExecutor}s managed by this {@link EventExecutorGroup}
-     * are being {@linkplain #shutdownGracefully() shut down gracefully} or was {@linkplain #isShutdown() shut down}.
+     * 如果  {@link EventExecutorGroup} 管理的所有 {@link EventExecutor}s 调用
+     * {@linkplain #shutdownGracefully() 优雅的关闭} 或者调用 {@linkplain #isShutdown() 关闭} 的话，返回 {@code true}.
      */
     boolean isShuttingDown();
 
