@@ -17,6 +17,7 @@ package io.netty.util.concurrent;
 
 import io.netty.util.internal.ObjectUtil;
 
+// 包装java运行器
 final class FastThreadLocalRunnable implements Runnable {
     private final Runnable runnable;
 
@@ -27,12 +28,15 @@ final class FastThreadLocalRunnable implements Runnable {
     @Override
     public void run() {
         try {
+            // 运行任务
             runnable.run();
         } finally {
+            // 移除所有 {@link FastThreadLocal} 绑定到此线程的变量.
             FastThreadLocal.removeAll();
         }
     }
 
+    // 包装任务
     static Runnable wrap(Runnable runnable) {
         return runnable instanceof FastThreadLocalRunnable ? runnable : new FastThreadLocalRunnable(runnable);
     }

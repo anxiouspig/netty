@@ -24,15 +24,14 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 
 /**
- * A {@link ChannelOption} allows to configure a {@link ChannelConfig} in a type-safe
- * way. Which {@link ChannelOption} is supported depends on the actual implementation
- * of {@link ChannelConfig} and may depend on the nature of the transport it belongs
- * to.
+ * 一个{@link ChannelOption}允许以类型安全的方式配置一个{@link ChannelConfig}。
+ * 支持哪个{@link ChannelOption}取决于{@link ChannelConfig}的实际实现，也可能取决于它所属的传输的性质。
  *
- * @param <T>   the type of the value which is valid for the {@link ChannelOption}
+ * @param <T>   对{@link ChannelOption}有效的值的类型
  */
 public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
 
+    // key池，静态属性，全局唯一内容池
     private static final ConstantPool<ChannelOption<Object>> pool = new ConstantPool<ChannelOption<Object>>() {
         @Override
         protected ChannelOption<Object> newConstant(int id, String name) {
@@ -41,7 +40,7 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
     };
 
     /**
-     * Returns the {@link ChannelOption} of the specified name.
+     * 返回指定名称的{@link ChannelOption}。
      */
     @SuppressWarnings("unchecked")
     public static <T> ChannelOption<T> valueOf(String name) {
@@ -49,7 +48,7 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
     }
 
     /**
-     * Shortcut of {@link #valueOf(String) valueOf(firstNameComponent.getName() + "#" + secondNameComponent)}.
+     * {@link #valueOf(String) valueOf(firstNameComponent.getName()+"#"+secondNameComponent)}的快捷方式。
      */
     @SuppressWarnings("unchecked")
     public static <T> ChannelOption<T> valueOf(Class<?> firstNameComponent, String secondNameComponent) {
@@ -57,17 +56,17 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
     }
 
     /**
-     * Returns {@code true} if a {@link ChannelOption} exists for the given {@code name}.
+     * 如果给定的{@code name}存在一个{@link ChannelOption}，则返回{@code true}。
      */
     public static boolean exists(String name) {
         return pool.exists(name);
     }
 
     /**
-     * Creates a new {@link ChannelOption} for the given {@code name} or fail with an
-     * {@link IllegalArgumentException} if a {@link ChannelOption} for the given {@code name} exists.
+     * 为给定的{@code name}创建一个新的{@link ChannelOption}，
+     * 如果给定的{@code name}存在一个{@link ChannelOption}，则用{@link IllegalArgumentException}失败。
      *
-     * @deprecated use {@link #valueOf(String)}.
+     * @deprecated 使用 {@link #valueOf(String)}.
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -75,66 +74,83 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
         return (ChannelOption<T>) pool.newInstance(name);
     }
 
-    public static final ChannelOption<ByteBufAllocator> ALLOCATOR = valueOf("ALLOCATOR");
+    // 普通ByteBuffer
+    public static final ChannelOption<ByteBufAllocator> ALLOCATOR = valueOf("ALLOCATOR"); //分配ByteBuffer
+    // 接受全部数据的ByteBuffer
     public static final ChannelOption<RecvByteBufAllocator> RCVBUF_ALLOCATOR = valueOf("RCVBUF_ALLOCATOR");
+    // 计算数据大小
     public static final ChannelOption<MessageSizeEstimator> MESSAGE_SIZE_ESTIMATOR = valueOf("MESSAGE_SIZE_ESTIMATOR");
-
+    // 连接超时毫秒
     public static final ChannelOption<Integer> CONNECT_TIMEOUT_MILLIS = valueOf("CONNECT_TIMEOUT_MILLIS");
     /**
-     * @deprecated Use {@link MaxMessagesRecvByteBufAllocator}
-     * and {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead(int)}.
+     * @deprecated 使用 {@link MaxMessagesRecvByteBufAllocator}
+     * 和 {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead(int)}.
      */
     @Deprecated
+    // 每次阅读最大消息
     public static final ChannelOption<Integer> MAX_MESSAGES_PER_READ = valueOf("MAX_MESSAGES_PER_READ");
+    // 写入自旋数
     public static final ChannelOption<Integer> WRITE_SPIN_COUNT = valueOf("WRITE_SPIN_COUNT");
     /**
-     * @deprecated Use {@link #WRITE_BUFFER_WATER_MARK}
+     * @deprecated 使用 {@link #WRITE_BUFFER_WATER_MARK}
      */
     @Deprecated
     public static final ChannelOption<Integer> WRITE_BUFFER_HIGH_WATER_MARK = valueOf("WRITE_BUFFER_HIGH_WATER_MARK");
     /**
-     * @deprecated Use {@link #WRITE_BUFFER_WATER_MARK}
+     * @deprecated 使用 {@link #WRITE_BUFFER_WATER_MARK}
      */
     @Deprecated
     public static final ChannelOption<Integer> WRITE_BUFFER_LOW_WATER_MARK = valueOf("WRITE_BUFFER_LOW_WATER_MARK");
+    // 写缓冲的水位标记
     public static final ChannelOption<WriteBufferWaterMark> WRITE_BUFFER_WATER_MARK =
             valueOf("WRITE_BUFFER_WATER_MARK");
-
+    // 是否允许半关闭
     public static final ChannelOption<Boolean> ALLOW_HALF_CLOSURE = valueOf("ALLOW_HALF_CLOSURE");
+    // 是否允许自动读
     public static final ChannelOption<Boolean> AUTO_READ = valueOf("AUTO_READ");
 
     /**
-     * If {@code true} then the {@link Channel} is closed automatically and immediately on write failure.
-     * The default value is {@code true}.
+     * 如果{@code true}，那么{@link Channel}会在写入失败时立即自动关闭。 默认值是{@code true}。
      */
     public static final ChannelOption<Boolean> AUTO_CLOSE = valueOf("AUTO_CLOSE");
-
+    // 广播
     public static final ChannelOption<Boolean> SO_BROADCAST = valueOf("SO_BROADCAST");
+    // 保活
     public static final ChannelOption<Boolean> SO_KEEPALIVE = valueOf("SO_KEEPALIVE");
+    // 子buffer
     public static final ChannelOption<Integer> SO_SNDBUF = valueOf("SO_SNDBUF");
+    // 接收buffer
     public static final ChannelOption<Integer> SO_RCVBUF = valueOf("SO_RCVBUF");
+    // 重新使用地址
     public static final ChannelOption<Boolean> SO_REUSEADDR = valueOf("SO_REUSEADDR");
+    //
     public static final ChannelOption<Integer> SO_LINGER = valueOf("SO_LINGER");
+    //
     public static final ChannelOption<Integer> SO_BACKLOG = valueOf("SO_BACKLOG");
+    // 超时
     public static final ChannelOption<Integer> SO_TIMEOUT = valueOf("SO_TIMEOUT");
-
+    //
     public static final ChannelOption<Integer> IP_TOS = valueOf("IP_TOS");
+    //
     public static final ChannelOption<InetAddress> IP_MULTICAST_ADDR = valueOf("IP_MULTICAST_ADDR");
+    //
     public static final ChannelOption<NetworkInterface> IP_MULTICAST_IF = valueOf("IP_MULTICAST_IF");
+    //
     public static final ChannelOption<Integer> IP_MULTICAST_TTL = valueOf("IP_MULTICAST_TTL");
+    //
     public static final ChannelOption<Boolean> IP_MULTICAST_LOOP_DISABLED = valueOf("IP_MULTICAST_LOOP_DISABLED");
-
+    // tcp无延迟
     public static final ChannelOption<Boolean> TCP_NODELAY = valueOf("TCP_NODELAY");
 
     @Deprecated
     public static final ChannelOption<Boolean> DATAGRAM_CHANNEL_ACTIVE_ON_REGISTRATION =
             valueOf("DATAGRAM_CHANNEL_ACTIVE_ON_REGISTRATION");
-
+    // 每个组单个事件执行器
     public static final ChannelOption<Boolean> SINGLE_EVENTEXECUTOR_PER_GROUP =
             valueOf("SINGLE_EVENTEXECUTOR_PER_GROUP");
 
     /**
-     * Creates a new {@link ChannelOption} with the specified unique {@code name}.
+     * 用指定的唯一的{@@code name}创建一个新的{@link ChannelOption}。
      */
     private ChannelOption(int id, String name) {
         super(id, name);
@@ -146,8 +162,7 @@ public class ChannelOption<T> extends AbstractConstant<ChannelOption<T>> {
     }
 
     /**
-     * Validate the value which is set for the {@link ChannelOption}. Sub-classes
-     * may override this for special checks.
+     * 验证为{@link ChannelOption}设置的值。子类可能会因为特殊的检查而重写它。
      */
     public void validate(T value) {
         ObjectUtil.checkNotNull(value, "value");

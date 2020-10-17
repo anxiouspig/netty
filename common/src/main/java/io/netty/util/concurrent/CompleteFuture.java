@@ -21,16 +21,16 @@ import io.netty.util.internal.ObjectUtil;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A skeletal {@link Future} implementation which represents a {@link Future} which has been completed already.
+ * 一个骨架式的{@link Future}实现，它代表一个已经完成的{@link Future}。
  */
 public abstract class CompleteFuture<V> extends AbstractFuture<V> {
 
     private final EventExecutor executor;
 
     /**
-     * Creates a new instance.
+     * 创建一个新的实例。
      *
-     * @param executor the {@link EventExecutor} associated with this future
+     * @param executor 与此future关联的{@link EventExecutor}。
      */
     protected CompleteFuture(EventExecutor executor) {
         this.executor = executor;
@@ -43,6 +43,7 @@ public abstract class CompleteFuture<V> extends AbstractFuture<V> {
         return executor;
     }
 
+    // 添加监听者，直接通知
     @Override
     public Future<V> addListener(GenericFutureListener<? extends Future<? super V>> listener) {
         DefaultPromise.notifyListener(executor(), this, ObjectUtil.checkNotNull(listener, "listener"));
@@ -76,6 +77,7 @@ public abstract class CompleteFuture<V> extends AbstractFuture<V> {
 
     @Override
     public Future<V> await() throws InterruptedException {
+        // 检查线程中断
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
@@ -84,6 +86,7 @@ public abstract class CompleteFuture<V> extends AbstractFuture<V> {
 
     @Override
     public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+        // 检查线程中断
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
@@ -102,6 +105,7 @@ public abstract class CompleteFuture<V> extends AbstractFuture<V> {
 
     @Override
     public boolean await(long timeoutMillis) throws InterruptedException {
+        // 检查线程中断
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
@@ -141,7 +145,7 @@ public abstract class CompleteFuture<V> extends AbstractFuture<V> {
     /**
      * {@inheritDoc}
      *
-     * @param mayInterruptIfRunning this value has no effect in this implementation.
+     * @param mayInterruptIfRunning 这个值在本实施例中没有影响。
      */
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {

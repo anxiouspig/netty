@@ -36,50 +36,49 @@ public interface EventExecutorGroup extends ScheduledExecutorService, Iterable<E
     boolean isShuttingDown();
 
     /**
-     * Shortcut method for {@link #shutdownGracefully(long, long, TimeUnit)} with sensible default values.
+     * 便捷的方法 {@link #shutdownGracefully(long, long, TimeUnit)} 用合理的默认值.
      *
      * @return the {@link #terminationFuture()}
      */
     Future<?> shutdownGracefully();
 
     /**
-     * Signals this executor that the caller wants the executor to be shut down.  Once this method is called,
-     * {@link #isShuttingDown()} starts to return {@code true}, and the executor prepares to shut itself down.
-     * Unlike {@link #shutdown()}, graceful shutdown ensures that no tasks are submitted for <i>'the quiet period'</i>
-     * (usually a couple seconds) before it shuts itself down.  If a task is submitted during the quiet period,
-     * it is guaranteed to be accepted and the quiet period will start over.
+     * 标记这个执行器，调用者想要执行器关闭.  一旦方法被调用,
+     * {@link #isShuttingDown()} 将返回 {@code true}, 试行器就会关闭他自己.
+     * 不像 {@link #shutdown()}, 优雅的关闭确保在静默期无任务被提交
+     * (通常是几秒钟) 在关闭之前. 如果一个任务在静默期被提交,
+     * 它保证会被接受，之后静默期会重新开始
      *
-     * @param quietPeriod the quiet period as described in the documentation
-     * @param timeout     the maximum amount of time to wait until the executor is {@linkplain #shutdown()}
-     *                    regardless if a task was submitted during the quiet period
-     * @param unit        the unit of {@code quietPeriod} and {@code timeout}
+     * @param quietPeriod 文档中描述的静默期
+     * @param timeout     直到执行器被 {@linkplain #shutdown()} ，等待的最大时间
+     *                    如果一个任务在静默期提交，将会被忽略
+     * @param unit         {@code quietPeriod} 和 {@code timeout} 的单位
      *
      * @return the {@link #terminationFuture()}
      */
     Future<?> shutdownGracefully(long quietPeriod, long timeout, TimeUnit unit);
 
     /**
-     * Returns the {@link Future} which is notified when all {@link EventExecutor}s managed by this
-     * {@link EventExecutorGroup} have been terminated.
+     * 返回这个 {@link Future} ， 当这个 {@link EventExecutorGroup} 管理的所有 {@link EventExecutor}s 被终止，会得到通知.
      */
     Future<?> terminationFuture();
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或者 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated
     void shutdown();
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或者 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated
     List<Runnable> shutdownNow();
 
     /**
-     * Returns one of the {@link EventExecutor}s managed by this {@link EventExecutorGroup}.
+     * Returns 这个 {@link EventExecutorGroup} 管理的 {@link EventExecutor}s 之一.
      */
     EventExecutor next();
 

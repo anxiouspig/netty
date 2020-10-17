@@ -18,17 +18,17 @@ package io.netty.util;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Base implementation of {@link Constant}.
+ * {@link Constant}的基本实现。
  */
 public abstract class AbstractConstant<T extends AbstractConstant<T>> implements Constant<T> {
 
-    private static final AtomicLong uniqueIdGenerator = new AtomicLong();
+    private static final AtomicLong uniqueIdGenerator = new AtomicLong(); // 静态属性，唯一id
     private final int id;
     private final String name;
-    private final long uniquifier;
+    private final long uniquifier; // 唯一id
 
     /**
-     * Creates a new instance.
+     * 创建一个新的实例。
      */
     protected AbstractConstant(int id, String name) {
         this.id = id;
@@ -71,6 +71,7 @@ public abstract class AbstractConstant<T extends AbstractConstant<T>> implements
         AbstractConstant<T> other = o;
         int returnCode;
 
+        // 比较hashcode
         returnCode = hashCode() - other.hashCode();
         if (returnCode != 0) {
             return returnCode;

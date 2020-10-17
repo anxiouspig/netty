@@ -24,9 +24,8 @@ import java.util.Set;
 /**
  * @deprecated Use {@link PromiseCombiner#PromiseCombiner(EventExecutor)}.
  *
- * {@link GenericFutureListener} implementation which consolidates multiple {@link Future}s
- * into one, by listening to individual {@link Future}s and producing an aggregated result
- * (success/failure) when all {@link Future}s have completed.
+ * {@link GenericFutureListener}的实现，它通过监听单个{@link Future}，
+ * 将多个{@link Future}合并为一个，当所有{@link Future}完成后，产生一个汇总结果（成功/失败）。
  *
  * @param <V> the type of value returned by the {@link Future}
  * @param <F> the type of {@link Future}

@@ -32,37 +32,37 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * {@link MultithreadEventLoopGroup} implementations which is used for NIO {@link Selector} based {@link Channel}s.
+ * {@link MultithreadEventLoopGroup}实现，它用于基于NIO {@link Selector}的{@link Channel}。
  */
 public class NioEventLoopGroup extends MultithreadEventLoopGroup {
 
     /**
-     * Create a new instance using the default number of threads, the default {@link ThreadFactory} and
-     * the {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
+     * 使用默认的线程数、默认的{@link ThreadFactory}和
+     * {@link SelectorProvider#provider()}返回的{@link SelectorProvider#provider()}创建一个新实例。
      */
     public NioEventLoopGroup() {
         this(0);
     }
 
     /**
-     * Create a new instance using the specified number of threads, {@link ThreadFactory} and the
-     * {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
+     * 使用指定数量的线程、{@link ThreadFactory}和
+     * {@link SelectorProvider#provider()}返回的{@link SelectorProvider#provider()}创建一个新的实例。
      */
     public NioEventLoopGroup(int nThreads) {
         this(nThreads, (Executor) null);
     }
 
     /**
-     * Create a new instance using the default number of threads, the given {@link ThreadFactory} and the
-     * {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
+     * 使用默认的线程数、给定的{@link ThreadFactory}和{@link ThreadFactory}创建一个新的实例。
+     *  {@link SelectorProvider}是由{@link SelectorProvider#provider()}返回的。
      */
     public NioEventLoopGroup(ThreadFactory threadFactory) {
         this(0, threadFactory, SelectorProvider.provider());
     }
 
     /**
-     * Create a new instance using the specified number of threads, the given {@link ThreadFactory} and the
-     * {@link SelectorProvider} which is returned by {@link SelectorProvider#provider()}.
+     * 使用指定数量的线程、给定的{@link ThreadFactory}和{@link SelectorProvider#provider()}
+     * 返回的{@link SelectorProvider#provider()}创建一个新实例。
      */
     public NioEventLoopGroup(int nThreads, ThreadFactory threadFactory) {
         this(nThreads, threadFactory, SelectorProvider.provider());
@@ -73,8 +73,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     }
 
     /**
-     * Create a new instance using the specified number of threads, the given {@link ThreadFactory} and the given
-     * {@link SelectorProvider}.
+     * 使用指定数量的线程、给定的{@link ThreadFactory}和给定的{@link SelectorProvider}创建一个新实例。
      */
     public NioEventLoopGroup(
             int nThreads, ThreadFactory threadFactory, final SelectorProvider selectorProvider) {
@@ -120,8 +119,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     }
 
     /**
-     * Sets the percentage of the desired amount of time spent for I/O in the child event loops.  The default value is
-     * {@code 50}, which means the event loop will try to spend the same amount of time for I/O as for non-I/O tasks.
+     * 设置子事件循环中用于I/O的所需时间的百分比。默认值是{@code 50}，这意味着事件循环将尝试为I/O任务花费与非I/O任务相同的时间。
      */
     public void setIoRatio(int ioRatio) {
         for (EventExecutor e: this) {
@@ -130,8 +128,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     }
 
     /**
-     * Replaces the current {@link Selector}s of the child event loops with newly created {@link Selector}s to work
-     * around the  infamous epoll 100% CPU bug.
+     * 用新创建的{@link Selector}替换子事件循环的当前{@link Selector}，以解决臭名昭著的epoll 100% CPU bug。
      */
     public void rebuildSelectors() {
         for (EventExecutor e: this) {

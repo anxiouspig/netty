@@ -28,162 +28,142 @@ import java.net.SocketAddress;
 
 
 /**
- * A nexus to a network socket or a component which is capable of I/O
- * operations such as read, write, connect, and bind.
+ * 连接到网络套接字或能够进行I/O操作的组件，如读、写、连接和绑定。
  * <p>
- * A channel provides a user:
+ * 通道为用户提供:
  * <ul>
- * <li>the current state of the channel (e.g. is it open? is it connected?),</li>
- * <li>the {@linkplain ChannelConfig configuration parameters} of the channel (e.g. receive buffer size),</li>
- * <li>the I/O operations that the channel supports (e.g. read, write, connect, and bind), and</li>
- * <li>the {@link ChannelPipeline} which handles all I/O events and requests
- *     associated with the channel.</li>
+ * <li>通道的当前状态(例如，它是打开的吗?)它是连接吗?)</li>
+ * <li>通道的{@linkplain ChannelConfig 配置参数}(例如接收缓冲区大小)，</li>
+ * <li>通道支持的I/O操作(例如，读、写、连接和绑定)，以及</li>
+ * <li>处理与通道相关的所有I/O事件和请求的@{link ChannelPipeline}。</li>
  * </ul>
  *
- * <h3>All I/O operations are asynchronous.</h3>
+ * <h3>所有的I/O操作都是异步的。</h3>
  * <p>
- * All I/O operations in Netty are asynchronous.  It means any I/O calls will
- * return immediately with no guarantee that the requested I/O operation has
- * been completed at the end of the call.  Instead, you will be returned with
- * a {@link ChannelFuture} instance which will notify you when the requested I/O
- * operation has succeeded, failed, or canceled.
+ * 所有的I/O操作在Netty是异步的。这意味着任何I/O调用将立即返回，而不能保证所请求的I/O操作已经在调用结束时完成。
+ * 相反，您将返回一个{@link ChannelFuture}实例，当请求的I/O操作成功、失败或取消时，该实例将通知您。
  *
- * <h3>Channels are hierarchical</h3>
+ * <h3>通道是分层的</h3>
  * <p>
- * A {@link Channel} can have a {@linkplain #parent() parent} depending on
- * how it was created.  For instance, a {@link SocketChannel}, that was accepted
- * by {@link ServerSocketChannel}, will return the {@link ServerSocketChannel}
- * as its parent on {@link #parent()}.
+ * 一个{@link Channel}可以有一个{@linkplain #parent() parent}，这取决于它是如何创建的。
+ * 例如，被{@link ServerSocketChannel}接受的{@link SocketChannel}将在{@link #parent()}上返回{@link ServerSocketChannel}作为它的父节点。
  * <p>
- * The semantics of the hierarchical structure depends on the transport
- * implementation where the {@link Channel} belongs to.  For example, you could
- * write a new {@link Channel} implementation that creates the sub-channels that
- * share one socket connection, as <a href="http://beepcore.org/">BEEP</a> and
- * <a href="http://en.wikipedia.org/wiki/Secure_Shell">SSH</a> do.
+ * 层次结构的语义取决于{@link Channel}所属的传输实现。
+ * 例如，你可以编写一个新的{@link Channel}实现，创建共享一个套接字连接的子通道，
+ * 就像<a href="http://beepcore.org/">BEEP</a>和<a href="http://en.wikipedia.org/wiki/Secure_Shell">SSH</a>那样。
  *
- * <h3>Downcast to access transport-specific operations</h3>
+ * <h3>访问特定传输操作</h3>
  * <p>
- * Some transports exposes additional operations that is specific to the
- * transport.  Down-cast the {@link Channel} to sub-type to invoke such
- * operations.  For example, with the old I/O datagram transport, multicast
- * join / leave operations are provided by {@link DatagramChannel}.
+ * 有些传输会暴露出传输所特有的附加操作。 将{@link Channel}下传到子类型来调用这些操作。
+ * 例如，在旧的I/O数据报传输中，多播数据报是一个很好的选择。
  *
- * <h3>Release resources</h3>
+ * <h3>释放资源</h3>
  * <p>
- * It is important to call {@link #close()} or {@link #close(ChannelPromise)} to release all
- * resources once you are done with the {@link Channel}. This ensures all resources are
- * released in a proper way, i.e. filehandles.
+ * 重要的是，一旦你完成了对{@link Channel}的操作，就要调用{@link #close()}或{@link #close(ChannelPromise)}来释放所有资源。
+ * 这可以确保所有资源都以正确的方式释放，即文件柄。
  */
 public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparable<Channel> {
 
     /**
-     * Returns the globally unique identifier of this {@link Channel}.
+     * 返回这个{@link Channel}的全局唯一标识符。
      */
     ChannelId id();
 
     /**
-     * Return the {@link EventLoop} this {@link Channel} was registered to.
+     * 返回这个{@link Channel}注册的{@link EventLoop}。
      */
     EventLoop eventLoop();
 
     /**
-     * Returns the parent of this channel.
+     * 返回这个通道的父通道。
      *
-     * @return the parent channel.
-     *         {@code null} if this channel does not have a parent channel.
+     * @return 父通道.
+     *         {@code null}如果这个Channel没有父Channel。
      */
     Channel parent();
 
     /**
-     * Returns the configuration of this channel.
+     * 返回该通道的配置。
      */
     ChannelConfig config();
 
     /**
-     * Returns {@code true} if the {@link Channel} is open and may get active later
+     * 如果{@link Channel}是开放的，并且以后可能会被激活，则返回{@code true}。
      */
     boolean isOpen();
 
     /**
-     * Returns {@code true} if the {@link Channel} is registered with an {@link EventLoop}.
+     * 如果{@link Channel}注册了{@link EventLoop}，返回{@code true}。
      */
     boolean isRegistered();
 
     /**
-     * Return {@code true} if the {@link Channel} is active and so connected.
+     * 如果{@link Channel}是活动的，并且连接了，返回{@code true}。
      */
     boolean isActive();
 
     /**
-     * Return the {@link ChannelMetadata} of the {@link Channel} which describe the nature of the {@link Channel}.
+     * 返回{@link Channel}的{@link ChannelMetadata}，其中描述了{@link Channel}的性质。
      */
     ChannelMetadata metadata();
 
     /**
-     * Returns the local address where this channel is bound to.  The returned
-     * {@link SocketAddress} is supposed to be down-cast into more concrete
-     * type such as {@link InetSocketAddress} to retrieve the detailed
-     * information.
+     * 返回此通道绑定的本地地址。 返回的{@link SocketAddress}应该被向下转换为更具体的类型，如
+     * {@link InetSocketAddress}，以获取详细信息。
      *
-     * @return the local address of this channel.
-     *         {@code null} if this channel is not bound.
+     * @return 这个通道的本地地址。
+     *         {@code null}如果这个通道没有绑定。
      */
     SocketAddress localAddress();
 
     /**
-     * Returns the remote address where this channel is connected to.  The
-     * returned {@link SocketAddress} is supposed to be down-cast into more
-     * concrete type such as {@link InetSocketAddress} to retrieve the detailed
-     * information.
+     * 返回这个通道连接的远程地址。 返回的{@link SocketAddress}应该被向下转换为更具体的类型，如
+     * {@link InetSocketAddress}，以获取详细信息。
      *
-     * @return the remote address of this channel.
-     *         {@code null} if this channel is not connected.
-     *         If this channel is not connected but it can receive messages
-     *         from arbitrary remote addresses (e.g. {@link DatagramChannel},
-     *         use {@link DatagramPacket#recipient()} to determine
-     *         the origination of the received message as this method will
-     *         return {@code null}.
+     * @return 这个通道的远程地址。
+     *         {@code null}如果这个通道没有连接，但它可以接收来自任意远程地址的消息（例如
+     *         {@link DatagramChannel}，使用
+     *         {@link DatagramPacket#recipient()}来确定接收消息的来源，因为这个方法将返回
+     *         {@code null}。
      */
     SocketAddress remoteAddress();
 
     /**
-     * Returns the {@link ChannelFuture} which will be notified when this
-     * channel is closed.  This method always returns the same future instance.
+     * 返回{@link ChannelFuture}，当这个通道被关闭时，将通知它。 此方法总是返回相同的未来实例。
      */
     ChannelFuture closeFuture();
 
     /**
-     * Returns {@code true} if and only if the I/O thread will perform the
-     * requested write operation immediately.  Any write requests made when
-     * this method returns {@code false} are queued until the I/O thread is
-     * ready to process the queued write requests.
+     * 如果且仅如果I/O线程将立即执行请求的写操作，则返回{@code true}。
+     * 当本方法返回{@code false}时，任何写入请求都会被排队，直到I/O线程准备好处理排队的写入请求。
      */
     boolean isWritable();
 
     /**
-     * Get how many bytes can be written until {@link #isWritable()} returns {@code false}.
-     * This quantity will always be non-negative. If {@link #isWritable()} is {@code false} then 0.
+     * 获取可以写入的字节数，直到{@link #isWritable()}返回{@code false}。这个数量永远是非负数。
+     * 如果{@link #isWritable()}为{@code false}，则为0。
      */
     long bytesBeforeUnwritable();
 
     /**
-     * Get how many bytes must be drained from underlying buffers until {@link #isWritable()} returns {@code true}.
-     * This quantity will always be non-negative. If {@link #isWritable()} is {@code true} then 0.
+     * 获取从底层缓冲区中排出的字节数，直到
+     * {@link #isWritable()}返回{@code true}。
+     * 这个数量总是非负数。如果{@link #isWritable()}为{@code true}，则为0。
      */
     long bytesBeforeWritable();
 
     /**
-     * Returns an <em>internal-use-only</em> object that provides unsafe operations.
+     * 返回一个提供不安全操作的<em>内部使用</em>对象。
      */
     Unsafe unsafe();
 
     /**
-     * Return the assigned {@link ChannelPipeline}.
+     * 返回分配的{@link ChannelPipeline}。
      */
     ChannelPipeline pipeline();
 
     /**
-     * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
+     * 返回分配的{@link ByteBufAllocator}，它将被用来分配{@link ByteBuf}s。
      */
     ByteBufAllocator alloc();
 
@@ -194,9 +174,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     Channel flush();
 
     /**
-     * <em>Unsafe</em> operations that should <em>never</em> be called from user-code. These methods
-     * are only provided to implement the actual transport, and must be invoked from an I/O thread except for the
-     * following methods:
+     * <em>不安全的<em></em>操作，<em>绝对不能</em>从用户代码中调用。
+     * 这些方法只是为了实现实际的传输而提供的，必须从一个 I/O 线程中调用，除了
      * <ul>
      *   <li>{@link #localAddress()}</li>
      *   <li>{@link #remoteAddress()}</li>
@@ -209,93 +188,85 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     interface Unsafe {
 
         /**
-         * Return the assigned {@link RecvByteBufAllocator.Handle} which will be used to allocate {@link ByteBuf}'s when
-         * receiving data.
+         * 返回被分配的{@link RecvByteBufAllocator.Handle}，它将被用于分配{@link ByteBuf}，当
          */
         RecvByteBufAllocator.Handle recvBufAllocHandle();
 
         /**
-         * Return the {@link SocketAddress} to which is bound local or
-         * {@code null} if none.
+         * 返回本地绑定的{@link SocketAddress}，如果没有，则返回{@code null}。
          */
         SocketAddress localAddress();
 
         /**
-         * Return the {@link SocketAddress} to which is bound remote or
-         * {@code null} if none is bound yet.
+         * 返回远端或远程绑定的{@link SocketAddress}。
          */
         SocketAddress remoteAddress();
 
         /**
-         * Register the {@link Channel} of the {@link ChannelPromise} and notify
-         * the {@link ChannelFuture} once the registration was complete.
+         * 注册{@link ChannelPromise}的{@link ChannelPromise}，注册完成后通知{@link ChannelFuture}。
          */
         void register(EventLoop eventLoop, ChannelPromise promise);
 
         /**
-         * Bind the {@link SocketAddress} to the {@link Channel} of the {@link ChannelPromise} and notify
-         * it once its done.
+         * 将{@link SocketAddress}绑定到{@link ChannelPromise}的{@link Channel}上，并在绑定完成后通知它。
          */
         void bind(SocketAddress localAddress, ChannelPromise promise);
 
         /**
-         * Connect the {@link Channel} of the given {@link ChannelFuture} with the given remote {@link SocketAddress}.
-         * If a specific local {@link SocketAddress} should be used it need to be given as argument. Otherwise just
-         * pass {@code null} to it.
+         * 将给定的{@link ChannelFuture}的{@link Channel}与给定的远程{@link SocketAddress}连接。如果需要使用一个特定的本地
+         * {@link SocketAddress}，则需要给定它作为参数，否则只需给定{@link ChannelFuture}和远程{@link SocketAddress}。否则只需将{@code null}传递给它。
          *
-         * The {@link ChannelPromise} will get notified once the connect operation was complete.
+         * 连接操作完成后，{@link ChannelPromise}将得到通知。
          */
         void connect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise);
 
         /**
-         * Disconnect the {@link Channel} of the {@link ChannelFuture} and notify the {@link ChannelPromise} once the
-         * operation was complete.
+         * 断开{@link ChannelFuture}的{@link ChannelFuture}，操作完成后通知{@link ChannelPromise}。
          */
         void disconnect(ChannelPromise promise);
 
         /**
-         * Close the {@link Channel} of the {@link ChannelPromise} and notify the {@link ChannelPromise} once the
-         * operation was complete.
+         * 关闭{@link ChannelPromise}的{@link ChannelPromise}，操作完成后通知{@link ChannelPromise}。
          */
         void close(ChannelPromise promise);
 
         /**
-         * Closes the {@link Channel} immediately without firing any events.  Probably only useful
-         * when registration attempt failed.
+         * 在不触发任何事件的情况下立即关闭{@link Channel}。 可能只在注册失败时有用。
          */
         void closeForcibly();
 
         /**
-         * Deregister the {@link Channel} of the {@link ChannelPromise} from {@link EventLoop} and notify the
-         * {@link ChannelPromise} once the operation was complete.
+         * 将{@link ChannelPromise}的{@link ChannelPromise}的
+         * {@link ChannelPromise}从{@link EventLoop}中取消注册，并通知{@link EventLoop}。
          */
         void deregister(ChannelPromise promise);
 
         /**
-         * Schedules a read operation that fills the inbound buffer of the first {@link ChannelInboundHandler} in the
-         * {@link ChannelPipeline}.  If there's already a pending read operation, this method does nothing.
+         * 安排一个读取操作，填充{@link ChannelPipeline}中第一个{@link ChannelInboundHandler}的入站缓冲区。
+         * 如果已经有一个挂起的读取操作，本方法不做任何操作。
          */
         void beginRead();
 
         /**
-         * Schedules a write operation.
+         * 安排写操作。
          */
         void write(Object msg, ChannelPromise promise);
 
         /**
-         * Flush out all write operations scheduled via {@link #write(Object, ChannelPromise)}.
+         * 通过{@link #write(Object, ChannelPromise)}冲出所有预定的写操作。
          */
         void flush();
 
         /**
-         * Return a special ChannelPromise which can be reused and passed to the operations in {@link Unsafe}.
-         * It will never be notified of a success or error and so is only a placeholder for operations
-         * that take a {@link ChannelPromise} as argument but for which you not want to get notified.
+         * 返回一个特殊的ChannelPromise，该ChannelPromise可以重复使用，并传递给
+         * {@link Unsafe}中的操作。它永远不会被通知成功或出错，因此对于那些使用
+         * {@link ChannelPromise}作为参数，但不想被通知的操作来说，它只是一个占位符。
          */
         ChannelPromise voidPromise();
 
         /**
-         * Returns the {@link ChannelOutboundBuffer} of the {@link Channel} where the pending write requests are stored.
+         * Returns the {@link ChannelOutboundBuffer} for the
+         * {@link Channel} where the pending write requests are stored.
          */
         ChannelOutboundBuffer outboundBuffer();
     }

@@ -50,21 +50,20 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * {@link SingleThreadEventLoop} implementation which register the {@link Channel}'s to a
- * {@link Selector} and so does the multi-plexing of these in the event loop.
+ * {@link SingleThreadEventLoop}实现，它将{@link Channel}注册到{@link Selector}，并且在事件循环中对这些通道进行多处理。
  *
  */
 public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioEventLoop.class);
-
+    // 清理间隔
     private static final int CLEANUP_INTERVAL = 256; // XXX Hard-coded value, but won't need customization.
 
     private static final boolean DISABLE_KEY_SET_OPTIMIZATION =
             SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
 
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
-    private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
+    private static final int SELECTOR_AUTO_REBUILD_THRESHOLD; // 选择器自动重新生成阈值
 
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
@@ -74,7 +73,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     };
 
     // Workaround for JDK NIO bug.
-    //
+    // Epoll空轮训bug
     // See:
     // - http://bugs.sun.com/view_bug.do?bug_id=6427854
     // - https://github.com/netty/netty/issues/203
@@ -94,7 +93,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 logger.debug("Unable to get/set System Property: " + key, e);
             }
         }
-
+        // selector轮训阈值，默认512
         int selectorAutoRebuildThreshold = SystemPropertyUtil.getInt("io.netty.selectorAutoRebuildThreshold", 512);
         if (selectorAutoRebuildThreshold < MIN_PREMATURE_SELECTOR_RETURNS) {
             selectorAutoRebuildThreshold = 0;
@@ -111,11 +110,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     /**
      * The NIO {@link Selector}.
      */
-    private Selector selector;
-    private Selector unwrappedSelector;
-    private SelectedSelectionKeySet selectedKeys;
+    private Selector selector; // 选择器
+    private Selector unwrappedSelector; // 未包装选择器
+    private SelectedSelectionKeySet selectedKeys; // set<key>
 
-    private final SelectorProvider provider;
+    private final SelectorProvider provider; // jdk选择器
 
     private static final long AWAKE = -1L;
     private static final long NONE = Long.MAX_VALUE;
@@ -144,6 +143,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         this.unwrappedSelector = selectorTuple.unwrappedSelector;
     }
 
+    // 新任务队列
     private static Queue<Runnable> newTaskQueue(
             EventLoopTaskQueueFactory queueFactory) {
         if (queueFactory == null) {
@@ -431,6 +431,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    // 执行逻辑
     @Override
     protected void run() {
         int selectCnt = 0;

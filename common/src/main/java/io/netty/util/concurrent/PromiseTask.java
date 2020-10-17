@@ -18,8 +18,10 @@ package io.netty.util.concurrent;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RunnableFuture;
 
+// Promise任务
 class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
 
+    // 适配器
     private static final class RunnableAdapter<T> implements Callable<T> {
         final Runnable task;
         final T result;
@@ -41,9 +43,10 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         }
     }
 
-    private static final Runnable COMPLETED = new SentinelRunnable("COMPLETED");
-    private static final Runnable CANCELLED = new SentinelRunnable("CANCELLED");
-    private static final Runnable FAILED = new SentinelRunnable("FAILED");
+    // 标记Runnable
+    private static final Runnable COMPLETED = new SentinelRunnable("COMPLETED"); // 完成
+    private static final Runnable CANCELLED = new SentinelRunnable("CANCELLED"); // 取消
+    private static final Runnable FAILED = new SentinelRunnable("FAILED"); // 失败
 
     private static class SentinelRunnable implements Runnable {
         private final String name;
@@ -61,7 +64,7 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         }
     }
 
-    // Strictly of type Callable<V> or Runnable
+    // 严格按照Callable<V>或Runnable类型。
     private Object task;
 
     PromiseTask(EventExecutor executor, Runnable runnable, V result) {
@@ -111,12 +114,11 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         }
     }
 
+    // 完成后清除任务
     private boolean clearTaskAfterCompletion(boolean done, Runnable result) {
         if (done) {
-            // The only time where it might be possible for the sentinel task
-            // to be called is in the case of a periodic ScheduledFutureTask,
-            // in which case it's a benign race with cancellation and the (null)
-            // return value is not used.
+            // 只有在周期性的ScheduledFutureTask的情况下，才有可能调用哨兵任务，
+            // 在这种情况下，这是一个良性的竞赛与取消，（null）返回值不会被使用。
             task = result;
         }
         return done;

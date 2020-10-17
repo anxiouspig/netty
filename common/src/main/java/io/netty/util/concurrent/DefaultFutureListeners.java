@@ -17,10 +17,11 @@ package io.netty.util.concurrent;
 
 import java.util.Arrays;
 
+// 这是个监听者数组
 final class DefaultFutureListeners {
-
+    // 监听者
     private GenericFutureListener<? extends Future<?>>[] listeners;
-    private int size;
+    private int size; // 数量
     private int progressiveSize; // the number of progressive listeners
 
     @SuppressWarnings("unchecked")
@@ -42,6 +43,7 @@ final class DefaultFutureListeners {
         GenericFutureListener<? extends Future<?>>[] listeners = this.listeners;
         final int size = this.size;
         if (size == listeners.length) {
+            // 扩容，二倍
             this.listeners = listeners = Arrays.copyOf(listeners, size << 1);
         }
         listeners[size] = l;
@@ -52,6 +54,7 @@ final class DefaultFutureListeners {
         }
     }
 
+    // 这地方实现类似List的实现
     public void remove(GenericFutureListener<? extends Future<?>> l) {
         final GenericFutureListener<? extends Future<?>>[] listeners = this.listeners;
         int size = this.size;

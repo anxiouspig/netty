@@ -19,10 +19,11 @@ import io.netty.util.internal.InternalThreadLocalMap;
 import io.netty.util.internal.UnstableApi;
 
 /**
- * A special {@link Thread} that provides fast access to {@link FastThreadLocal} variables.
+ * 一个特别的 {@link Thread} ，提供快速获得 {@link FastThreadLocal} 变量的方法.
  */
+// 用于快速存取线程本地变量
 public class FastThreadLocalThread extends Thread {
-    // This will be set to true if we have a chance to wrap the Runnable.
+    // 设置是否removeAll，这个估计是以后版本计划实现
     private final boolean cleanupFastThreadLocals;
 
     private InternalThreadLocalMap threadLocalMap;
@@ -32,7 +33,7 @@ public class FastThreadLocalThread extends Thread {
     }
 
     public FastThreadLocalThread(Runnable target) {
-        super(FastThreadLocalRunnable.wrap(target));
+        super(FastThreadLocalRunnable.wrap(target)); // 传入包装后的Runnable
         cleanupFastThreadLocals = true;
     }
 
@@ -67,23 +68,23 @@ public class FastThreadLocalThread extends Thread {
     }
 
     /**
-     * Returns the internal data structure that keeps the thread-local variables bound to this thread.
-     * Note that this method is for internal use only, and thus is subject to change at any time.
+     * 返回内部数据结构，保存当前线程的线程本地变量.
+     * 注意这个方法仅限内部使用, 因为可能随时改变.
      */
     public final InternalThreadLocalMap threadLocalMap() {
         return threadLocalMap;
     }
 
     /**
-     * Sets the internal data structure that keeps the thread-local variables bound to this thread.
-     * Note that this method is for internal use only, and thus is subject to change at any time.
+     * 设置内部数据结构，保存当前线程的线程本地变量.
+     * 注意这个方法仅限内部使用, 因为可能随时改变.
      */
     public final void setThreadLocalMap(InternalThreadLocalMap threadLocalMap) {
         this.threadLocalMap = threadLocalMap;
     }
 
     /**
-     * Returns {@code true} if {@link FastThreadLocal#removeAll()} will be called once {@link #run()} completes.
+     * 一旦 {@link #run()} 完成，如果 {@link FastThreadLocal#removeAll()} 被回调，则 {@code true}  .
      */
     @UnstableApi
     public boolean willCleanupFastThreadLocals() {
@@ -91,7 +92,7 @@ public class FastThreadLocalThread extends Thread {
     }
 
     /**
-     * Returns {@code true} if {@link FastThreadLocal#removeAll()} will be called once {@link Thread#run()} completes.
+     * 一旦 {@link #run()} 完成，如果 {@link FastThreadLocal#removeAll()} 被回调，则 {@code true}  .
      */
     @UnstableApi
     public static boolean willCleanupFastThreadLocals(Thread thread) {

@@ -27,15 +27,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Abstract base class for {@link EventLoop}s that execute all its submitted tasks in a single thread.
+ * {@link EventLoop}的抽象基类，它在一个线程中执行所有提交的任务。
  *
  */
 public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor implements EventLoop {
 
+    // 默认最大任务数
     protected static final int DEFAULT_MAX_PENDING_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventLoop.maxPendingTasks", Integer.MAX_VALUE));
 
-    private final Queue<Runnable> tailTasks;
+    private final Queue<Runnable> tailTasks; // 任务队列
 
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, threadFactory, addTaskWakesUp, DEFAULT_MAX_PENDING_TASKS, RejectedExecutionHandlers.reject());
@@ -98,18 +99,18 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     }
 
     /**
-     * Adds a task to be run once at the end of next (or current) {@code eventloop} iteration.
+     * 添加要在下一次(或当前){@code eventloop}迭代末尾运行一次的任务。
      *
      * @param task to be added.
      */
     @UnstableApi
     public final void executeAfterEventLoopIteration(Runnable task) {
         ObjectUtil.checkNotNull(task, "task");
-        if (isShutdown()) {
+        if (isShutdown()) { // 若关闭则拒绝
             reject();
         }
 
-        if (!tailTasks.offer(task)) {
+        if (!tailTasks.offer(task)) { // 满了，拒绝
             reject(task);
         }
 
@@ -119,7 +120,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     }
 
     /**
-     * Removes a task that was added previously via {@link #executeAfterEventLoopIteration(Runnable)}.
+     * 删除之前通过{@link #executeAfterEventLoopIteration(Runnable)}添加的任务。
      *
      * @param task to be removed.
      *
@@ -146,9 +147,8 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     }
 
     /**
-     * Returns the number of {@link Channel}s registered with this {@link EventLoop} or {@code -1}
-     * if operation is not supported. The returned value is not guaranteed to be exact accurate and
-     * should be viewed as a best effort.
+     * 返回在此{@link EventLoop}或{@code -1}中注册的{@link Channel}的数目(如果操作不受支持)。
+     * 返回的值不能保证是精确的，应该看作是最好的努力。
      */
     @UnstableApi
     public int registeredChannels() {

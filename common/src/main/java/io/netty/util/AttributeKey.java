@@ -16,14 +16,15 @@
 package io.netty.util;
 
 /**
- * Key which can be used to access {@link Attribute} out of the {@link AttributeMap}. Be aware that it is not be
- * possible to have multiple keys with the same name.
+ * 可以用来从{@link AttributeMap}中访问{@link Attribute}的key。
+ * 请注意，不可能有多个同名的键。
  *
- * @param <T>   the type of the {@link Attribute} which can be accessed via this {@link AttributeKey}.
+ * @param <T>   可以通过这个{@link AttributeKey}来访问的{@link Attribute}的类型。
  */
 @SuppressWarnings("UnusedDeclaration") // 'T' is used only at compile time
 public final class AttributeKey<T> extends AbstractConstant<AttributeKey<T>> {
 
+    // key池，静态属性，全局唯一内容池
     private static final ConstantPool<AttributeKey<Object>> pool = new ConstantPool<AttributeKey<Object>>() {
         @Override
         protected AttributeKey<Object> newConstant(int id, String name) {
@@ -32,7 +33,7 @@ public final class AttributeKey<T> extends AbstractConstant<AttributeKey<T>> {
     };
 
     /**
-     * Returns the singleton instance of the {@link AttributeKey} which has the specified {@code name}.
+     * 返回具有指定的{@code name}的{@link AttributeKey}的单例实例。
      */
     @SuppressWarnings("unchecked")
     public static <T> AttributeKey<T> valueOf(String name) {
@@ -40,15 +41,15 @@ public final class AttributeKey<T> extends AbstractConstant<AttributeKey<T>> {
     }
 
     /**
-     * Returns {@code true} if a {@link AttributeKey} exists for the given {@code name}.
+     * 如果给定的{@code name}存在{@link AttributeKey}，则返回{@code true}。
      */
     public static boolean exists(String name) {
         return pool.exists(name);
     }
 
     /**
-     * Creates a new {@link AttributeKey} for the given {@code name} or fail with an
-     * {@link IllegalArgumentException} if a {@link AttributeKey} for the given {@code name} exists.
+     * 为给定的{@code name}创建一个新的{@link AttributeKey}，
+     * 或者如果给定的{@code name}存在一个{@link AttributeKey}，则使用{@link IllegalArgumentException}失败。
      */
     @SuppressWarnings("unchecked")
     public static <T> AttributeKey<T> newInstance(String name) {

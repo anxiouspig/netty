@@ -24,17 +24,17 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A {@link ThreadFactory} implementation with a simple naming rule.
+ * 一个简单命名规则 {@link ThreadFactory} 的实现.
  */
 public class DefaultThreadFactory implements ThreadFactory {
 
-    private static final AtomicInteger poolId = new AtomicInteger();
+    private static final AtomicInteger poolId = new AtomicInteger(); // 原子int，设置线程名中间的id
 
-    private final AtomicInteger nextId = new AtomicInteger();
-    private final String prefix;
-    private final boolean daemon;
-    private final int priority;
-    protected final ThreadGroup threadGroup;
+    private final AtomicInteger nextId = new AtomicInteger(); // 原子int
+    private final String prefix; // 线程名前缀
+    private final boolean daemon; // 是否为守护线程
+    private final int priority; // 线程优先级
+    protected final ThreadGroup threadGroup; // java线程组
 
     public DefaultThreadFactory(Class<?> poolType) {
         this(poolType, false, Thread.NORM_PRIORITY);
@@ -66,7 +66,7 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     public static String toPoolName(Class<?> poolType) {
         ObjectUtil.checkNotNull(poolType, "poolType");
-
+        // 返回类名
         String poolName = StringUtil.simpleClassName(poolType);
         switch (poolName.length()) {
             case 0:
@@ -85,15 +85,16 @@ public class DefaultThreadFactory implements ThreadFactory {
     public DefaultThreadFactory(String poolName, boolean daemon, int priority, ThreadGroup threadGroup) {
         ObjectUtil.checkNotNull(poolName, "poolName");
 
+        // 优先级要在1～10之间
         if (priority < Thread.MIN_PRIORITY || priority > Thread.MAX_PRIORITY) {
             throw new IllegalArgumentException(
                     "priority: " + priority + " (expected: Thread.MIN_PRIORITY <= priority <= Thread.MAX_PRIORITY)");
         }
-
+        // 前缀为传入的名加上工厂的id
         prefix = poolName + '-' + poolId.incrementAndGet() + '-';
-        this.daemon = daemon;
-        this.priority = priority;
-        this.threadGroup = threadGroup;
+        this.daemon = daemon; // 守护线程
+        this.priority = priority; // 优先级
+        this.threadGroup = threadGroup; // 线程组
     }
 
     public DefaultThreadFactory(String poolName, boolean daemon, int priority) {
@@ -103,21 +104,23 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
+        // 新建线程，传入任务和线程名，id本工厂自增
         Thread t = newThread(FastThreadLocalRunnable.wrap(r), prefix + nextId.incrementAndGet());
         try {
-            if (t.isDaemon() != daemon) {
+            if (t.isDaemon() != daemon) { // 是否为守护线程
                 t.setDaemon(daemon);
             }
 
-            if (t.getPriority() != priority) {
+            if (t.getPriority() != priority) { // 设置线程优先级
                 t.setPriority(priority);
             }
         } catch (Exception ignored) {
-            // Doesn't matter even if failed to set.
+            // 如果设置失败了，不关心.
         }
         return t;
     }
 
+    // 创建FastThreadLocalThread
     protected Thread newThread(Runnable r, String name) {
         return new FastThreadLocalThread(threadGroup, r, name);
     }

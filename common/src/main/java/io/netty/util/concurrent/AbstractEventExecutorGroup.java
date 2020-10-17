@@ -27,7 +27,7 @@ import static io.netty.util.concurrent.AbstractEventExecutor.*;
 
 
 /**
- * Abstract base class for {@link EventExecutorGroup} implementations.
+ * {@link EventExecutorGroup} 实现的抽象基类.
  */
 public abstract class AbstractEventExecutorGroup implements EventExecutorGroup {
     @Override
@@ -71,14 +71,14 @@ public abstract class AbstractEventExecutorGroup implements EventExecutorGroup {
     }
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated
     public abstract void shutdown();
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated

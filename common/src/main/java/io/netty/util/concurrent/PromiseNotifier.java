@@ -22,12 +22,13 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
- * {@link GenericFutureListener} implementation which takes other {@link Promise}s
- * and notifies them on completion.
+ * {@link GenericFutureListener}的实现可以添加{@link Promise}s
+ * 并在完成时通知他们.
  *
- * @param <V> the type of value returned by the future
- * @param <F> the type of future
+ * @param <V> 返回的结果类型
+ * @param <F> future类型
  */
+// 任务成功通知类
 public class PromiseNotifier<V, F extends Future<V>> implements GenericFutureListener<F> {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PromiseNotifier.class);
@@ -35,9 +36,9 @@ public class PromiseNotifier<V, F extends Future<V>> implements GenericFutureLis
     private final boolean logNotifyFailure;
 
     /**
-     * Create a new instance.
+     * 创建一个实例
      *
-     * @param promises  the {@link Promise}s to notify once this {@link GenericFutureListener} is notified.
+     * @param promises  这个 {@link Promise}s 去通知，一旦 {@link GenericFutureListener} 被通知.
      */
     @SafeVarargs
     public PromiseNotifier(Promise<? super V>... promises) {
@@ -45,19 +46,21 @@ public class PromiseNotifier<V, F extends Future<V>> implements GenericFutureLis
     }
 
     /**
-     * Create a new instance.
+     * 创建一个实例
      *
-     * @param logNotifyFailure {@code true} if logging should be done in case notification fails.
-     * @param promises  the {@link Promise}s to notify once this {@link GenericFutureListener} is notified.
+     * @param logNotifyFailure {@code true} 通知失败时是否记录日志
+     * @param promises  这个 {@link Promise}s 去通知，一旦 {@link GenericFutureListener} 被通知.
      */
     @SafeVarargs
     public PromiseNotifier(boolean logNotifyFailure, Promise<? super V>... promises) {
+        // 检查不能为null
         checkNotNull(promises, "promises");
         for (Promise<? super V> promise: promises) {
             if (promise == null) {
                 throw new IllegalArgumentException("promises contains null Promise");
             }
         }
+        // 克隆一个
         this.promises = promises.clone();
         this.logNotifyFailure = logNotifyFailure;
     }

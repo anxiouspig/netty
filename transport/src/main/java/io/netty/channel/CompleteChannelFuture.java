@@ -22,17 +22,16 @@ import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.ObjectUtil;
 
 /**
- * A skeletal {@link ChannelFuture} implementation which represents a
- * {@link ChannelFuture} which has been completed already.
+ * 一个骨架式的{@link ChannelFuture}实现，它代表了一个已经完成的{@link ChannelFuture}。
  */
 abstract class CompleteChannelFuture extends CompleteFuture<Void> implements ChannelFuture {
 
     private final Channel channel;
 
     /**
-     * Creates a new instance.
+     * 创建一个新的实例。
      *
-     * @param channel the {@link Channel} associated with this future
+     * @param channel 与此future相关的{@link Channel}。
      */
     protected CompleteChannelFuture(Channel channel, EventExecutor executor) {
         super(executor);

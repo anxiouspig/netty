@@ -16,7 +16,7 @@
 package io.netty.util.concurrent;
 
 /**
- * The result of an scheduled asynchronous operation.
+ * 一个调度异步操作的结果.
  */
 @SuppressWarnings("ClassNameSameAsAncestorName")
 public interface ScheduledFuture<V> extends Future<V>, java.util.concurrent.ScheduledFuture<V> {

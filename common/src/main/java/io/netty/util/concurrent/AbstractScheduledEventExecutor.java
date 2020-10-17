@@ -27,9 +27,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Abstract base class for {@link EventExecutor}s that want to support scheduling.
+ * 想要支持调度的{@link EventExecutor}的抽象基类。
  */
 public abstract class AbstractScheduledEventExecutor extends AbstractEventExecutor {
+    // 比较任务剩余时间
     private static final Comparator<ScheduledFutureTask<?>> SCHEDULED_FUTURE_TASK_COMPARATOR =
             new Comparator<ScheduledFutureTask<?>>() {
                 @Override
@@ -38,14 +39,16 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
                 }
             };
 
+    // 唤醒任务标记
    static final Runnable WAKEUP_TASK = new Runnable() {
        @Override
        public void run() { } // Do nothing
     };
 
+   // 优先队列
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue;
 
-    long nextTaskId;
+    long nextTaskId; // 下一个任务id
 
     protected AbstractScheduledEventExecutor() {
     }
@@ -54,28 +57,30 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         super(parent);
     }
 
+    // 返回与初始时间时间差
     protected static long nanoTime() {
         return ScheduledFutureTask.nanoTime();
     }
 
     /**
-     * Given an arbitrary deadline {@code deadlineNanos}, calculate the number of nano seconds from now
-     * {@code deadlineNanos} would expire.
+     * 给定一个任意的最后期限{@code deadlineNanos}，计算从现在开始{@code deadlineNanos}将有多少纳秒到期。
      * @param deadlineNanos An arbitrary deadline in nano seconds.
      * @return the number of nano seconds from now {@code deadlineNanos} would expire.
      */
+    // 返回到期时间
     protected static long deadlineToDelayNanos(long deadlineNanos) {
         return ScheduledFutureTask.deadlineToDelayNanos(deadlineNanos);
     }
 
     /**
-     * The initial value used for delay and computations based upon a monatomic time source.
+     * 用于基于单原子时间源的延迟和计算的初始值。
      * @return initial value used for delay and computations based upon a monatomic time source.
      */
     protected static long initialNanoTime() {
         return ScheduledFutureTask.initialNanoTime();
     }
 
+    // 返回优先队列
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue() {
         if (scheduledTaskQueue == null) {
             scheduledTaskQueue = new DefaultPriorityQueue<ScheduledFutureTask<?>>(
@@ -86,14 +91,15 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         return scheduledTaskQueue;
     }
 
+    // 判断队列是否为空
     private static boolean isNullOrEmpty(Queue<ScheduledFutureTask<?>> queue) {
         return queue == null || queue.isEmpty();
     }
 
     /**
-     * Cancel all scheduled tasks.
+     * 取消所有调度任务.
      *
-     * This method MUST be called only when {@link #inEventLoop()} is {@code true}.
+     * 只有当{@link #inEventLoop()}为{@code true}时，才必须调用此方法。
      */
     protected void cancelScheduledTasks() {
         assert inEventLoop();
@@ -120,8 +126,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     }
 
     /**
-     * Return the {@link Runnable} which is ready to be executed with the given {@code nanoTime}.
-     * You should use {@link #nanoTime()} to retrieve the correct {@code nanoTime}.
+     * 返回{@link Runnable}，它可以用给定的{@code nanoTime}执行。你应该使用{@link #nanoTime()}来获取正确的{@code nanoTime}。
      */
     protected final Runnable pollScheduledTask(long nanoTime) {
         assert inEventLoop();
@@ -130,13 +135,13 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         if (scheduledTask == null || scheduledTask.deadlineNanos() - nanoTime > 0) {
             return null;
         }
-        scheduledTaskQueue.remove();
+        scheduledTaskQueue.remove(); // 取出来了
         scheduledTask.setConsumed();
         return scheduledTask;
     }
 
     /**
-     * Return the nanoseconds until the next scheduled task is ready to be run or {@code -1} if no task is scheduled.
+     * 返回下一个预定任务准备运行前的纳秒数，如果没有预定任务，则返回{@code -1}。
      */
     protected final long nextScheduledTaskNano() {
         ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
@@ -144,27 +149,28 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     }
 
     /**
-     * Return the deadline (in nanoseconds) when the next scheduled task is ready to be run or {@code -1}
-     * if no task is scheduled.
+     * 返回下一个预定任务准备运行的截止时间（纳秒），如果没有预定任务，则返回{@code -1}。
      */
     protected final long nextScheduledTaskDeadlineNanos() {
         ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
         return scheduledTask != null ? scheduledTask.deadlineNanos() : -1;
     }
 
+    // 取一个
     final ScheduledFutureTask<?> peekScheduledTask() {
         Queue<ScheduledFutureTask<?>> scheduledTaskQueue = this.scheduledTaskQueue;
         return scheduledTaskQueue != null ? scheduledTaskQueue.peek() : null;
     }
 
     /**
-     * Returns {@code true} if a scheduled task is ready for processing.
+     * 返回{@code true}一个预定任务是否准备好进行处理。
      */
     protected final boolean hasScheduledTasks() {
         ScheduledFutureTask<?> scheduledTask = peekScheduledTask();
         return scheduledTask != null && scheduledTask.deadlineNanos() <= nanoTime();
     }
 
+    // 调度
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         ObjectUtil.checkNotNull(command, "command");
@@ -172,7 +178,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         if (delay < 0) {
             delay = 0;
         }
-        validateScheduled0(delay, unit);
+        validateScheduled0(delay, unit); // 默认空方法
 
         return schedule(new ScheduledFutureTask<Void>(
                 this,
@@ -237,7 +243,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     }
 
     /**
-     * Sub-classes may override this to restrict the maximal amount of time someone can use to schedule a task.
+     * 子类可以重写这一点，以限制某人可以用来安排任务的最大时间。
      *
      * @deprecated will be removed in the future.
      */
@@ -247,16 +253,16 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     }
 
     final void scheduleFromEventLoop(final ScheduledFutureTask<?> task) {
-        // nextTaskId a long and so there is no chance it will overflow back to 0
+        // nextTaskId为long，所以不会溢出回到0的机会。
         scheduledTaskQueue().add(task.setId(++nextTaskId));
     }
 
     private <V> ScheduledFuture<V> schedule(final ScheduledFutureTask<V> task) {
-        if (inEventLoop()) {
+        if (inEventLoop()) { // 是执行器线程
             scheduleFromEventLoop(task);
-        } else {
+        } else { // 不是执行器线程
             final long deadlineNanos = task.deadlineNanos();
-            // task will add itself to scheduled task queue when run if not expired
+            // 如果没有过期，任务将在运行时将自己添加到计划任务队列中。
             if (beforeScheduledTaskSubmitted(deadlineNanos)) {
                 execute(task);
             } else {
@@ -276,19 +282,17 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         if (inEventLoop()) {
             scheduledTaskQueue().removeTyped(task);
         } else {
-            // task will remove itself from scheduled task queue when it runs
+            // 任务将在运行时从计划任务队列中删除自己
             lazyExecute(task);
         }
     }
 
     /**
-     * Called from arbitrary non-{@link EventExecutor} threads prior to scheduled task submission.
-     * Returns {@code true} if the {@link EventExecutor} thread should be woken immediately to
-     * process the scheduled task (if not already awake).
+     * 在计划任务提交之前从任意非{@link EventExecutor}线程调用。
+     * 如果需要立即唤醒{@link EventExecutor}线程来处理计划的任务(如果还没有唤醒)，则返回{@code true}。
      * <p>
-     * If {@code false} is returned, {@link #afterScheduledTaskSubmitted(long)} will be called with
-     * the same value <i>after</i> the scheduled task is enqueued, providing another opportunity
-     * to wake the {@link EventExecutor} thread if required.
+     * 如果{@code false}被返回，{@link # afterscheduledtasksubmit (long)}将在</i>调度任务进入队列后以相同的值<i>被调用，
+     * 提供了另一个机会在需要时唤醒{@link EventExecutor}线程。
      *
      * @param deadlineNanos deadline of the to-be-scheduled task
      *     relative to {@link AbstractScheduledEventExecutor#nanoTime()}
@@ -299,7 +303,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     }
 
     /**
-     * See {@link #beforeScheduledTaskSubmitted(long)}. Called only after that method returns false.
+     * 看到{@link # beforeScheduledTaskSubmitted(长)}。仅在该方法返回false后调用。
      *
      * @param deadlineNanos relative to {@link AbstractScheduledEventExecutor#nanoTime()}
      * @return  {@code true} if the {@link EventExecutor} thread should be woken, {@code false} otherwise

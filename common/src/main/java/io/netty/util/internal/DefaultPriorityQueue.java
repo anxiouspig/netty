@@ -24,9 +24,9 @@ import java.util.NoSuchElementException;
 import static io.netty.util.internal.PriorityQueueNode.INDEX_NOT_IN_QUEUE;
 
 /**
- * A priority queue which uses natural ordering of elements. Elements are also required to be of type
- * {@link PriorityQueueNode} for the purpose of maintaining the index in the priority queue.
- * @param <T> The object that is maintained in the queue.
+ * 一个使用元素自然排序的优先队列。为了维护优先级队列中的索引，
+ * 还要求元素的类型为{@link PriorityQueueNode}。
+ * @param <T> 队列中维护的对象。
  */
 public final class DefaultPriorityQueue<T extends PriorityQueueNode> extends AbstractQueue<T>
                                                                      implements PriorityQueue<T> {

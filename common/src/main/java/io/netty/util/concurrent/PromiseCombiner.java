@@ -18,16 +18,15 @@ package io.netty.util.concurrent;
 import io.netty.util.internal.ObjectUtil;
 
 /**
- * <p>A promise combiner monitors the outcome of a number of discrete futures, then notifies a final, aggregate promise
- * when all of the combined futures are finished. The aggregate promise will succeed if and only if all of the combined
- * futures succeed. If any of the combined futures fail, the aggregate promise will fail. The cause failure for the
- * aggregate promise will be the failure for one of the failed combined futures; if more than one of the combined
- * futures fails, exactly which cause of failure will be assigned to the aggregate promise is undefined.</p>
+ * <p>promise组合器监控一些离散futures的结果，然后在所有组合futures完成后通知一个最终的集合promise。
+ * 只有当所有的组合futures都成功时，集合promise才会成功。如果任何一个合并futures失败，则总promise将失败。
+ * 合并promise的失败原因将是失败的其中一个合并futures的失败原因；
+ * 如果超过一个合并futures失败，具体哪个失败原因将分配给合并promise是没有定义的。</p>
  *
- * <p>Callers may populate a promise combiner with any number of futures to be combined via the
- * {@link PromiseCombiner#add(Future)} and {@link PromiseCombiner#addAll(Future[])} methods. When all futures to be
- * combined have been added, callers must provide an aggregate promise to be notified when all combined promises have
- * finished via the {@link PromiseCombiner#finish(Promise)} method.</p>
+ * <p>调用者可以通过{@link PromiseCombiner#add(Future)}和
+ * {@link PromiseCombiner#addAll(Future[])}方法来组合任意数量的futures来填充promise组合器。
+ * 当所有要组合的futures都已添加，调用者必须提供一个聚合promise，当所有组合的promise都已完成时，
+ *  * 调用者将通过{@link PromiseCombiner#finish(Promise)}方法得到通知。</p>
  *
  * <p>This implementation is <strong>NOT</strong> thread-safe and all methods must be called
  * from the {@link EventExecutor} thread.</p>
@@ -75,8 +74,8 @@ public final class PromiseCombiner {
     }
 
     /**
-     * The {@link EventExecutor} to use for notifications. You must call {@link #add(Future)}, {@link #addAll(Future[])}
-     * and {@link #finish(Promise)} from within the {@link EventExecutor} thread.
+     * 用于通知的{@link EventExecutor}。
+     * 您必须在{@link EventExecutor}线程中调用{@link #add(Future)}、{@link #addAll(Future[])}和{@link #finish(Promise)}。
      *
      * @param executor the {@link EventExecutor} to use for notifications.
      */
@@ -85,8 +84,7 @@ public final class PromiseCombiner {
     }
 
     /**
-     * Adds a new promise to be combined. New promises may be added until an aggregate promise is added via the
-     * {@link PromiseCombiner#finish(Promise)} method.
+     * 添加要组合的新承诺。可以添加新的承诺，直到通过{@link PromiseCombiner#finish(Promise)}方法添加了一个聚合promise。
      *
      * @param promise the promise to add to this promise combiner
      *
@@ -98,8 +96,7 @@ public final class PromiseCombiner {
     }
 
     /**
-     * Adds a new future to be combined. New futures may be added until an aggregate promise is added via the
-     * {@link PromiseCombiner#finish(Promise)} method.
+     * 增加了一个新的未来被结合。可以添加新的期货，直到通过{@link PromiseCombiner#finish(Promise)}方法添加了一个聚合promise。
      *
      * @param future the future to add to this promise combiner
      */
@@ -112,8 +109,7 @@ public final class PromiseCombiner {
     }
 
     /**
-     * Adds new promises to be combined. New promises may be added until an aggregate promise is added via the
-     * {@link PromiseCombiner#finish(Promise)} method.
+     * 添加要合并的新promises。新的promises可以被添加，直到一个总的promises通过
      *
      * @param promises the promises to add to this promise combiner
      *
@@ -125,8 +121,8 @@ public final class PromiseCombiner {
     }
 
     /**
-     * Adds new futures to be combined. New futures may be added until an aggregate promise is added via the
-     * {@link PromiseCombiner#finish(Promise)} method.
+     * 添加新的futures以进行组合。新的futures可以被添加，
+     * 直到通过{@link PromiseCombiner#finish(Promise)}方法添加一个集合promise。
      *
      * @param futures the futures to add to this promise combiner
      */
@@ -138,10 +134,9 @@ public final class PromiseCombiner {
     }
 
     /**
-     * <p>Sets the promise to be notified when all combined futures have finished. If all combined futures succeed,
-     * then the aggregate promise will succeed. If one or more combined futures fails, then the aggregate promise will
-     * fail with the cause of one of the failed futures. If more than one combined future fails, then exactly which
-     * failure will be assigned to the aggregate promise is undefined.</p>
+     * <p>设置当所有组合futures结束时通知的promise。如果所有合并futures都成功，那么集合promise将成功。
+     * 如果一个或多个合并futures失败，那么集合promise将以其中一个失败futures的原因失败。
+     * 如果一个以上的合并futures失败，那么到底哪一个失败将被分配给集合promise是未定义的。</p>
      *
      * <p>After this method is called, no more futures may be added via the {@link PromiseCombiner#add(Future)} or
      * {@link PromiseCombiner#addAll(Future[])} methods.</p>

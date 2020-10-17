@@ -16,57 +16,56 @@
 package io.netty.util.concurrent;
 
 /**
- * The {@link EventExecutor} is a special {@link EventExecutorGroup} which comes
- * with some handy methods to see if a {@link Thread} is executed in a event loop.
- * Besides this, it also extends the {@link EventExecutorGroup} to allow for a generic
- * way to access methods.
+ * 这个 {@link EventExecutor} 是一个特殊的 {@link EventExecutorGroup} ，
+ * 包含一些方便的方法去查看一个 {@link Thread} 是否在事件循环中被执行.
+ * 除此之外, 它也继承自 {@link EventExecutorGroup} 允许用通用的方式来访问方法
  *
  */
 public interface EventExecutor extends EventExecutorGroup {
 
     /**
-     * Returns a reference to itself.
+     * 返回它自己的引用
      */
     @Override
     EventExecutor next();
 
     /**
-     * Return the {@link EventExecutorGroup} which is the parent of this {@link EventExecutor},
+     * 返回 {@link EventExecutorGroup} ， 它是这个 {@link EventExecutor} 的父亲,
      */
     EventExecutorGroup parent();
 
     /**
-     * Calls {@link #inEventLoop(Thread)} with {@link Thread#currentThread()} as argument
+     * 调用 {@link #inEventLoop(Thread)} 用 {@link Thread#currentThread()} 作为参数
      */
     boolean inEventLoop();
 
     /**
-     * Return {@code true} if the given {@link Thread} is executed in the event loop,
+     * 返回 {@code true} 如果给定的 {@link Thread} 在事件循环中被执行,
      * {@code false} otherwise.
      */
     boolean inEventLoop(Thread thread);
 
     /**
-     * Return a new {@link Promise}.
+     * 返回一个新的 {@link Promise}.
      */
     <V> Promise<V> newPromise();
 
     /**
-     * Create a new {@link ProgressivePromise}.
+     * 创建一个新的 {@link ProgressivePromise}.
      */
     <V> ProgressivePromise<V> newProgressivePromise();
 
     /**
-     * Create a new {@link Future} which is marked as succeeded already. So {@link Future#isSuccess()}
-     * will return {@code true}. All {@link FutureListener} added to it will be notified directly. Also
-     * every call of blocking methods will just return without blocking.
+     * 创建一个新的 {@link Future} ，它已被标记为成功. 所以 {@link Future#isSuccess()} 方法
+     * 将返回 {@code true}. 所有 {@link FutureListener} 将会直接被通知. 而且
+     * 每次调用阻塞方法都会返回，而不阻塞.
      */
     <V> Future<V> newSucceededFuture(V result);
 
     /**
-     * Create a new {@link Future} which is marked as failed already. So {@link Future#isSuccess()}
-     * will return {@code false}. All {@link FutureListener} added to it will be notified directly. Also
-     * every call of blocking methods will just return without blocking.
+     * 创建一个新的 {@link Future} ，它已被标记为失败. 所以 {@link Future#isSuccess()}
+     * 将返回 {@code false}. 所有 {@link FutureListener} 将会直接被通知. 而且
+     * 每次调用阻塞方法都会返回，而不阻塞.
      */
     <V> Future<V> newFailedFuture(Throwable cause);
 }

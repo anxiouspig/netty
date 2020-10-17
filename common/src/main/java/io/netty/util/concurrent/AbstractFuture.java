@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Abstract {@link Future} implementation which does not allow for cancellation.
+ * 抽象 {@link Future} 实现，当不允许取消的时候.
  *
  * @param <V>
  */
@@ -29,30 +29,30 @@ public abstract class AbstractFuture<V> implements Future<V> {
 
     @Override
     public V get() throws InterruptedException, ExecutionException {
-        await();
+        await(); // 等待
 
-        Throwable cause = cause();
-        if (cause == null) {
+        Throwable cause = cause(); // 失败原因
+        if (cause == null) { // 为null的话，获取结果
             return getNow();
         }
         if (cause instanceof CancellationException) {
-            throw (CancellationException) cause;
+            throw (CancellationException) cause; // 取消异常的话抛出
         }
-        throw new ExecutionException(cause);
+        throw new ExecutionException(cause); // 其他抛出执行异常
     }
 
     @Override
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        if (await(timeout, unit)) {
+        if (await(timeout, unit)) { // 等待固定时间
             Throwable cause = cause();
             if (cause == null) {
-                return getNow();
+                return getNow(); // 到时间了，获取结果
             }
             if (cause instanceof CancellationException) {
-                throw (CancellationException) cause;
+                throw (CancellationException) cause; // 取消异常的话抛出
             }
-            throw new ExecutionException(cause);
+            throw new ExecutionException(cause); // 其他抛出执行异常
         }
-        throw new TimeoutException();
+        throw new TimeoutException(); // 抛出超时异常
     }
 }

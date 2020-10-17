@@ -25,7 +25,7 @@ public final class ThrowableUtil {
     private ThrowableUtil() { }
 
     /**
-     * Set the {@link StackTraceElement} for the given {@link Throwable}, using the {@link Class} and method name.
+     * 设置这个 {@link StackTraceElement} 对于给定的 {@link Throwable}, 使用 {@link Class} 和方法名.
      */
     public static <T extends Throwable> T unknownStackTrace(T cause, Class<?> clazz, String method) {
         cause.setStackTrace(new StackTraceElement[] { new StackTraceElement(clazz.getName(), method, null, -1)});

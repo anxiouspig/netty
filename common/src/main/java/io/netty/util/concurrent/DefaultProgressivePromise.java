@@ -19,12 +19,12 @@ package io.netty.util.concurrent;
 public class DefaultProgressivePromise<V> extends DefaultPromise<V> implements ProgressivePromise<V> {
 
     /**
-     * Creates a new instance.
+     * 创建一个新的实例.
      *
-     * It is preferable to use {@link EventExecutor#newProgressivePromise()} to create a new progressive promise
+     * 最好使用{@link EventExecutor#newProgressivePromise()}来创建一个新的渐进式Promise。
      *
      * @param executor
-     *        the {@link EventExecutor} which is used to notify the promise when it progresses or it is complete
+     *        {@link EventExecutor}，用于在Promise进展或完成时通知Promise。
      */
     public DefaultProgressivePromise(EventExecutor executor) {
         super(executor);

@@ -44,47 +44,46 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link AbstractBootstrap} is a helper class that makes it easy to bootstrap a {@link Channel}. It support
- * method-chaining to provide an easy way to configure the {@link AbstractBootstrap}.
+ * {@link AbstractBootstrap}是一个帮助类，它可以让你轻松地引导一个{@link Channel}。
+ * 它支持方法链来提供一个简单的方法来配置{@link AbstractBootstrap}。
  *
- * <p>When not used in a {@link ServerBootstrap} context, the {@link #bind()} methods are useful for connectionless
- * transports such as datagram (UDP).</p>
+ * <p>当不在{@link ServerBootstrap}上下文中使用时，{@link #bind()}方法对无连接的传输（如数据报（UDP））很有用。</p>
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
     @SuppressWarnings("unchecked")
-    static final Map.Entry<ChannelOption<?>, Object>[] EMPTY_OPTION_ARRAY = new Map.Entry[0];
+    static final Map.Entry<ChannelOption<?>, Object>[] EMPTY_OPTION_ARRAY = new Map.Entry[0]; // 空选项数组
     @SuppressWarnings("unchecked")
-    static final Map.Entry<AttributeKey<?>, Object>[] EMPTY_ATTRIBUTE_ARRAY = new Map.Entry[0];
+    static final Map.Entry<AttributeKey<?>, Object>[] EMPTY_ATTRIBUTE_ARRAY = new Map.Entry[0]; // 空参数数组
 
-    volatile EventLoopGroup group;
+    volatile EventLoopGroup group; // 线程组
     @SuppressWarnings("deprecation")
-    private volatile ChannelFactory<? extends C> channelFactory;
-    private volatile SocketAddress localAddress;
+    private volatile ChannelFactory<? extends C> channelFactory; // 生成channel
+    private volatile SocketAddress localAddress; // 地址
 
-    // The order in which ChannelOptions are applied is important they may depend on each other for validation
-    // purposes.
+    // 应用ChannelOptions的顺序是很重要的，它们可能为了验证的目的而相互依赖。
+    // 非线程安全
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
+    // 线程安全
     private final Map<AttributeKey<?>, Object> attrs = new ConcurrentHashMap<AttributeKey<?>, Object>();
-    private volatile ChannelHandler handler;
+    private volatile ChannelHandler handler; // channel处理器
 
     AbstractBootstrap() {
-        // Disallow extending from a different package.
+        // 不允许从不同的包扩展
     }
 
     AbstractBootstrap(AbstractBootstrap<B, C> bootstrap) {
-        group = bootstrap.group;
-        channelFactory = bootstrap.channelFactory;
-        handler = bootstrap.handler;
-        localAddress = bootstrap.localAddress;
-        synchronized (bootstrap.options) {
+        group = bootstrap.group; // 线程组
+        channelFactory = bootstrap.channelFactory; // channel工厂
+        handler = bootstrap.handler; // 处理器
+        localAddress = bootstrap.localAddress; // 地址
+        synchronized (bootstrap.options) { // 设置选项
             options.putAll(bootstrap.options);
         }
-        attrs.putAll(bootstrap.attrs);
+        attrs.putAll(bootstrap.attrs); // 设置参数
     }
 
     /**
-     * The {@link EventLoopGroup} which is used to handle all the events for the to-be-created
-     * {@link Channel}
+     * 用于处理即将创建的{@link通道}的所有事件的{@link EventLoopGroup}
      */
     public B group(EventLoopGroup group) {
         ObjectUtil.checkNotNull(group, "group");

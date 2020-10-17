@@ -18,15 +18,16 @@ package io.netty.util.concurrent;
 import java.util.EventListener;
 
 /**
- * Listens to the result of a {@link Future}.  The result of the asynchronous operation is notified once this listener
- * is added by calling {@link Future#addListener(GenericFutureListener)}.
+ * 监听一个 {@link Future} 的结果.  异步操作的结果将被通知， once this listener
+ * 一旦这个监听器通过 {@link Future#addListener(GenericFutureListener)} 被添加的话.
  */
+// 观察者模式，应该。
 public interface GenericFutureListener<F extends Future<?>> extends EventListener {
 
     /**
-     * Invoked when the operation associated with the {@link Future} has been completed.
+     * 当与操作关联的 {@link Future} 完成时调用.
      *
-     * @param future  the source {@link Future} which called this callback
+     * @param future  调用这个回调的 {@link Future}
      */
     void operationComplete(F future) throws Exception;
 }

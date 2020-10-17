@@ -36,11 +36,10 @@ public interface PriorityQueue<T> extends Queue<T> {
     void priorityChanged(T node);
 
     /**
-     * Removes all of the elements from this {@link PriorityQueue} without calling
-     * {@link PriorityQueueNode#priorityQueueIndex(DefaultPriorityQueue)} or explicitly removing references to them to
-     * allow them to be garbage collected. This should only be used when it is certain that the nodes will not be
-     * re-inserted into this or any other {@link PriorityQueue} and it is known that the {@link PriorityQueue} itself
-     * will be garbage collected after this call.
+     * 在不调用{@link PriorityQueueNode#priorityQueueIndex(DefaultPriorityQueue)}
+     * 或显式删除对它们的引用以允许对它们进行垃圾收集的情况下，从这个{@link PriorityQueue}中删除所有元素。
+     * 只有在确定这些节点不会被重新插入到这个或其他{@link PriorityQueue}中，
+     * 并且知道{@link PriorityQueue}本身将在此调用后被垃圾回收时，才可以使用此方法。
      */
     void clearIgnoringIndexes();
 }

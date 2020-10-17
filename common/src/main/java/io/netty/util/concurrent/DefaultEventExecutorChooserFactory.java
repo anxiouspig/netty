@@ -21,17 +21,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Default implementation which uses simple round-robin to choose next {@link EventExecutor}.
+ * 使用简单循环去选择下一个 {@link EventExecutor} 的默认实现.
  */
 @UnstableApi
+// 工厂模式
 public final class DefaultEventExecutorChooserFactory implements EventExecutorChooserFactory {
 
+    // 单例模式
     public static final DefaultEventExecutorChooserFactory INSTANCE = new DefaultEventExecutorChooserFactory();
 
     private DefaultEventExecutorChooserFactory() { }
 
     @Override
     public EventExecutorChooser newChooser(EventExecutor[] executors) {
+        // 策略模式，根据是否是二的次幂来选择实现算法
         if (isPowerOfTwo(executors.length)) {
             return new PowerOfTwoEventExecutorChooser(executors);
         } else {
@@ -39,12 +42,15 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
         }
     }
 
+    // 判断是否是二的次幂
     private static boolean isPowerOfTwo(int val) {
         return (val & -val) == val;
     }
 
+
+
     private static final class PowerOfTwoEventExecutorChooser implements EventExecutorChooser {
-        private final AtomicInteger idx = new AtomicInteger();
+        private final AtomicInteger idx = new AtomicInteger(); // 原子int
         private final EventExecutor[] executors;
 
         PowerOfTwoEventExecutorChooser(EventExecutor[] executors) {
@@ -53,15 +59,14 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
 
         @Override
         public EventExecutor next() {
+            // 相当于取绝对值了，但是位运算要快一点
             return executors[idx.getAndIncrement() & executors.length - 1];
         }
     }
 
     private static final class GenericEventExecutorChooser implements EventExecutorChooser {
-        // Use a 'long' counter to avoid non-round-robin behaviour at the 32-bit overflow boundary.
-        // The 64-bit long solves this by placing the overflow so far into the future, that no system
-        // will encounter this in practice.
-        private final AtomicLong idx = new AtomicLong();
+        // 使用long64位避免int32溢出
+        private final AtomicLong idx = new AtomicLong();// 原子long
         private final EventExecutor[] executors;
 
         GenericEventExecutorChooser(EventExecutor[] executors) {
@@ -70,6 +75,7 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
 
         @Override
         public EventExecutor next() {
+            // 按原子int+1与长度的绝对值返回
             return executors[(int) Math.abs(idx.getAndIncrement() % executors.length)];
         }
     }

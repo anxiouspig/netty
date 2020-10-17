@@ -25,27 +25,23 @@ import io.netty.util.concurrent.EventExecutor;
 import java.nio.channels.Channels;
 
 /**
- * Enables a {@link ChannelHandler} to interact with its {@link ChannelPipeline}
- * and other handlers. Among other things a handler can notify the next {@link ChannelHandler} in the
- * {@link ChannelPipeline} as well as modify the {@link ChannelPipeline} it belongs to dynamically.
+ * 使{@link ChannelHandler}能够与它的{@link ChannelPipeline}和其他处理程序进行交互。其中，处理程序可以通知
+ * {@link ChannelPipeline}中的下一个{@link ChannelHandler}，也可以动态地修改它所属的{@link ChannelPipeline}。
  *
- * <h3>Notify</h3>
+ * <h3>通知</h3>
  *
- * You can notify the closest handler in the same {@link ChannelPipeline} by calling one of the various methods
- * provided here.
+ * 你可以通过调用这里提供的各种方法之一来通知同一个{@link ChannelPipeline}中最近的处理程序。
  *
- * Please refer to {@link ChannelPipeline} to understand how an event flows.
+ * 请参考{@link ChannelPipeline}来了解事件的流程。
  *
- * <h3>Modifying a pipeline</h3>
+ * <h3>修改管道</h3>
  *
- * You can get the {@link ChannelPipeline} your handler belongs to by calling
- * {@link #pipeline()}.  A non-trivial application could insert, remove, or
- * replace handlers in the pipeline dynamically at runtime.
+ * 你可以通过调用{@link #pipeline()}来获取你的处理程序所属的{@link ChannelPipeline}。
+ * 一个非平凡的应用程序可以插入、删除或添加。
  *
- * <h3>Retrieving for later use</h3>
+ * <h3>检索供以后使用</h3>
  *
- * You can keep the {@link ChannelHandlerContext} for later use, such as
- * triggering an event outside the handler methods, even from a different thread.
+ * 你可以保留{@link ChannelHandlerContext}供以后使用，比如在处理方法之外触发一个事件，甚至从不同的线程触发。
  * <pre>
  * public class MyHandler extends {@link ChannelDuplexHandler} {
  *
@@ -62,58 +58,50 @@ import java.nio.channels.Channels;
  * }
  * </pre>
  *
- * <h3>Storing stateful information</h3>
+ * <h3>存储有状态信息</h3>
  *
- * {@link #attr(AttributeKey)} allow you to
- * store and access stateful information that is related with a {@link ChannelHandler} / {@link Channel} and its
- * context. Please refer to {@link ChannelHandler} to learn various recommended
- * ways to manage stateful information.
+ * {@link #attr(AttributeKey)}允许你存储和访问与{@link ChannelHandler}相关的状态信息。/ {@link Channel}及其上下文。
+ * 请参考{@link ChannelHandler}来了解各种推荐的管理有状态信息的方法。
  *
- * <h3>A handler can have more than one {@link ChannelHandlerContext}</h3>
+ * <h3>一个处理程序可以有多个{@link ChannelHandlerContext}。</h3>
  *
- * Please note that a {@link ChannelHandler} instance can be added to more than
- * one {@link ChannelPipeline}.  It means a single {@link ChannelHandler}
- * instance can have more than one {@link ChannelHandlerContext} and therefore
- * the single instance can be invoked with different
- * {@link ChannelHandlerContext}s if it is added to one or more {@link ChannelPipeline}s more than once.
- * Also note that a {@link ChannelHandler} that is supposed to be added to multiple {@link ChannelPipeline}s should
- * be marked as {@link io.netty.channel.ChannelHandler.Sharable}.
+ * 请注意，一个{@link ChannelHandler}实例可以被添加到多个{@link ChannelPipeline}中。
+ * 这意味着一个{@link ChannelHandler}实例可以有多个{@link ChannelHandlerContext}，
+ * 因此如果一个实例被添加到一个或多个{@link ChannelPipeline}中，它可以被不同的{@link ChannelHandlerContext}调用。
+ * 同时要注意的是，一个{@link ChannelHandler}如果应该被添加到多个{@link ChannelPipeline}中，
+ * 应该标记为{@link io.netty.channel.ChannelHandler.Sharable}。
  *
- * <h3>Additional resources worth reading</h3>
+ * <h3>其他值得阅读的资源</h3>
  * <p>
- * Please refer to the {@link ChannelHandler}, and
- * {@link ChannelPipeline} to find out more about inbound and outbound operations,
- * what fundamental differences they have, how they flow in a  pipeline,  and how to handle
- * the operation in your application.
+ * 请参考{@link ChannelHandler}，和{@link ChannelPipeline}来了解更多关于入站操作和出站操作的信息，
+ * 它们有什么根本性的区别，它们在管道中是如何流动的，以及如何在你的应用程序中处理操作。
  */
 public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvoker, ChannelOutboundInvoker {
 
     /**
-     * Return the {@link Channel} which is bound to the {@link ChannelHandlerContext}.
+     * 返回绑定在{@link ChannelHandlerContext}上的{@link Channel}。
      */
     Channel channel();
 
     /**
-     * Returns the {@link EventExecutor} which is used to execute an arbitrary task.
+     * 返回用于执行任意任务的{@link EventExecutor}。
      */
     EventExecutor executor();
 
     /**
-     * The unique name of the {@link ChannelHandlerContext}.The name was used when then {@link ChannelHandler}
-     * was added to the {@link ChannelPipeline}. This name can also be used to access the registered
-     * {@link ChannelHandler} from the {@link ChannelPipeline}.
+     * {@link ChannelHandlerContext}.这个名字是在{@link ChannelPipeline}中添加{@link ChannelHandler}时使用的。
+     * 这个名字也可以用来从{@link ChannelPipeline}访问注册的{@link ChannelHandler}。
      */
     String name();
 
     /**
-     * The {@link ChannelHandler} that is bound this {@link ChannelHandlerContext}.
+     * 绑定这个{@link ChannelHandlerContext}的{@link ChannelHandler}。
      */
     ChannelHandler handler();
 
     /**
-     * Return {@code true} if the {@link ChannelHandler} which belongs to this context was removed
-     * from the {@link ChannelPipeline}. Note that this method is only meant to be called from with in the
-     * {@link EventLoop}.
+     * 如果属于这个上下文的{@link ChannelHandler}被从{@link ChannelPipeline}中移除，返回{@code true}。
+     * 请注意，这个方法只能在{@link EventLoop}中调用。
      */
     boolean isRemoved();
 
@@ -151,24 +139,24 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
     ChannelHandlerContext flush();
 
     /**
-     * Return the assigned {@link ChannelPipeline}
+     * 返回被分配的{@link ChannelPipeline}。
      */
     ChannelPipeline pipeline();
 
     /**
-     * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
+     * 返回分配的{@link ByteBufAllocator}，它将被用来分配{@link ByteBuf}s。
      */
     ByteBufAllocator alloc();
 
     /**
-     * @deprecated Use {@link Channel#attr(AttributeKey)}
+     * 使用 {@link Channel#attr(AttributeKey)}。
      */
     @Deprecated
     @Override
     <T> Attribute<T> attr(AttributeKey<T> key);
 
     /**
-     * @deprecated Use {@link Channel#hasAttr(AttributeKey)}
+     * @deprecated 使用 {@link Channel#hasAttr(AttributeKey)}。
      */
     @Deprecated
     @Override

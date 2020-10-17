@@ -31,34 +31,36 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link EventExecutorGroup} which will preserve {@link Runnable} execution order but makes no guarantees about what
- * {@link EventExecutor} (and therefore {@link Thread}) will be used to execute the {@link Runnable}s.
+ * {@link EventExecutorGroup} 将保证 {@link Runnable} 的执行顺序，但不保证用哪个
+ * {@link EventExecutor} (就是{@link Thread}) 去执行 {@link Runnable}s.
  *
- * <p>The {@link EventExecutorGroup#next()} for the wrapped {@link EventExecutorGroup} must <strong>NOT</strong> return
- * executors of type {@link OrderedEventExecutor}.
+ * 这个 {@link EventExecutorGroup#next()} 包装的 {@link EventExecutorGroup} 不能是 {@link OrderedEventExecutor} 类型.
  */
-@UnstableApi
+// 包装器模式？
+@UnstableApi // 多线程使用，未加锁而是使用判断
 public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
-    private final EventExecutorGroup group;
+    private final EventExecutorGroup group; // 包装这个
     private final int maxTaskExecutePerRun;
 
     /**
-     * Creates a new instance. Be aware that the given {@link EventExecutorGroup} <strong>MUST NOT</strong> contain
-     * any {@link OrderedEventExecutor}s.
+     * 创建一个实例. 想要给 {@link EventExecutorGroup} 不能包含
+     * 任何 {@link OrderedEventExecutor}s.
      */
     public NonStickyEventExecutorGroup(EventExecutorGroup group) {
         this(group, 1024);
     }
 
     /**
-     * Creates a new instance. Be aware that the given {@link EventExecutorGroup} <strong>MUST NOT</strong> contain
-     * any {@link OrderedEventExecutor}s.
+     * 创建一个实例. 想要给 {@link EventExecutorGroup} 不能包含
+     * 任何 {@link OrderedEventExecutor}s.
      */
     public NonStickyEventExecutorGroup(EventExecutorGroup group, int maxTaskExecutePerRun) {
         this.group = verify(group);
+        // 最大任务执行数量
         this.maxTaskExecutePerRun = ObjectUtil.checkPositive(maxTaskExecutePerRun, "maxTaskExecutePerRun");
     }
 
+    // 判断不是OrderedEventExecutor类型
     private static EventExecutorGroup verify(EventExecutorGroup group) {
         Iterator<EventExecutor> executors = ObjectUtil.checkNotNull(group, "group").iterator();
         while (executors.hasNext()) {
@@ -71,6 +73,7 @@ public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
         return group;
     }
 
+    // 产生非严格顺序执行器，包装一下
     private NonStickyOrderedEventExecutor newExecutor(EventExecutor executor) {
         return new NonStickyOrderedEventExecutor(executor, maxTaskExecutePerRun);
     }
@@ -112,6 +115,7 @@ public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
         return newExecutor(group.next());
     }
 
+    // 迭代方法
     @Override
     public Iterator<EventExecutor> iterator() {
         final Iterator<EventExecutor> itr = group.iterator();
@@ -148,6 +152,7 @@ public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
         return group.submit(task);
     }
 
+    // 调度
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         return group.schedule(command, delay, unit);
@@ -211,71 +216,73 @@ public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
         group.execute(command);
     }
 
+    // 实现
     private static final class NonStickyOrderedEventExecutor extends AbstractEventExecutor
             implements Runnable, OrderedEventExecutor {
-        private final EventExecutor executor;
-        private final Queue<Runnable> tasks = PlatformDependent.newMpscQueue();
+        private final EventExecutor executor; // 包装它
+        private final Queue<Runnable> tasks = PlatformDependent.newMpscQueue(); // 任务队列
 
-        private static final int NONE = 0;
-        private static final int SUBMITTED = 1;
-        private static final int RUNNING = 2;
+        private static final int NONE = 0; // 无任务状态
+        private static final int SUBMITTED = 1; // 提交状态
+        private static final int RUNNING = 2; // 执行状态
 
-        private final AtomicInteger state = new AtomicInteger();
-        private final int maxTaskExecutePerRun;
+        private final AtomicInteger state = new AtomicInteger(); // 原子状态
+        private final int maxTaskExecutePerRun; // 最大执行数量
 
         NonStickyOrderedEventExecutor(EventExecutor executor, int maxTaskExecutePerRun) {
             super(executor);
-            this.executor = executor;
+            this.executor = executor; // 父执行器组
             this.maxTaskExecutePerRun = maxTaskExecutePerRun;
         }
 
         @Override
         public void run() {
-            if (!state.compareAndSet(SUBMITTED, RUNNING)) {
+            if (!state.compareAndSet(SUBMITTED, RUNNING)) { // state设为执行状态
                 return;
             }
             for (;;) {
                 int i = 0;
                 try {
-                    for (; i < maxTaskExecutePerRun; i++) {
-                        Runnable task = tasks.poll();
+                    for (; i < maxTaskExecutePerRun; i++) { // 每次循环的最大执行数
+                        Runnable task = tasks.poll(); // 拿出任务
                         if (task == null) {
                             break;
                         }
-                        safeExecute(task);
+                        safeExecute(task); // 执行任务
                     }
                 } finally {
                     if (i == maxTaskExecutePerRun) {
                         try {
                             state.set(SUBMITTED);
+                            // 循环执行
                             executor.execute(this);
-                            return; // done
-                        } catch (Throwable ignore) {
-                            // Reset the state back to running as we will keep on executing tasks.
+                            return; // 返回
+                        } catch (Throwable ignore) { // 若有异常
+                            // 将状态重置回运行状态，因为我们将继续执行任务。
                             state.set(RUNNING);
-                            // if an error happened we should just ignore it and let the loop run again as there is not
-                            // much else we can do. Most likely this was triggered by a full task queue. In this case
-                            // we just will run more tasks and try again later.
+                            // 如果发生了错误，我们应该忽略它，让循环再次运行，因为我们没有什么别的办法。
+                            // 很有可能是由于任务队列满了而引发的。在这种情况下，我们只需要运行更多的任务，稍后再试。
                         }
-                    } else {
-                        state.set(NONE);
-                        // After setting the state to NONE, look at the tasks queue one more time.
-                        // If it is empty, then we can return from this method.
-                        // Otherwise, it means the producer thread has called execute(Runnable)
-                        // and enqueued a task in between the tasks.poll() above and the state.set(NONE) here.
-                        // There are two possible scenarios when this happen
+                    } else { // 没那么多任务了
+                        state.set(NONE); // 设为无任务状态
+                        // 将状态设置为NONE后，再看一次任务队列。如果它是空的，那么我们就可以从这个方法返回。
+                        // 否则，就意味着生产者线程在上面的tasks.poll()和这里的state.set(NONE)之间调用了execute(Runnable)并enqueued了一个任务。
+                        // 当这种情况发生时，有两种可能的情况
                         //
-                        // 1. The producer thread sees state == NONE, hence the compareAndSet(NONE, SUBMITTED)
-                        //    is successfully setting the state to SUBMITTED. This mean the producer
-                        //    will call / has called executor.execute(this). In this case, we can just return.
-                        // 2. The producer thread don't see the state change, hence the compareAndSet(NONE, SUBMITTED)
-                        //    returns false. In this case, the producer thread won't call executor.execute.
-                        //    In this case, we need to change the state to RUNNING and keeps running.
+                        // 1. 生产者线程看到state == NONE，因此compareAndSet(NONE, SUBMITTED)成功将状态设置为SUBMITTED。
+                        // 这意味着生产者将调用/已经调用executor.execute(this)。
+                        // 在这种情况下，我们可以直接返回。
                         //
-                        // The above cases can be distinguished by performing a
-                        // compareAndSet(NONE, RUNNING). If it returns "false", it is case 1; otherwise it is case 2.
+                        // 2. 生产者线程看不到状态变化，因此compareAndSet(NONE, SUBMITTED)返回false。
+                        // 在这种情况下，生产者线程不会调用executor.execute。
+                        // 在这种情况下，我们需要将状态改为RUNNING，并继续运行。
+                        //
+                        // 上述情况可以通过执行compareAndSet(NONE, RUNNING)来区分。
+                        // 如果返回 "false"，则为case 1；否则为case 2。
+                        //
+                        // 如果其他线程把NONE变成RUNNING，这个就会失败
                         if (tasks.isEmpty() || !state.compareAndSet(NONE, RUNNING)) {
-                            return; // done
+                            return; // 若任务为空，或状态非无任务状态
                         }
                     }
                 }
@@ -329,12 +336,11 @@ public final class NonStickyEventExecutorGroup implements EventExecutorGroup {
 
         @Override
         public void execute(Runnable command) {
-            if (!tasks.offer(command)) {
+            if (!tasks.offer(command)) { // 队列不能添加，拒绝
                 throw new RejectedExecutionException();
             }
-            if (state.compareAndSet(NONE, SUBMITTED)) {
-                // Actually it could happen that the runnable was picked up in between but we not care to much and just
-                // execute ourself. At worst this will be a NOOP when run() is called.
+            if (state.compareAndSet(NONE, SUBMITTED)) { // 刚开始把state变成提交状态
+                // 其实这中间也有可能发生runnable被拾取的情况，但我们不必太在意，只需自己执行即可。最坏的情况是，当调用run()时，这将是一个NOOP。
                 executor.execute(this);
             }
         }

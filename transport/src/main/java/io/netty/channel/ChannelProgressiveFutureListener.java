@@ -20,9 +20,8 @@ import io.netty.util.concurrent.GenericProgressiveFutureListener;
 import java.util.EventListener;
 
 /**
- * An {@link EventListener} listener which will be called once the sending task associated with future is
- * being transferred.
+ * 一个{@link EventListener}监听器，一旦与future相关联的发送任务完成，该监听器就会被调用。
  */
 public interface ChannelProgressiveFutureListener extends GenericProgressiveFutureListener<ChannelProgressiveFuture> {
-    // Just a type alias
+    // 只是一个类型的别称
 }

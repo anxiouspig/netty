@@ -17,7 +17,7 @@ package io.netty.util.internal;
 import java.util.Collection;
 
 /**
- * A grab-bag of useful utility methods.
+ * 实用方法
  */
 public final class ObjectUtil {
 
@@ -25,8 +25,8 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is not null. If it is, throws {@link NullPointerException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否为null. 如果是null, 抛出 {@link NullPointerException}.
+     * 否则, 返回参数.
      */
     public static <T> T checkNotNull(T arg, String text) {
         if (arg == null) {
@@ -36,8 +36,8 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is strictly positive. If it is not, throws {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否是正值. 如果不是, 抛出 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static int checkPositive(int i, String name) {
         if (i <= 0) {
@@ -47,8 +47,8 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is strictly positive. If it is not, throws {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否是正值. 如果不是, 抛出 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static long checkPositive(long l, String name) {
         if (l <= 0) {
@@ -58,8 +58,8 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is positive or zero. If it is not , throws {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否是正值或0. 如果不是 , 抛出 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static int checkPositiveOrZero(int i, String name) {
         if (i < 0) {
@@ -69,8 +69,8 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is positive or zero. If it is not, throws {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否是正值或0. 如果不是 , 抛出 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static long checkPositiveOrZero(long l, String name) {
         if (l < 0) {
@@ -80,9 +80,9 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is neither null nor empty.
-     * If it is, throws {@link NullPointerException} or {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否为null或空
+     * 如果是, 抛出 {@link NullPointerException} 或 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static <T> T[] checkNonEmpty(T[] array, String name) {
         checkNotNull(array, name);
@@ -91,9 +91,9 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is neither null nor empty.
-     * If it is, throws {@link NullPointerException} or {@link IllegalArgumentException}.
-     * Otherwise, returns the argument.
+     * 检查给定参数是否为null或空
+     * 如果是, 抛出 {@link NullPointerException} 或 {@link IllegalArgumentException}.
+     * 否则, 返回参数.
      */
     public static <T extends Collection<?>> T checkNonEmpty(T collection, String name) {
         checkNotNull(collection, name);
@@ -102,7 +102,7 @@ public final class ObjectUtil {
     }
 
     /**
-     * Resolves a possibly null Integer to a primitive int, using a default value.
+     * 使用一个默认值将可能为空的Integer解析为int
      * @param wrapper the wrapper
      * @param defaultValue the default value
      * @return the primitive value
@@ -112,7 +112,7 @@ public final class ObjectUtil {
     }
 
     /**
-     * Resolves a possibly null Long to a primitive long, using a default value.
+     * 使用一个默认值将可能为空的Long解析为long
      * @param wrapper the wrapper
      * @param defaultValue the default value
      * @return the primitive value

@@ -29,20 +29,20 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Abstract base class for {@link EventExecutor} implementations.
+ * {@link EventExecutor} 实现的抽象基类.
  */
 public abstract class AbstractEventExecutor extends AbstractExecutorService implements EventExecutor {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractEventExecutor.class);
 
-    static final long DEFAULT_SHUTDOWN_QUIET_PERIOD = 2;
-    static final long DEFAULT_SHUTDOWN_TIMEOUT = 15;
+    static final long DEFAULT_SHUTDOWN_QUIET_PERIOD = 2; // 默认关闭静默期
+    static final long DEFAULT_SHUTDOWN_TIMEOUT = 15; // 默认关闭超时
 
-    private final EventExecutorGroup parent;
-    private final Collection<EventExecutor> selfCollection = Collections.<EventExecutor>singleton(this);
+    private final EventExecutorGroup parent; // 父线程组
+    private final Collection<EventExecutor> selfCollection = Collections.<EventExecutor>singleton(this); // 只包含本执行器
 
     protected AbstractEventExecutor() {
         this(null);
-    }
+    } // 默认父线程组为null
 
     protected AbstractEventExecutor(EventExecutorGroup parent) {
         this.parent = parent;
@@ -51,37 +51,40 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
     @Override
     public EventExecutorGroup parent() {
         return parent;
-    }
+    } // 返回父线程组
 
     @Override
     public EventExecutor next() {
         return this;
-    }
+    } // 返回下一个执行器
 
+    // 当前线程是否在EventLoop
     @Override
     public boolean inEventLoop() {
         return inEventLoop(Thread.currentThread());
     }
 
+    // 执行器迭代器，只包含本执行器
     @Override
     public Iterator<EventExecutor> iterator() {
         return selfCollection.iterator();
     }
 
+    // 优雅关闭
     @Override
     public Future<?> shutdownGracefully() {
         return shutdownGracefully(DEFAULT_SHUTDOWN_QUIET_PERIOD, DEFAULT_SHUTDOWN_TIMEOUT, TimeUnit.SECONDS);
     }
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated
     public abstract void shutdown();
 
     /**
-     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} or {@link #shutdownGracefully()} instead.
+     * @deprecated {@link #shutdownGracefully(long, long, TimeUnit)} 或 {@link #shutdownGracefully()} 代替.
      */
     @Override
     @Deprecated
@@ -157,7 +160,7 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
     }
 
     /**
-     * Try to execute the given {@link Runnable} and just log if it throws a {@link Throwable}.
+     * 执行指定的 {@link Runnable} ，如果抛出 {@link Throwable}，打警告日志.
      */
     protected static void safeExecute(Runnable task) {
         try {
@@ -168,13 +171,12 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
     }
 
     /**
-     * Like {@link #execute(Runnable)} but does not guarantee the task will be run until either
-     * a non-lazy task is executed or the executor is shut down.
+     * 类似 {@link #execute(Runnable)} ，但不保证任务会被执行，直到有个非懒惰的任务被执行，或执行器关闭。
      *
-     * This is equivalent to submitting a {@link EventExecutor.LazyRunnable} to
-     * {@link #execute(Runnable)} but for an arbitrary {@link Runnable}.
+     * 这等于提交一个 {@link EventExecutor.LazyRunnable} 到
+     * {@link #execute(Runnable)} 但不是对于一个任意的 {@link Runnable}.
      *
-     * The default implementation just delegates to {@link #execute(Runnable)}.
+     * 默认实现仅仅会委托 {@link #execute(Runnable)}.
      */
     @UnstableApi
     public void lazyExecute(Runnable task) {
@@ -182,8 +184,8 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
     }
 
     /**
-     * Marker interface for {@link Runnable} to indicate that it should be queued for execution
-     * but does not need to run immediately.
+     * {@link Runnable}的标记接口，表示在执行队列中
+     * 但不需要立即执行.
      */
     @UnstableApi
     public interface LazyRunnable extends Runnable { }

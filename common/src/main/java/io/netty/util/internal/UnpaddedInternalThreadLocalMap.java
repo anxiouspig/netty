@@ -26,20 +26,21 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The internal data structure that stores the thread-local variables for Netty and all {@link FastThreadLocal}s.
- * Note that this class is for internal use only and is subject to change at any time.  Use {@link FastThreadLocal}
- * unless you know what you are doing.
+ * 这个内部数据结构，为 Netty 和所有 {@link FastThreadLocal}s 线程本地变量.
+ * 注意这个类仅作为内部使用， 并可随时更改.  使用 {@link FastThreadLocal}
+ * 除非你知道你正在做什么.
  */
 class UnpaddedInternalThreadLocalMap {
 
+    // 线程本地变量，全局对象，用于线程变量慢获取
     static final ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = new ThreadLocal<InternalThreadLocalMap>();
-    static final AtomicInteger nextIndex = new AtomicInteger();
+    static final AtomicInteger nextIndex = new AtomicInteger(); // 原子int
 
-    /** Used by {@link FastThreadLocal} */
-    Object[] indexedVariables;
+    /** {@link FastThreadLocal} 使用 */
+    Object[] indexedVariables; // 每个线程会保存一个
 
-    // Core thread-locals
-    int futureListenerStackDepth;
+    // 本地线程核心
+    int futureListenerStackDepth; // 监听栈深度
     int localChannelReaderStackDepth;
     Map<Class<?>, Boolean> handlerSharableCache;
     IntegerHolder counterHashCode;
@@ -47,12 +48,12 @@ class UnpaddedInternalThreadLocalMap {
     Map<Class<?>, TypeParameterMatcher> typeParameterMatcherGetCache;
     Map<Class<?>, Map<String, TypeParameterMatcher>> typeParameterMatcherFindCache;
 
-    // String-related thread-locals
+    // 本地线程相关字符串
     StringBuilder stringBuilder;
     Map<Charset, CharsetEncoder> charsetEncoderCache;
     Map<Charset, CharsetDecoder> charsetDecoderCache;
 
-    // ArrayList-related thread-locals
+    // 本地线程相关数组
     ArrayList<Object> arrayList;
 
     UnpaddedInternalThreadLocalMap(Object[] indexedVariables) {

@@ -19,8 +19,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Default implementation of {@link MultithreadEventExecutorGroup} which will use {@link DefaultEventExecutor} instances
- * to handle the tasks.
+ * {@link MultithreadEventExecutorGroup} 的默认实现，将会使用 {@link DefaultEventExecutor} 实例去处理任务。
  */
 public class DefaultEventExecutorGroup extends MultithreadEventExecutorGroup {
     /**
@@ -31,29 +30,23 @@ public class DefaultEventExecutorGroup extends MultithreadEventExecutorGroup {
     }
 
     /**
-     * Create a new instance.
+     * 创一个实例
      *
-     * @param nThreads          the number of threads that will be used by this instance.
-     * @param threadFactory     the ThreadFactory to use, or {@code null} if the default should be used.
+     * @param nThreads          实例使用的线程数量
+     * @param threadFactory     使用的线程工厂, 或者 {@code null} 的话，将使用默认执行器.
      */
     public DefaultEventExecutorGroup(int nThreads, ThreadFactory threadFactory) {
         this(nThreads, threadFactory, SingleThreadEventExecutor.DEFAULT_MAX_PENDING_EXECUTOR_TASKS,
                 RejectedExecutionHandlers.reject());
     }
 
-    /**
-     * Create a new instance.
-     *
-     * @param nThreads          the number of threads that will be used by this instance.
-     * @param threadFactory     the ThreadFactory to use, or {@code null} if the default should be used.
-     * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
-     * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
-     */
+    // 参考父类构造方法，这里把后面不是同种类型的参数变为变长参数，觉得这样设计不太好，
     public DefaultEventExecutorGroup(int nThreads, ThreadFactory threadFactory, int maxPendingTasks,
                                      RejectedExecutionHandler rejectedHandler) {
         super(nThreads, threadFactory, maxPendingTasks, rejectedHandler);
     }
 
+    // 构造线程执行器，上面的方法的参数会传到这里来
     @Override
     protected EventExecutor newChild(Executor executor, Object... args) throws Exception {
         return new DefaultEventExecutor(this, executor, (Integer) args[0], (RejectedExecutionHandler) args[1]);

@@ -18,23 +18,21 @@ package io.netty.channel;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
- * WriteBufferWaterMark is used to set low water mark and high water mark for the write buffer.
+ * WriteBufferWaterMark用于设置写缓冲区的低水位标志和高水位标志。
  * <p>
- * If the number of bytes queued in the write buffer exceeds the
- * {@linkplain #high high water mark}, {@link Channel#isWritable()}
- * will start to return {@code false}.
+ * 如果写入缓冲区中排队的字节数超过了{@linkplain #high - high water mark}，
+ * {@link Channel#isWritable()}将开始返回{@code false}。
  * <p>
- * If the number of bytes queued in the write buffer exceeds the
- * {@linkplain #high high water mark} and then
- * dropped down below the {@linkplain #low low water mark},
- * {@link Channel#isWritable()} will start to return
- * {@code true} again.
+ * 如果写入缓冲区中排队的字节数超过{@linkplain #high - high water mark}，
+ * 然后下降到{@linkplain #low - low water mark}之下，
+ * {@link Channel#isWritable()} 将开始返回{@code true}。
  */
 public final class WriteBufferWaterMark {
-
+    // 默认低水位标记
     private static final int DEFAULT_LOW_WATER_MARK = 32 * 1024;
+    // 默认高水位标记
     private static final int DEFAULT_HIGH_WATER_MARK = 64 * 1024;
-
+    // 单例
     public static final WriteBufferWaterMark DEFAULT =
             new WriteBufferWaterMark(DEFAULT_LOW_WATER_MARK, DEFAULT_HIGH_WATER_MARK, false);
 
@@ -42,17 +40,17 @@ public final class WriteBufferWaterMark {
     private final int high;
 
     /**
-     * Create a new instance.
+     * 创建一个实例。
      *
-     * @param low low water mark for write buffer.
-     * @param high high water mark for write buffer
+     * @param low l写buffer的低水位
+     * @param high 写buffer的高水位
      */
     public WriteBufferWaterMark(int low, int high) {
         this(low, high, true);
     }
 
     /**
-     * This constructor is needed to keep backward-compatibility.
+     * 为了保持向后兼容性，需要使用此构造函数。
      */
     WriteBufferWaterMark(int low, int high, boolean validate) {
         if (validate) {
@@ -69,14 +67,14 @@ public final class WriteBufferWaterMark {
     }
 
     /**
-     * Returns the low water mark for the write buffer.
+     * 返回写缓冲区的低水位标记。
      */
     public int low() {
         return low;
     }
 
     /**
-     * Returns the high water mark for the write buffer.
+     * 返回写缓冲区的高点标记。
      */
     public int high() {
         return high;

@@ -19,14 +19,14 @@ import io.netty.util.concurrent.Promise;
 import io.netty.util.internal.logging.InternalLogger;
 
 /**
- * Internal utilities to notify {@link Promise}s.
+ * 通知 {@link Promise}s 的内部工具.
  */
 public final class PromiseNotificationUtil {
 
     private PromiseNotificationUtil() { }
 
     /**
-     * Try to cancel the {@link Promise} and log if {@code logger} is not {@code null} in case this fails.
+     * 试图取消 {@link Promise} ，如果{@code logger}不是{@code null}，以防失败。
      */
     public static void tryCancel(Promise<?> p, InternalLogger logger) {
         if (!p.cancel(false) && logger != null) {
@@ -42,7 +42,7 @@ public final class PromiseNotificationUtil {
     }
 
     /**
-     * Try to mark the {@link Promise} as success and log if {@code logger} is not {@code null} in case this fails.
+     * 试图标记 {@link Promise} 为成功， 并在{@code logger}不是{@code null}时进行记录，以防失败。
      */
     public static <V> void trySuccess(Promise<? super V> p, V result, InternalLogger logger) {
         if (!p.trySuccess(result) && logger != null) {
@@ -58,7 +58,7 @@ public final class PromiseNotificationUtil {
     }
 
     /**
-     * Try to mark the {@link Promise} as failure and log if {@code logger} is not {@code null} in case this fails.
+     * 试图标记 {@link Promise} 为失败， 并在{@code logger}不是{@code null}时进行记录，以防失败。
      */
     public static void tryFailure(Promise<?> p, Throwable cause, InternalLogger logger) {
         if (!p.tryFailure(cause) && logger != null) {

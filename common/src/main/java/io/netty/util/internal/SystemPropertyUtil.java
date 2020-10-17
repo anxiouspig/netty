@@ -22,7 +22,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 /**
- * A collection of utility methods to retrieve and parse the values of the Java system properties.
+ * 用于检索和解析Java系统属性值的实用方法的集合。
  */
 public final class SystemPropertyUtil {
 
@@ -121,13 +121,11 @@ public final class SystemPropertyUtil {
     }
 
     /**
-     * Returns the value of the Java system property with the specified
-     * {@code key}, while falling back to the specified default value if
-     * the property access fails.
+     * 返回特定 {@code key} 的java系统参数,
+     * 如果变量获取失败则返回默认值.
      *
-     * @return the property value.
-     *         {@code def} if there's no such property or if an access to the
-     *         specified property is not allowed.
+     * @return 参数值.
+     *         {@code def} 如果没有这个参数，或者获取这个参数不被允许。
      */
     public static int getInt(String key, int def) {
         String value = get(key);

@@ -32,19 +32,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Single-thread singleton {@link EventExecutor}.  It starts the thread automatically and stops it when there is no
- * task pending in the task queue for 1 second.  Please note it is not scalable to schedule large number of tasks to
- * this executor; use a dedicated executor.
+ * 单线程singleton {@link EventExecutor}。它自动启动线程，并在任务队列中没有任务挂起1秒时停止它。
+ * 请注意，它是不可伸缩的调度大量的任务到这个执行器;使用专门的执行者。
  */
 public final class GlobalEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(GlobalEventExecutor.class);
-
+    // 安排安静时间间隔
     private static final long SCHEDULE_QUIET_PERIOD_INTERVAL = TimeUnit.SECONDS.toNanos(1);
-
+    // 单例
     public static final GlobalEventExecutor INSTANCE = new GlobalEventExecutor();
 
-    final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<Runnable>();
+    final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<Runnable>(); // 任务阻塞队列
     final ScheduledFutureTask<Void> quietPeriodTask = new ScheduledFutureTask<Void>(
             this, Executors.<Void>callable(new Runnable() {
         @Override
@@ -53,14 +52,13 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
         }
     }, null), ScheduledFutureTask.deadlineNanos(SCHEDULE_QUIET_PERIOD_INTERVAL), -SCHEDULE_QUIET_PERIOD_INTERVAL);
 
-    // because the GlobalEventExecutor is a singleton, tasks submitted to it can come from arbitrary threads and this
-    // can trigger the creation of a thread from arbitrary thread groups; for this reason, the thread factory must not
-    // be sticky about its thread group
-    // visible for testing
-    final ThreadFactory threadFactory;
-    private final TaskRunner taskRunner = new TaskRunner();
-    private final AtomicBoolean started = new AtomicBoolean();
-    volatile Thread thread;
+    // 因为GlobalEventExecutor是一个单例，
+    // 提交给它的任务可以来自任意线程，这可以触发任意线程组的线程创建;
+    // 由于这个原因，线程工厂必须不让它的线程组对测试可见
+    final ThreadFactory threadFactory; // 线程工厂
+    private final TaskRunner taskRunner = new TaskRunner(); // 任务
+    private final AtomicBoolean started = new AtomicBoolean(); // 任务是否开始
+    volatile Thread thread; // 当前线程
 
     private final Future<?> terminationFuture = new FailedFuture<Object>(this, new UnsupportedOperationException());
 
@@ -71,7 +69,7 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     }
 
     /**
-     * Take the next {@link Runnable} from the task queue and so will block if no task is currently present.
+     * 从任务队列中取下一个{@link Runnable}，如果当前没有任务，则会阻塞。
      *
      * @return {@code null} if the executor thread has been interrupted or waken up.
      */
@@ -124,18 +122,16 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     }
 
     /**
-     * Return the number of tasks that are pending for processing.
+     * 返回等待处理的任务数量。
      *
-     * <strong>Be aware that this operation may be expensive as it depends on the internal implementation of the
-     * SingleThreadEventExecutor. So use it was care!</strong>
+     * <strong>请注意，这个操作的开销可能很大，因为它依赖于SingleThreadEventExecutor的内部实现。所以使用它是小心!</strong>
      */
     public int pendingTasks() {
         return taskQueue.size();
     }
 
     /**
-     * Add a task to the task queue, or throws a {@link RejectedExecutionException} if this instance was shutdown
-     * before.
+     * 在任务队列中添加一个任务，或者抛出一个{@link RejectedExecutionException}，如果这个实例之前被关闭了。
      */
     private void addTask(Runnable task) {
         taskQueue.add(ObjectUtil.checkNotNull(task, "task"));
@@ -183,10 +179,8 @@ public final class GlobalEventExecutor extends AbstractScheduledEventExecutor im
     }
 
     /**
-     * Waits until the worker thread of this executor has no tasks left in its task queue and terminates itself.
-     * Because a new worker thread will be started again when a new task is submitted, this operation is only useful
-     * when you want to ensure that the worker thread is terminated <strong>after</strong> your application is shut
-     * down and there's no chance of submitting a new task afterwards.
+     * 等待，直到此执行器的工作线程在其任务队列中没有剩余任务，并自行终止。
+     * 由于在提交新任务时将再次启动新的工作线程，因此此操作仅在您希望确保工作线程在</strong>您的应用程序被关闭且之后没有机会提交新任务时才有用。
      *
      * @return {@code true} if and only if the worker thread has been terminated
      */

@@ -34,18 +34,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A random number generator isolated to the current thread.  Like the
- * global {@link java.util.Random} generator used by the {@link
- * java.lang.Math} class, a {@code ThreadLocalRandom} is initialized
- * with an internally generated seed that may not otherwise be
- * modified. When applicable, use of {@code ThreadLocalRandom} rather
- * than shared {@code Random} objects in concurrent programs will
- * typically encounter much less overhead and contention.  Use of
- * {@code ThreadLocalRandom} is particularly appropriate when multiple
- * tasks (for example, each a {@link io.netty.util.internal.chmv8.ForkJoinTask}) use random numbers
- * in parallel in thread pools.
+ * 隔离到当前线程的随机数生成器。  类似
+ * 全局 {@link java.util.Random}, 一个 {@code ThreadLocalRandom} 初始化
+ * 用内部生成的种子，之后不允许修改. 当应用时, 在当前的程序中，使用 {@code ThreadLocalRandom} 而不是
+ * 共享的 {@code Random} 对象  ，通常会用更小的性能开销.  使用
+ * {@code ThreadLocalRandom} 当多个任务
+ * (f例如, 每个 {@link io.netty.util.internal.chmv8.ForkJoinTask}) 使用随机数在并行线程池中。
  *
- * <p>Usages of this class should typically be of the form:
+ * <p>这个类的使用应遵循如下形式:
  * {@code ThreadLocalRandom.current().nextX(...)} (where
  * {@code X} is {@code Int}, {@code Long}, etc).
  * When all usages are of this form, it is never possible to

@@ -33,11 +33,11 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 /**
- * {@link EventExecutor} implementation which makes no guarantees about the ordering of task execution that
- * are submitted because there may be multiple threads executing these tasks.
- * This implementation is most useful for protocols that do not need strict ordering.
+ * {@link EventExecutor}的实现，不保证提交的任务的顺序执行，
+ * 因为可能有多个线程执行这些任务.
+ * 这个实现对不要求严格执行顺序的实现更有用.
  *
- * <strong>Because it provides no ordering care should be taken when using it!</strong>
+ * <strong>因为当使用时，不关心执行顺序</strong>
  */
 public final class UnorderedThreadPoolEventExecutor extends ScheduledThreadPoolExecutor implements EventExecutor {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(

@@ -22,10 +22,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * Expose helper methods which create different {@link RejectedExecutionHandler}s.
+ * 暴露帮助方法用于创建不同的 {@link RejectedExecutionHandler}s.
  */
+// 策略模式
 public final class RejectedExecutionHandlers {
     private static final RejectedExecutionHandler REJECT = new RejectedExecutionHandler() {
+        // 拒绝会抛异常
         @Override
         public void rejected(Runnable task, SingleThreadEventExecutor executor) {
             throw new RejectedExecutionException();
@@ -35,37 +37,36 @@ public final class RejectedExecutionHandlers {
     private RejectedExecutionHandlers() { }
 
     /**
-     * Returns a {@link RejectedExecutionHandler} that will always just throw a {@link RejectedExecutionException}.
+     * 返回一个 {@link RejectedExecutionHandler}，这总会抛出一个 {@link RejectedExecutionException}.
      */
     public static RejectedExecutionHandler reject() {
         return REJECT;
     }
 
     /**
-     * Tries to backoff when the task can not be added due restrictions for an configured amount of time. This
-     * is only done if the task was added from outside of the event loop which means
-     * {@link EventExecutor#inEventLoop()} returns {@code false}.
+     * 在配置的时间范围内，由于限制无法添加任务时，会尝试后退。
+     * 如果事件在 EventLoop 外添加，这意味着
+     * {@link EventExecutor#inEventLoop()} 返回 {@code false}.
      */
     public static RejectedExecutionHandler backoff(final int retries, long backoffAmount, TimeUnit unit) {
-        ObjectUtil.checkPositive(retries, "retries");
-        final long backOffNanos = unit.toNanos(backoffAmount);
+        ObjectUtil.checkPositive(retries, "retries"); // 检查是否正数
+        final long backOffNanos = unit.toNanos(backoffAmount); // 纳秒
         return new RejectedExecutionHandler() {
             @Override
             public void rejected(Runnable task, SingleThreadEventExecutor executor) {
-                if (!executor.inEventLoop()) {
-                    for (int i = 0; i < retries; i++) {
-                        // Try to wake up the executor so it will empty its task queue.
+                if (!executor.inEventLoop()) { // 执行器是否在EventLoop中
+                    for (int i = 0; i < retries; i++) { // 尝试次数
+                        // 尝试唤醒执行器，清空执行队列.
                         executor.wakeup(false);
 
-                        LockSupport.parkNanos(backOffNanos);
-                        if (executor.offerTask(task)) {
+                        LockSupport.parkNanos(backOffNanos); // 锁住一段时间
+                        if (executor.offerTask(task)) { // 如果能添加任务，则直接返回
                             return;
                         }
                     }
                 }
-                // Either we tried to add the task from within the EventLoop or we was not able to add it even with
-                // backoff.
-                throw new RejectedExecutionException();
+                // 或者尝试往EventLoop中添加任务，或者不能添加的话就回退。
+                throw new RejectedExecutionException(); // 抛出拒绝异常
             }
         };
     }

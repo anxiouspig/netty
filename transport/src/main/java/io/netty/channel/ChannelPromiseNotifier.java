@@ -18,14 +18,14 @@ package io.netty.channel;
 import io.netty.util.concurrent.PromiseNotifier;
 
 /**
- * ChannelFutureListener implementation which takes other {@link ChannelPromise}(s) and notifies them on completion.
+ * ChannelFutureListener实现，它接受其他{@link ChannelPromise}(s)并在完成时通知它们。
  */
 public final class ChannelPromiseNotifier
     extends PromiseNotifier<Void, ChannelFuture>
     implements ChannelFutureListener {
 
     /**
-     * Create a new instance
+     * 创建一个新的实例
      *
      * @param promises  the {@link ChannelPromise}s to notify once this {@link ChannelFutureListener} is notified.
      */
@@ -34,7 +34,7 @@ public final class ChannelPromiseNotifier
     }
 
     /**
-     * Create a new instance
+     * 创建一个新的实例
      *
      * @param logNotifyFailure {@code true} if logging should be done in case notification fails.
      * @param promises  the {@link ChannelPromise}s to notify once this {@link ChannelFutureListener} is notified.

@@ -16,77 +16,72 @@
 package io.netty.util;
 
 /**
- * An attribute which allows to store a value reference. It may be updated atomically and so is thread-safe.
+ * 一个允许存储值引用的属性。它可以原子地更新，所以是线程安全的。
  *
- * @param <T>   the type of the value it holds.
+ * @param <T>   它所拥有的值的类型。
  */
 public interface Attribute<T> {
 
     /**
-     * Returns the key of this attribute.
+     * 返回此属性的键。
      */
     AttributeKey<T> key();
 
     /**
-     * Returns the current value, which may be {@code null}
+     * 返回当前值，可能是{@code null}。
      */
     T get();
 
     /**
-     * Sets the value
+     * 设定值
      */
     void set(T value);
 
     /**
-     *  Atomically sets to the given value and returns the old value which may be {@code null} if non was set before.
+     *  原子化地设置为给定值，并返回旧值，如果之前没有设置，则可能是{@code null}。
      */
     T getAndSet(T value);
 
     /**
-     *  Atomically sets to the given value if this {@link Attribute}'s value is {@code null}.
-     *  If it was not possible to set the value as it contains a value it will just return the current value.
+     *  如果这个{@link Attribute}的值是{@code null}，则原子地设置为给定值。
+     *  如果无法设置值，因为它包含一个值，它将只返回当前值。
      */
     T setIfAbsent(T value);
 
     /**
-     * Removes this attribute from the {@link AttributeMap} and returns the old value. Subsequent {@link #get()}
-     * calls will return {@code null}.
+     * 从{@link AttributeMap}中删除这个属性，并返回旧值。随后的{@link #get()}调用将返回{@code null}。
      *
-     * If you only want to return the old value and clear the {@link Attribute} while still keep it in the
-     * {@link AttributeMap} use {@link #getAndSet(Object)} with a value of {@code null}.
+     * 如果你只想返回旧的值，并清除{@link Attribute}，同时仍将其保留在{@link AttributeMap}中，
+     * 则使用{@link #getAndSet(Object)}，值为{@code null}。
      *
      * <p>
-     * Be aware that even if you call this method another thread that has obtained a reference to this {@link Attribute}
-     * via {@link AttributeMap#attr(AttributeKey)} will still operate on the same instance. That said if now another
-     * thread or even the same thread later will call {@link AttributeMap#attr(AttributeKey)} again, a new
-     * {@link Attribute} instance is created and so is not the same as the previous one that was removed. Because of
-     * this special caution should be taken when you call {@link #remove()} or {@link #getAndRemove()}.
+     * 要注意，即使你调用了这个方法，另一个通过{@link AttributeMap#attr(AttributeKey)}获得了对这个{@link Attribute}的引用的线程仍然会对同一个实例进行操作。
+     * 也就是说如果现在另一个线程甚至同一个线程以后会再次调用{@link AttributeMap#attr(AttributeKey)}，
+     * 就会创建一个新的{@link Attribute}实例，所以和之前被删除的实例是不一样的。由于 当你调用{@link #remove()}或{@link #getAndRemove()}时，应特别注意。
      *
-     * @deprecated please consider using {@link #getAndSet(Object)} (with value of {@code null}).
+     * @deprecated 请考虑使用{@link #getAndSet(Object)}（值为{@code null}）。
      */
     @Deprecated
     T getAndRemove();
 
     /**
-     * Atomically sets the value to the given updated value if the current value == the expected value.
-     * If it the set was successful it returns {@code true} otherwise {@code false}.
+     * 如果当前值==预期值，则原子式地将其设置为给定的更新值，如果设置成功则返回{@code true}，否则返回{@code false}。
+     * 如果设置成功，则返回{@code true}，否则返回{@code false}。
      */
     boolean compareAndSet(T oldValue, T newValue);
 
     /**
-     * Removes this attribute from the {@link AttributeMap}. Subsequent {@link #get()} calls will return @{code null}.
+     * 从{@link AttributeMap}中删除这个属性。随后的{@link #get()}调用将返回@{code null}。
      *
-     * If you only want to remove the value and clear the {@link Attribute} while still keep it in
-     * {@link AttributeMap} use {@link #set(Object)} with a value of {@code null}.
+     * 如果你只想移除该值并清除{@link Attribute}，
+     * 同时仍将其保留在{@link AttributeMap}中，则使用{@link #set(Object)}，值为{@code null}。
      *
      * <p>
-     * Be aware that even if you call this method another thread that has obtained a reference to this {@link Attribute}
-     * via {@link AttributeMap#attr(AttributeKey)} will still operate on the same instance. That said if now another
-     * thread or even the same thread later will call {@link AttributeMap#attr(AttributeKey)} again, a new
-     * {@link Attribute} instance is created and so is not the same as the previous one that was removed. Because of
-     * this special caution should be taken when you call {@link #remove()} or {@link #getAndRemove()}.
+     * 要注意，即使你调用了这个方法，另一个通过{@link AttributeMap#attr(AttributeKey)}获得了对这个{@link Attribute}的引用的线程仍然会对同一个实例进行操作。
+     * 也就是说如果现在另一个线程甚至同一个线程以后会再次调用{@link AttributeMap#attr(AttributeKey)}，
+     * 就会创建一个新的{@link Attribute}实例，所以和之前被删除的实例是不一样的。正因为如此，当你调用{@link #remove()}或{@link #getAndRemove()}时，应该特别注意。
      *
-     * @deprecated please consider using {@link #set(Object)} (with value of {@code null}).
+     * @deprecated 请考虑使用{@link #set(Object)}（值为{@code null}）。
      */
     @Deprecated
     void remove();

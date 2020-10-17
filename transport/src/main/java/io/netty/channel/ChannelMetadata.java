@@ -20,7 +20,7 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
 import java.net.SocketAddress;
 
 /**
- * Represents the properties of a {@link Channel} implementation.
+ * 表示一个{@link Channel}实现的属性。
  */
 public final class ChannelMetadata {
 
@@ -28,24 +28,22 @@ public final class ChannelMetadata {
     private final int defaultMaxMessagesPerRead;
 
     /**
-     * Create a new instance
+     * 创建一个新的实例
      *
-     * @param hasDisconnect     {@code true} if and only if the channel has the {@code disconnect()} operation
-     *                          that allows a user to disconnect and then call {@link Channel#connect(SocketAddress)}
-     *                          again, such as UDP/IP.
+     * @param hasDisconnect     {@code true}如果且仅如果通道有{@code disconnect()}操作，允许用户断开连接，然后调用
+     *                          {@link Channel#connect(SocketAddress)}。
      */
     public ChannelMetadata(boolean hasDisconnect) {
         this(hasDisconnect, 1);
     }
 
     /**
-     * Create a new instance
+     * 创建一个新的实例
      *
-     * @param hasDisconnect     {@code true} if and only if the channel has the {@code disconnect()} operation
-     *                          that allows a user to disconnect and then call {@link Channel#connect(SocketAddress)}
-     *                          again, such as UDP/IP.
-     * @param defaultMaxMessagesPerRead If a {@link MaxMessagesRecvByteBufAllocator} is in use, then this value will be
-     * set for {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}. Must be {@code > 0}.
+     * @param hasDisconnect     {@code true}如果且仅如果通道有{@code disconnect()}操作，允许用户断开连接，然后再次调用
+     *                          {@link Channel#connect(SocketAddress)}，如UDP/IP。
+     * @param defaultMaxMessagesPerRead 如果使用了{@link MaxMessagesRecvByteBufAllocator}，那么这个值将被设置为
+     *                                  {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}。必须是{@code > 0}。
      */
     public ChannelMetadata(boolean hasDisconnect, int defaultMaxMessagesPerRead) {
         checkPositive(defaultMaxMessagesPerRead, "defaultMaxMessagesPerRead");
@@ -54,17 +52,16 @@ public final class ChannelMetadata {
     }
 
     /**
-     * Returns {@code true} if and only if the channel has the {@code disconnect()} operation
-     * that allows a user to disconnect and then call {@link Channel#connect(SocketAddress)} again,
-     * such as UDP/IP.
+     * 如果且仅如果通道有{@code disconnect()}操作，允许用户断开连接，然后再次调用{@link Channel#connect(SocketAddress)}，
+     * 如UDP/IP，则返回{@code true}。
      */
     public boolean hasDisconnect() {
         return hasDisconnect;
     }
 
     /**
-     * If a {@link MaxMessagesRecvByteBufAllocator} is in use, then this is the default value for
-     * {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}.
+     * 如果使用了{@link MaxMessagesRecvByteBufAllocator}，那么这就是
+     * {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}的默认值。
      */
     public int defaultMaxMessagesPerRead() {
         return defaultMaxMessagesPerRead;

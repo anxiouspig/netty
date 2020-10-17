@@ -18,77 +18,69 @@ package io.netty.channel;
 public interface ChannelInboundInvoker {
 
     /**
-     * A {@link Channel} was registered to its {@link EventLoop}.
+     * 一个{@link Channel}被注册到它的{@link EventLoop}。
      *
-     * This will result in having the  {@link ChannelInboundHandler#channelRegistered(ChannelHandlerContext)} method
-     * called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将会导致调用ChannelInboundHandler#channelRegistered(ChannelHandlerContext)}方法的下一个
+     * {@link ChannelPipeline}中的{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireChannelRegistered();
 
     /**
-     * A {@link Channel} was unregistered from its {@link EventLoop}.
+     * 一个{@link Channel}从它的{@link EventLoop}中被取消注册。
      *
-     * This will result in having the  {@link ChannelInboundHandler#channelUnregistered(ChannelHandlerContext)} method
-     * called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将会导致调用ChannelUnregistered(ChannelHandlerContext)}方法的下一个
+     * {@link ChannelPipeline}中包含的{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireChannelUnregistered();
 
     /**
-     * A {@link Channel} is active now, which means it is connected.
+     * 一个{@link Channel}现在是活动的，这意味着它是连接的。
      *
-     * This will result in having the  {@link ChannelInboundHandler#channelActive(ChannelHandlerContext)} method
-     * called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将会导致调用ChannelInboundHandler#channelActive(ChannelHandlerContext)}方法的下一个
+     * {@link ChannelPipeline}中的{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireChannelActive();
 
     /**
-     * A {@link Channel} is inactive now, which means it is closed.
+     * 一个{@link Channel}现在是不活跃的，这意味着它是关闭的。
      *
-     * This will result in having the  {@link ChannelInboundHandler#channelInactive(ChannelHandlerContext)} method
-     * called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将会导致调用{@link ChannelInboundHandler#channelInactive(ChannelHandlerContext)}方法的下一个
+     * {@link ChannelPipeline}中的{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireChannelInactive();
 
     /**
-     * A {@link Channel} received an {@link Throwable} in one of its inbound operations.
+     * 一个{@link Channel}在其一次入站操作中收到了一个{@link Throwable}。
      *
-     * This will result in having the  {@link ChannelInboundHandler#exceptionCaught(ChannelHandlerContext, Throwable)}
-     * method  called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将导致调用ChannelInboundHandler#exceptionCaught(ChannelHandlerContext, Throwable)}方法的下一个
+     * {@link ChannelPipeline}中包含的{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireExceptionCaught(Throwable cause);
 
     /**
-     * A {@link Channel} received an user defined event.
+     * 一个{@link Channel}收到了一个用户定义的事件。
      *
-     * This will result in having the  {@link ChannelInboundHandler#userEventTriggered(ChannelHandlerContext, Object)}
-     * method  called of the next  {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将导致在{@link Channel}的{@link ChannelPipeline}中包含的下一个{@link ChannelInboundHandler}中调用
+     * {@link ChannelInboundHandler#userEventTriggered(ChannelHandlerContext, Object)}方法。
      */
     ChannelInboundInvoker fireUserEventTriggered(Object event);
 
     /**
-     * A {@link Channel} received a message.
+     * 一个{@link Channel}收到了一条消息。
      *
-     * This will result in having the {@link ChannelInboundHandler#channelRead(ChannelHandlerContext, Object)}
-     * method  called of the next {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
-     * {@link Channel}.
+     * 这将导致在{@link Channel}的{@link ChannelPipeline}中包含的下一个{@link ChannelInboundHandler}中调用
+     * {@link ChannelInboundHandler#channelRead(ChannelHandlerContext, Object)}方法。
      */
     ChannelInboundInvoker fireChannelRead(Object msg);
 
     /**
-     * Triggers an {@link ChannelInboundHandler#channelReadComplete(ChannelHandlerContext)}
-     * event to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 触发一个{@link ChannelInboundHandler#channelReadComplete(ChannelHandlerContext)}事件到
+     * {@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      */
     ChannelInboundInvoker fireChannelReadComplete();
 
     /**
-     * Triggers an {@link ChannelInboundHandler#channelWritabilityChanged(ChannelHandlerContext)}
-     * event to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 触发{@link ChannelInboundHandler#channelWritabilityChanged(ChannelHandlerContext)}。
      */
     ChannelInboundInvoker fireChannelWritabilityChanged();
 }

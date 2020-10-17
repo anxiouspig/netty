@@ -20,7 +20,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.ProgressivePromise;
 
 /**
- * Special {@link ChannelPromise} which will be notified once the associated bytes is transferring.
+ * 特殊的{@link ChannelPromise}，一旦相关的字节传输完毕，就会被通知。
  */
 public interface ChannelProgressivePromise extends ProgressivePromise<Void>, ChannelProgressiveFuture, ChannelPromise {
 

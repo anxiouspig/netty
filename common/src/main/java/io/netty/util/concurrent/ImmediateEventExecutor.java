@@ -24,18 +24,19 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Executes {@link Runnable} objects in the caller's thread. If the {@link #execute(Runnable)} is reentrant it will be
- * queued until the original {@link Runnable} finishes execution.
+ * 在调用者的线程中执行{@link Runnable}对象。如果{@link #execute(Runnable)}是可重入的，它将被排队，直到原始的{@link Runnable}完成执行。
  * <p>
- * All {@link Throwable} objects thrown from {@link #execute(Runnable)} will be swallowed and logged. This is to ensure
- * that all queued {@link Runnable} objects have the chance to be run.
+ * 所有从{@link #execute(Runnable)}抛出的{@link Throwable}对象将被吞入并记录。
+ * 这是为了确保所有排队的{@link Runnable}对象都有机会运行。
  */
 public final class ImmediateEventExecutor extends AbstractEventExecutor {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ImmediateEventExecutor.class);
+    // 单例模式
     public static final ImmediateEventExecutor INSTANCE = new ImmediateEventExecutor();
     /**
-     * A Runnable will be queued if we are executing a Runnable. This is to prevent a {@link StackOverflowError}.
+     * 如果我们正在执行一个Runnable，那么一个Runnable将会被排队。这是为了防止{@link StackOverflowError}。
      */
+    // 延迟运行队列
     private static final FastThreadLocal<Queue<Runnable>> DELAYED_RUNNABLES = new FastThreadLocal<Queue<Runnable>>() {
         @Override
         protected Queue<Runnable> initialValue() throws Exception {
@@ -43,8 +44,9 @@ public final class ImmediateEventExecutor extends AbstractEventExecutor {
         }
     };
     /**
-     * Set to {@code true} if we are executing a runnable.
+     * 如果我们正在执行一个runnable，设置为{@code true}。
      */
+    // 运行状态
     private static final FastThreadLocal<Boolean> RUNNING = new FastThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() throws Exception {
@@ -104,25 +106,25 @@ public final class ImmediateEventExecutor extends AbstractEventExecutor {
     @Override
     public void execute(Runnable command) {
         ObjectUtil.checkNotNull(command, "command");
-        if (!RUNNING.get()) {
+        if (!RUNNING.get()) { // 若不在执行
             RUNNING.set(true);
             try {
-                command.run();
+                command.run(); // 执行
             } catch (Throwable cause) {
                 logger.info("Throwable caught while executing Runnable {}", command, cause);
             } finally {
-                Queue<Runnable> delayedRunnables = DELAYED_RUNNABLES.get();
+                Queue<Runnable> delayedRunnables = DELAYED_RUNNABLES.get(); // 拿到任务队列
                 Runnable runnable;
-                while ((runnable = delayedRunnables.poll()) != null) {
+                while ((runnable = delayedRunnables.poll()) != null) { // 顺序执行
                     try {
                         runnable.run();
                     } catch (Throwable cause) {
                         logger.info("Throwable caught while executing Runnable {}", runnable, cause);
                     }
                 }
-                RUNNING.set(false);
+                RUNNING.set(false); // 执行结束
             }
-        } else {
+        } else { // 若正在执行，则加入队列
             DELAYED_RUNNABLES.get().add(command);
         }
     }

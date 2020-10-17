@@ -19,19 +19,18 @@ import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
 
 /**
- * The {@link CompleteFuture} which is failed already.  It is
- * recommended to use {@link EventExecutor#newFailedFuture(Throwable)}
- * instead of calling the constructor of this future.
+ * 已经失败的{@link CompleteFuture}。
+ * 建议使用{@link EventExecutor#newFailedFuture(Throwable)}代替调用这个未来的构造函数。
  */
 public final class FailedFuture<V> extends CompleteFuture<V> {
 
     private final Throwable cause;
 
     /**
-     * Creates a new instance.
+     * 创建一个新的实例。
      *
-     * @param executor the {@link EventExecutor} associated with this future
-     * @param cause   the cause of failure
+     * @param executor 与此未来相关联的{@link EventExecutor}。
+     * @param cause   败因
      */
     public FailedFuture(EventExecutor executor, Throwable cause) {
         super(executor);
