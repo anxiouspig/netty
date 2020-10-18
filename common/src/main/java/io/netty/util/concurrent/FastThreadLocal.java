@@ -139,6 +139,7 @@ public class FastThreadLocal<V> {
     private final int index; // 对象id
 
     public FastThreadLocal() {
+        // 线程本地变量保存的id
         index = InternalThreadLocalMap.nextVariableIndex();
     }
 

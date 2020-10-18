@@ -20,22 +20,20 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 /**
- * An arbitrary task that can be executed by {@link NioEventLoop} when a {@link SelectableChannel} becomes ready.
+ * 当{@link SelectableChannel}准备就绪时，可以由{@link NioEventLoop}执行的任意任务。
  *
  * @see NioEventLoop#register(SelectableChannel, int, NioTask)
  */
 public interface NioTask<C extends SelectableChannel> {
     /**
-     * Invoked when the {@link SelectableChannel} has been selected by the {@link Selector}.
+     * 当{@link Selector}选择了{@link SelectableChannel}时调用。
      */
     void channelReady(C ch, SelectionKey key) throws Exception;
 
     /**
-     * Invoked when the {@link SelectionKey} of the specified {@link SelectableChannel} has been cancelled and thus
-     * this {@link NioTask} will not be notified anymore.
+     * 当指定的{@link SelectionKey}的{@link SelectionKey}被取消，因此这个{@link NioTask}将不再被通知时调用。
      *
-     * @param cause the cause of the unregistration. {@code null} if a user called {@link SelectionKey#cancel()} or
-     *              the event loop has been shut down.
+     * @param cause 取消注册的原因。如果调用{@link SelectionKey#cancel()}的用户或事件循环已被关闭，则为{@code null}。
      */
     void channelUnregistered(C ch, Throwable cause) throws Exception;
 }

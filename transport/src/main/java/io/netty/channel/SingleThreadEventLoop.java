@@ -32,11 +32,11 @@ import java.util.concurrent.ThreadFactory;
  */
 public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor implements EventLoop {
 
-    // 默认最大任务数
+    // 默认最大等待任务数
     protected static final int DEFAULT_MAX_PENDING_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventLoop.maxPendingTasks", Integer.MAX_VALUE));
 
-    private final Queue<Runnable> tailTasks; // 任务队列
+    private final Queue<Runnable> tailTasks; // 收尾任务
 
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, threadFactory, addTaskWakesUp, DEFAULT_MAX_PENDING_TASKS, RejectedExecutionHandlers.reject());
@@ -67,16 +67,19 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         tailTasks = ObjectUtil.checkNotNull(tailTaskQueue, "tailTaskQueue");
     }
 
+    // 返回父线程组
     @Override
     public EventLoopGroup parent() {
         return (EventLoopGroup) super.parent();
     }
 
+    // 返回下一个执行器
     @Override
     public EventLoop next() {
         return (EventLoop) super.next();
     }
 
+    // 注册
     @Override
     public ChannelFuture register(Channel channel) {
         return register(new DefaultChannelPromise(channel, this));
@@ -124,18 +127,20 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
      *
      * @param task to be removed.
      *
-     * @return {@code true} if the task was removed as a result of this call.
+     * @return {@code true} 如果任务因此调用而被删除。
      */
     @UnstableApi
     final boolean removeAfterEventLoopIterationTask(Runnable task) {
         return tailTasks.remove(ObjectUtil.checkNotNull(task, "task"));
     }
 
+    // 运行所有任务之后运行任务
     @Override
     protected void afterRunningAllTasks() {
         runAllTasksFrom(tailTasks);
     }
 
+    // 是否还有任务
     @Override
     protected boolean hasTasks() {
         return super.hasTasks() || !tailTasks.isEmpty();

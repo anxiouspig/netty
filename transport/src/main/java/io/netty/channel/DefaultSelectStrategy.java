@@ -18,7 +18,7 @@ package io.netty.channel;
 import io.netty.util.IntSupplier;
 
 /**
- * Default select strategy.
+ * 默认选择策略.
  */
 final class DefaultSelectStrategy implements SelectStrategy {
     static final SelectStrategy INSTANCE = new DefaultSelectStrategy();
@@ -26,6 +26,7 @@ final class DefaultSelectStrategy implements SelectStrategy {
     private DefaultSelectStrategy() { }
 
     @Override
+    // 计算策略，如果还有任务则立即select，否则
     public int calculateStrategy(IntSupplier selectSupplier, boolean hasTasks) throws Exception {
         return hasTasks ? selectSupplier.get() : SelectStrategy.SELECT;
     }

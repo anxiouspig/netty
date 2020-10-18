@@ -16,12 +16,12 @@
 package io.netty.channel;
 
 /**
- * Factory that creates a new {@link SelectStrategy} every time.
+ * 每次创建 {@link SelectStrategy} 的工厂.
  */
 public interface SelectStrategyFactory {
 
     /**
-     * Creates a new {@link SelectStrategy}.
+     * 创建一个 {@link SelectStrategy}.
      */
     SelectStrategy newSelectStrategy();
 }

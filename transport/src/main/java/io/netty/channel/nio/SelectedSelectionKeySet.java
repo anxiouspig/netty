@@ -21,15 +21,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+// 优化SelectionKey
 final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
-    SelectionKey[] keys;
-    int size;
+    SelectionKey[] keys; // 保存keys
+    int size; // 大小
 
     SelectedSelectionKeySet() {
         keys = new SelectionKey[1024];
-    }
+    } // 初始化大小
 
+    // 添加
     @Override
     public boolean add(SelectionKey o) {
         if (o == null) {
@@ -37,28 +39,31 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
         }
 
         keys[size++] = o;
-        if (size == keys.length) {
+        if (size == keys.length) { // 如果满了则扩容
             increaseCapacity();
         }
 
         return true;
     }
 
+    // 不支持移除
     @Override
     public boolean remove(Object o) {
         return false;
     }
-
+    // 不支持查询
     @Override
     public boolean contains(Object o) {
         return false;
     }
 
+    // 返回大小
     @Override
     public int size() {
         return size;
     }
 
+    // 迭代器
     @Override
     public Iterator<SelectionKey> iterator() {
         return new Iterator<SelectionKey>() {
@@ -84,6 +89,7 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
         };
     }
 
+    // 清空
     void reset() {
         reset(0);
     }
@@ -93,7 +99,9 @@ final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
         size = 0;
     }
 
+    // 扩容
     private void increaseCapacity() {
+        // 扩容为二倍
         SelectionKey[] newKeys = new SelectionKey[keys.length << 1];
         System.arraycopy(keys, 0, newKeys, 0, size);
         keys = newKeys;

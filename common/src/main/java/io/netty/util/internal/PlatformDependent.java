@@ -935,9 +935,9 @@ public final class PlatformDependent {
         }
 
         static <T> Queue<T> newMpscQueue(final int maxCapacity) {
-            // Calculate the max capacity which can not be bigger than MAX_ALLOWED_MPSC_CAPACITY.
-            // This is forced by the MpscChunkedArrayQueue implementation as will try to round it
-            // up to the next power of two and so will overflow otherwise.
+            // 计算不能大于MAX_ALLOWED_MPSC_CAPACITY的最大容量。
+            // 这是MpscChunkedArrayQueue实现强制执行的，因为它将试图四舍五
+            // 一直到下一个2的幂，否则就会溢出。
             final int capacity = max(min(maxCapacity, MAX_ALLOWED_MPSC_CAPACITY), MIN_MAX_MPSC_CAPACITY);
             return USE_MPSC_CHUNKED_ARRAY_QUEUE ? new MpscChunkedArrayQueue<T>(MPSC_CHUNK_SIZE, capacity)
                                                 : new MpscChunkedAtomicArrayQueue<T>(MPSC_CHUNK_SIZE, capacity);

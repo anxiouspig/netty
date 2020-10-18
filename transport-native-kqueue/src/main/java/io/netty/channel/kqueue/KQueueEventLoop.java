@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import static java.lang.Math.min;
 
 /**
- * {@link EventLoop} which uses kqueue under the covers. Only works on BSD!
+ * {@link EventLoop}在幕后使用了kqueue。只在BSD上工作!
  */
 final class KQueueEventLoop extends SingleThreadEventLoop {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(KQueueEventLoop.class);

@@ -114,7 +114,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         for (ScheduledFutureTask<?> task: scheduledTasks) {
             task.cancelWithoutRemove(false);
         }
-
+        // 帮助GC，清除引用
         scheduledTaskQueue.clearIgnoringIndexes();
     }
 
