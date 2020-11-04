@@ -29,16 +29,17 @@ import java.util.List;
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
- * A skeletal {@link AddressResolver} implementation.
+ * 骨架{@link AddressResolver}实现。
  */
 public abstract class AbstractAddressResolver<T extends SocketAddress> implements AddressResolver<T> {
 
+    // 执行器
     private final EventExecutor executor;
+    // 匹配器
     private final TypeParameterMatcher matcher;
 
     /**
-     * @param executor the {@link EventExecutor} which is used to notify the listeners of the {@link Future} returned
-     *                 by {@link #resolve(SocketAddress)}
+     * @param executor 用于通知监听器{@link #resolve(SocketAddress)}返回的{@link Future}的{@link EventExecutor}
      */
     protected AbstractAddressResolver(EventExecutor executor) {
         this.executor = checkNotNull(executor, "executor");
@@ -46,9 +47,8 @@ public abstract class AbstractAddressResolver<T extends SocketAddress> implement
     }
 
     /**
-     * @param executor the {@link EventExecutor} which is used to notify the listeners of the {@link Future} returned
-     *                 by {@link #resolve(SocketAddress)}
-     * @param addressType the type of the {@link SocketAddress} supported by this resolver
+     * @param executor 用于通知监听器{@link #resolve(SocketAddress)}返回的{@link Future}的{@link EventExecutor}
+     * @param addressType 此解析器支持的{@link SocketAddress}的类型
      */
     protected AbstractAddressResolver(EventExecutor executor, Class<? extends T> addressType) {
         this.executor = checkNotNull(executor, "executor");
@@ -56,8 +56,7 @@ public abstract class AbstractAddressResolver<T extends SocketAddress> implement
     }
 
     /**
-     * Returns the {@link EventExecutor} which is used to notify the listeners of the {@link Future} returned
-     * by {@link #resolve(SocketAddress)}.
+     * 返回{@link EventExecutor}，用于通知侦听器{@link Future}由{@link #resolve(SocketAddress)}返回的{@link Future}。
      */
     protected EventExecutor executor() {
         return executor;
@@ -80,8 +79,7 @@ public abstract class AbstractAddressResolver<T extends SocketAddress> implement
     }
 
     /**
-     * Invoked by {@link #isResolved(SocketAddress)} to check if the specified {@code address} has been resolved
-     * already.
+     * 由{@link # isresolve (SocketAddress)}调用，检查指定的{@code address}是否已经被解析。
      */
     protected abstract boolean doIsResolved(T address);
 

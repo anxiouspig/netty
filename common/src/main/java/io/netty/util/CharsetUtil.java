@@ -25,40 +25,37 @@ import java.nio.charset.CodingErrorAction;
 import java.util.Map;
 
 /**
- * A utility class that provides various common operations and constants
- * related with {@link Charset} and its relevant classes.
+ * 提供与{@link Charset}及其相关类相关的各种常见操作和常量的实用程序类。
  */
 public final class CharsetUtil {
 
     /**
-     * 16-bit UTF (UCS Transformation Format) whose byte order is identified by
-     * an optional byte-order mark
+     * 16位UTF (UCS转换格式)，其字节顺序由一个可选的字节顺序标记标识
      */
     public static final Charset UTF_16 = Charset.forName("UTF-16");
 
     /**
-     * 16-bit UTF (UCS Transformation Format) whose byte order is big-endian
+     * 16位UTF (UCS转换格式)，字节顺序为big-endian
      */
     public static final Charset UTF_16BE = Charset.forName("UTF-16BE");
 
     /**
-     * 16-bit UTF (UCS Transformation Format) whose byte order is little-endian
+     * 16位UTF (UCS转换格式)，字节顺序是little-endian
      */
     public static final Charset UTF_16LE = Charset.forName("UTF-16LE");
 
     /**
-     * 8-bit UTF (UCS Transformation Format)
+     * 8位UTF (UCS转换格式)
      */
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /**
-     * ISO Latin Alphabet No. 1, as known as <tt>ISO-LATIN-1</tt>
+     * ISO拉丁字母表第1号，即<tt>ISO- Latin -1</tt>
      */
     public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     /**
-     * 7-bit ASCII, as known as ISO646-US or the Basic Latin block of the
-     * Unicode character set
+     * 7位ASCII，称为ISO646-US或Unicode字符集的基本拉丁块
      */
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
 
@@ -78,11 +75,11 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a new {@link CharsetEncoder} for the {@link Charset} with specified error actions.
+     * 为带有指定错误操作的{@link Charset}返回一个新的{@link CharsetEncoder}。
      *
      * @param charset The specified charset
-     * @param malformedInputAction The encoder's action for malformed-input errors
-     * @param unmappableCharacterAction The encoder's action for unmappable-character errors
+     * @param malformedInputAction 编码器对错误输入的操作
+     * @param unmappableCharacterAction 编码器对不可映射字符错误的操作
      * @return The encoder for the specified {@code charset}
      */
     public static CharsetEncoder encoder(Charset charset, CodingErrorAction malformedInputAction,
@@ -94,7 +91,7 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a new {@link CharsetEncoder} for the {@link Charset} with the specified error action.
+     * 为带有指定错误操作的{@link字符集}返回一个新的{@link CharsetEncoder}。
      *
      * @param charset The specified charset
      * @param codingErrorAction The encoder's action for malformed-input and unmappable-character errors
@@ -105,10 +102,10 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a cached thread-local {@link CharsetEncoder} for the specified {@link Charset}.
+     * 为指定的{@link Charset}返回缓存的线程本地{@link CharsetEncoder}。
      *
      * @param charset The specified charset
-     * @return The encoder for the specified {@code charset}
+     * @return 指定{@code charset}的编码器
      */
     public static CharsetEncoder encoder(Charset charset) {
         checkNotNull(charset, "charset");
@@ -134,7 +131,7 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a new {@link CharsetDecoder} for the {@link Charset} with specified error actions.
+     * 为带有指定错误操作的{@link Charset}返回一个新的{@link CharsetDecoder}。
      *
      * @param charset The specified charset
      * @param malformedInputAction The decoder's action for malformed-input errors
@@ -150,7 +147,7 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a new {@link CharsetDecoder} for the {@link Charset} with the specified error action.
+     * 为带有指定错误操作的{@link Charset}返回一个新的{@link CharsetDecoder}。
      *
      * @param charset The specified charset
      * @param codingErrorAction The decoder's action for malformed-input and unmappable-character errors
@@ -161,7 +158,7 @@ public final class CharsetUtil {
     }
 
     /**
-     * Returns a cached thread-local {@link CharsetDecoder} for the specified {@link Charset}.
+     * 为指定的{@link字符集}返回缓存的线程本地{@link CharsetDecoder}。
      *
      * @param charset The specified charset
      * @return The decoder for the specified {@code charset}

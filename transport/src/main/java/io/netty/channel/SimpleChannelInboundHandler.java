@@ -19,9 +19,9 @@ import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.TypeParameterMatcher;
 
 /**
- * {@link ChannelInboundHandlerAdapter} which allows to explicit only handle a specific type of messages.
+ * {@link ChannelInboundHandlerAdapter}，允许明确只处理特定类型的消息。
  *
- * For example here is an implementation which only handle {@link String} messages.
+ * 例如这里是一个只处理{@link String}消息的实现。
  *
  * <pre>
  *     public class StringHandler extends
@@ -35,9 +35,9 @@ import io.netty.util.internal.TypeParameterMatcher;
  *     }
  * </pre>
  *
- * Be aware that depending of the constructor parameters it will release all handled messages by passing them to
- * {@link ReferenceCountUtil#release(Object)}. In this case you may need to use
- * {@link ReferenceCountUtil#retain(Object)} if you pass the object to the next handler in the {@link ChannelPipeline}.
+ * 请注意，根据构造函数参数的不同，它将通过传递给{@link ReferenceCountUtil#release(Object)}来释放所有处理的消息。
+ * 在这种情况下，如果你把对象传递给{@link ChannelPipeline}中的下一个处理程序，你可能需要使用
+ * {@link ReferenceCountUtil#retain(Object)}。
  */
 public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandlerAdapter {
 
@@ -45,14 +45,14 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
     private final boolean autoRelease;
 
     /**
-     * see {@link #SimpleChannelInboundHandler(boolean)} with {@code true} as boolean parameter.
+     * 见{@link #SimpleChannelInboundHandler(boolean)}，以{@code true}作为boolean参数。
      */
     protected SimpleChannelInboundHandler() {
         this(true);
     }
 
     /**
-     * Create a new instance which will try to detect the types to match out of the type parameter of the class.
+     * 创建一个新的实例，它将尝试从类的类型参数中检测出要匹配的类型。
      *
      * @param autoRelease   {@code true} if handled messages should be released automatically by passing them to
      *                      {@link ReferenceCountUtil#release(Object)}.
@@ -82,8 +82,8 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
     }
 
     /**
-     * Returns {@code true} if the given message should be handled. If {@code false} it will be passed to the next
-     * {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 返回{@code true}是否应该处理给定的消息。如果是{@code false}，则会被传递给
+     * {@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      */
     public boolean acceptInboundMessage(Object msg) throws Exception {
         return matcher.match(msg);
@@ -109,12 +109,11 @@ public abstract class SimpleChannelInboundHandler<I> extends ChannelInboundHandl
     }
 
     /**
-     * Is called for each message of type {@link I}.
+     * 对每个{@link I}类型的消息都会被调用。
      *
-     * @param ctx           the {@link ChannelHandlerContext} which this {@link SimpleChannelInboundHandler}
-     *                      belongs to
-     * @param msg           the message to handle
-     * @throws Exception    is thrown if an error occurred
+     * @param ctx           这个{@link SimpleChannelInboundHandler}所属的{@link ChannelHandlerContext}。
+     * @param msg           要处理的信息
+     * @throws Exception    如果发生错误，则抛出
      */
     protected abstract void channelRead0(ChannelHandlerContext ctx, I msg) throws Exception;
 }

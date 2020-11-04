@@ -35,17 +35,14 @@ import java.nio.charset.UnsupportedCharsetException;
  *
  * <h3>创建一个缓冲数组</h3>
  *
- * It is recommended to create a new buffer using the helper methods in
- * {@link Unpooled} rather than calling an individual implementation's
- * constructor.
+ * 建议使用{@link Unpooled}中的助手方法创建一个新的缓冲区，而不是调用单独实现的构造函数。
  *
- * <h3>Random Access Indexing</h3>
+ * <h3>随机访问索引</h3>
  *
- * Just like an ordinary primitive byte array, {@link ByteBuf} uses
- * <a href="http://en.wikipedia.org/wiki/Zero-based_numbering"> zero-based indexing</a>.
- * It means the index of the first byte is always {@code 0} and the index of the last byte is
- * always {@link #capacity() capacity - 1}.  For example, to iterate all bytes of a buffer, you
- * can do the following, regardless of its internal implementation:
+ * 就像一个普通的原始字节数组，{@link ByteBuf}使用
+ * <a href=" http://en.wikipedia.org/wiki/zero based_number" >基于索引</a>。
+ * 它意味着第一个字节的索引总是{@code 0}，最后一个字节的索引总是{@link #capacity() capacity - 1}。
+ * 例如，要迭代一个缓冲区的所有字节，您可以做以下操作，而不管它的内部实现:
  *
  * <pre>
  * {@link ByteBuf} buffer = ...;
@@ -55,13 +52,10 @@ import java.nio.charset.UnsupportedCharsetException;
  * }
  * </pre>
  *
- * <h3>Sequential Access Indexing</h3>
+ * <h3>索引顺序存取</h3>
  *
- * {@link ByteBuf} provides two pointer variables to support sequential
- * read and write operations - {@link #readerIndex() readerIndex} for a read
- * operation and {@link #writerIndex() writerIndex} for a write operation
- * respectively.  The following diagram shows how a buffer is segmented into
- * three areas by the two pointers:
+ * {@link ByteBuf}提供了两个指针变量来支持顺序读和写操作——分别为读操作提供{@link #readerIndex() readerIndex}
+ * 和为写操作提供{@link #writerIndex() writerIndex}。下图显示了缓冲区是如何通过两个指针分割成三个区域的:
  *
  * <pre>
  *      +-------------------+------------------+------------------+
@@ -72,44 +66,35 @@ import java.nio.charset.UnsupportedCharsetException;
  *      0      <=      readerIndex   <=   writerIndex    <=    capacity
  * </pre>
  *
- * <h4>Readable bytes (the actual content)</h4>
+ * <h4>可读字节(实际内容)</h4>
  *
- * This segment is where the actual data is stored.  Any operation whose name
- * starts with {@code read} or {@code skip} will get or skip the data at the
- * current {@link #readerIndex() readerIndex} and increase it by the number of
- * read bytes.  If the argument of the read operation is also a
- * {@link ByteBuf} and no destination index is specified, the specified
- * buffer's {@link #writerIndex() writerIndex} is increased together.
+ * 这个段是存储实际数据的地方。任何名称以{@code read}或{@code skip}开头的操作将获得或跳过当前
+ * {@link #readerIndex() readerIndex}处的数据，并增加读取字节数。
+ * 如果读操作的参数也是{@link ByteBuf}，并且没有指定目标索引，则指定缓冲区的{@link #writerIndex() writerIndex}一起增加。
  * <p>
- * If there's not enough content left, {@link IndexOutOfBoundsException} is
- * raised.  The default value of newly allocated, wrapped or copied buffer's
- * {@link #readerIndex() readerIndex} is {@code 0}.
+ * 如果没有足够的内容剩下，{@link IndexOutOfBoundsException}被抛出。
+ * 新分配、包装或复制的缓冲区的{@link #readerIndex() readerIndex}的默认值是{@code 0}。
  *
  * <pre>
- * // Iterates the readable bytes of a buffer.
+ * // 迭代缓冲区的可读字节。
  * {@link ByteBuf} buffer = ...;
  * while (buffer.isReadable()) {
  *     System.out.println(buffer.readByte());
  * }
  * </pre>
  *
- * <h4>Writable bytes</h4>
+ * <h4>可写的字节数</h4>
  *
- * This segment is a undefined space which needs to be filled.  Any operation
- * whose name starts with {@code write} will write the data at the current
- * {@link #writerIndex() writerIndex} and increase it by the number of written
- * bytes.  If the argument of the write operation is also a {@link ByteBuf},
- * and no source index is specified, the specified buffer's
- * {@link #readerIndex() readerIndex} is increased together.
+ * 这个段是一个未定义的空间，需要被填充。任何名称以{@code write}开头的操作都将在当前的
+ * {@link #writerIndex() writerIndex}处写入数据，并增加写入字节数。
+ * 如果写操作的参数也是{@link ByteBuf}，并且没有指定源索引，则指定缓冲区的{@link #readerIndex() readerIndex}一起增加。
  * <p>
- * If there's not enough writable bytes left, {@link IndexOutOfBoundsException}
- * is raised.  The default value of newly allocated buffer's
- * {@link #writerIndex() writerIndex} is {@code 0}.  The default value of
- * wrapped or copied buffer's {@link #writerIndex() writerIndex} is the
- * {@link #capacity() capacity} of the buffer.
+ * 如果没有足够的可写字节，{@link IndexOutOfBoundsException}被抛出。
+ * 新分配缓冲区的默认值{@link #writerIndex() writerIndex}是{@code 0}。
+ * 包装或复制缓冲区的{@link #writerIndex() writerIndex}的默认值是该缓冲区的{@link #capacity() capacity}。
  *
  * <pre>
- * // Fills the writable bytes of a buffer with random integers.
+ * // 用随机整数填充缓冲区的可写字节。
  * {@link ByteBuf} buffer = ...;
  * while (buffer.maxWritableBytes() >= 4) {
  *     buffer.writeInt(random.nextInt());
@@ -118,11 +103,9 @@ import java.nio.charset.UnsupportedCharsetException;
  *
  * <h4>Discardable bytes</h4>
  *
- * This segment contains the bytes which were read already by a read operation.
- * Initially, the size of this segment is {@code 0}, but its size increases up
- * to the {@link #writerIndex() writerIndex} as read operations are executed.
- * The read bytes can be discarded by calling {@link #discardReadBytes()} to
- * reclaim unused area as depicted by the following diagram:
+ * 此段包含已被读操作读取的字节。
+ * 最初，这个段的大小是{@code 0}，但是当执行读操作时，它的大小会增加到{@link #writerIndex() writerIndex}。
+ * 读取的字节可以通过调用{@link #discardReadBytes()}来回收未使用的区域来丢弃，如下图所示:
  *
  * <pre>
  *  BEFORE discardReadBytes()
@@ -143,18 +126,15 @@ import java.nio.charset.UnsupportedCharsetException;
  * readerIndex (0) <= writerIndex (decreased)        <=        capacity
  * </pre>
  *
- * Please note that there is no guarantee about the content of writable bytes
- * after calling {@link #discardReadBytes()}.  The writable bytes will not be
- * moved in most cases and could even be filled with completely different data
- * depending on the underlying buffer implementation.
+ * 请注意，在调用{@link #discardReadBytes()}之后，不能保证可写字节的内容。
+ * 在大多数情况下，可写字节不会被移动，甚至可以根据底层缓冲区实现使用完全不同的数据来填充。
  *
- * <h4>Clearing the buffer indexes</h4>
+ * <h4>清除缓冲区索引</h4>
  *
- * You can set both {@link #readerIndex() readerIndex} and
- * {@link #writerIndex() writerIndex} to {@code 0} by calling {@link #clear()}.
- * It does not clear the buffer content (e.g. filling with {@code 0}) but just
- * clears the two pointers.  Please also note that the semantic of this
- * operation is different from {@link ByteBuffer#clear()}.
+ * 通过调用{@link #readerIndex()}，可以将{@link #readerIndex() readerIndex}和
+ * {@link #writerIndex() writerIndex}设置为{@code 0}。
+ * 它不清除缓冲区内容(例如，用{@code 0}填充)，而只是清除两个指针。
+ * 还请注意，此操作的语义与{@link ByteBuffer#clear()}不同。
  *
  * <pre>
  *  BEFORE clear()
@@ -175,25 +155,21 @@ import java.nio.charset.UnsupportedCharsetException;
  *      0 = readerIndex = writerIndex            <=            capacity
  * </pre>
  *
- * <h3>Search operations</h3>
+ * <h3>搜索操作</h3>
  *
- * For simple single-byte searches, use {@link #indexOf(int, int, byte)} and {@link #bytesBefore(int, int, byte)}.
- * {@link #bytesBefore(byte)} is especially useful when you deal with a {@code NUL}-terminated string.
- * For complicated searches, use {@link #forEachByte(int, int, ByteProcessor)} with a {@link ByteProcessor}
- * implementation.
+ * 对于简单的单字节搜索，使用{@link #indexOf(int, int, byte)}和{@link #bytesBefore(int, int, byte)}。
+ * 当处理以{@code NUL}结尾的字符串时，{@link #bytesBefore(byte)}特别有用。
+ * 对于复杂的搜索，使用{@link #forEachByte(int, int, ByteProcessor)}和{@link ByteProcessor}实现。
  *
  * <h3>Mark and reset</h3>
  *
- * There are two marker indexes in every buffer. One is for storing
- * {@link #readerIndex() readerIndex} and the other is for storing
- * {@link #writerIndex() writerIndex}.  You can always reposition one of the
- * two indexes by calling a reset method.  It works in a similar fashion to
- * the mark and reset methods in {@link InputStream} except that there's no
- * {@code readlimit}.
+ * 每个缓冲区中都有两个标记索引。一个用于存储{@link #readerIndex() readerIndex}，
+ * 另一个用于存储{@link #writerIndex() writerIndex}。您总是可以通过调用reset方法来重新定位两个索引中的一个。
+ * 它的工作方式类似于{@link InputStream}中的标记和重置方法，只是没有{@code readlimit}。
  *
  * <h3>Derived buffers</h3>
  *
- * You can create a view of an existing buffer by calling one of the following methods:
+ * 您可以通过调用下列方法之一来创建现有缓冲区的视图:
  * <ul>
  *   <li>{@link #duplicate()}</li>
  *   <li>{@link #slice()}</li>
@@ -204,40 +180,35 @@ import java.nio.charset.UnsupportedCharsetException;
  *   <li>{@link #retainedSlice(int, int)}</li>
  *   <li>{@link #readRetainedSlice(int)}</li>
  * </ul>
- * A derived buffer will have an independent {@link #readerIndex() readerIndex},
- * {@link #writerIndex() writerIndex} and marker indexes, while it shares
- * other internal data representation, just like a NIO buffer does.
+ * 派生缓冲区将拥有独立的{@link #readerIndex() readerIndex}、
+ * {@link #writerIndex() writerIndex}和标记索引，同时它共享其他内部数据表示，就像NIO缓冲区所做的那样。
  * <p>
- * In case a completely fresh copy of an existing buffer is required, please
- * call {@link #copy()} method instead.
+ * 如果需要对现有缓冲区进行全新的复制，请调用{@link #copy()}方法。
  *
- * <h4>Non-retained and retained derived buffers</h4>
+ * <h4>非保留和保留的派生缓冲区</h4>
  *
- * Note that the {@link #duplicate()}, {@link #slice()}, {@link #slice(int, int)} and {@link #readSlice(int)} does NOT
- * call {@link #retain()} on the returned derived buffer, and thus its reference count will NOT be increased. If you
- * need to create a derived buffer with increased reference count, consider using {@link #retainedDuplicate()},
- * {@link #retainedSlice()}, {@link #retainedSlice(int, int)} and {@link #readRetainedSlice(int)} which may return
- * a buffer implementation that produces less garbage.
+ * 注意，{@link #duplicate()}、{@link #slice()}、{@link #slice(int, int)}和
+ * {@link #readSlice(int)}不会在返回的派生缓冲区上调用{@link #retain()}，
+ * 因此它的引用计数不会增加。如果需要创建一个引用计数增加的派生缓冲区，
+ * 可以考虑使用{@link #retainedDuplicate()}、{@link #retainedSlice()}、
+ * {@link #retainedSlice(int, int)}和{@link #readRetainedSlice(int)}，它们可能会返回一个产生更少垃圾的缓冲区实现。
  *
- * <h3>Conversion to existing JDK types</h3>
+ * <h3>转换到现有JDK类型</h3>
  *
  * <h4>Byte array</h4>
  *
- * If a {@link ByteBuf} is backed by a byte array (i.e. {@code byte[]}),
- * you can access it directly via the {@link #array()} method.  To determine
- * if a buffer is backed by a byte array, {@link #hasArray()} should be used.
+ * 如果一个{@link ByteBuf}由一个字节数组支持(即{@code byte[]})，
+ * 您可以通过{@link #array()}方法直接访问它。要确定缓冲区是否由字节数组支持，应该使用{@link #hasArray()}。
  *
  * <h4>NIO Buffers</h4>
  *
- * If a {@link ByteBuf} can be converted into an NIO {@link ByteBuffer} which shares its
- * content (i.e. view buffer), you can get it via the {@link #nioBuffer()} method.  To determine
- * if a buffer can be converted into an NIO buffer, use {@link #nioBufferCount()}.
+ * 如果一个{@link ByteBuf}可以转换为一个共享其内容(即视图缓冲区)的NIO {@link ByteBuffer}，
+ * 你可以通过{@link #nioBuffer()}方法获得它。要确定缓冲区是否可以转换为NIO缓冲区，使用{@link #nioBufferCount()}。
  *
  * <h4>Strings</h4>
  *
- * Various {@link #toString(Charset)} methods convert a {@link ByteBuf}
- * into a {@link String}.  Please note that {@link #toString()} is not a
- * conversion method.
+ * 各种{@link #toString(Charset)}方法将{@link ByteBuf}转换为{@link String}。
+ * 请注意{@link #toString()}不是一个转换方法。
  *
  * <h4>I/O Streams</h4>
  *
@@ -247,100 +218,90 @@ import java.nio.charset.UnsupportedCharsetException;
 public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
 
     /**
-     * Returns the number of bytes (octets) this buffer can contain.
+     * 返回此缓冲区可以包含的字节数(八进制)。
      */
     public abstract int capacity();
 
     /**
-     * Adjusts the capacity of this buffer.  If the {@code newCapacity} is less than the current
-     * capacity, the content of this buffer is truncated.  If the {@code newCapacity} is greater
-     * than the current capacity, the buffer is appended with unspecified data whose length is
-     * {@code (newCapacity - currentCapacity)}.
+     * 调整此缓冲区的容量。如果{@code newCapacity}小于当前容量，则该缓冲区的内容将被截断。
+     * 如果{@code newCapacity}大于当前容量，缓冲区将附加未指定的数据，其长度为{@code (newCapacity - currentCapacity)}。
      *
-     * @throws IllegalArgumentException if the {@code newCapacity} is greater than {@link #maxCapacity()}
+     * @throws IllegalArgumentException 如果{@code newCapacity}大于{@link #maxCapacity()}
      */
     public abstract ByteBuf capacity(int newCapacity);
 
     /**
-     * Returns the maximum allowed capacity of this buffer. This value provides an upper
-     * bound on {@link #capacity()}.
+     * 返回此缓冲区允许的最大容量。此值提供了{@link #capacity()}的上限。
      */
     public abstract int maxCapacity();
 
     /**
-     * Returns the {@link ByteBufAllocator} which created this buffer.
+     * 返回创建此缓冲区的{@link ByteBufAllocator}。
      */
     public abstract ByteBufAllocator alloc();
 
     /**
-     * Returns the <a href="http://en.wikipedia.org/wiki/Endianness">endianness</a>
-     * of this buffer.
+     * 返回该缓冲区的<a href="http://en.wikipedia.org/wiki/Endianness">endianness</a>。
      *
-     * @deprecated use the Little Endian accessors, e.g. {@code getShortLE}, {@code getIntLE}
-     * instead of creating a buffer with swapped {@code endianness}.
+     * @deprecated 使用小端访问器，例如{@code getShortLE}， {@code getIntLE}，而不是用交换的{@code endianness}来创建缓冲区。
      */
     @Deprecated
     public abstract ByteOrder order();
 
     /**
-     * Returns a buffer with the specified {@code endianness} which shares the whole region,
-     * indexes, and marks of this buffer.  Modifying the content, the indexes, or the marks of the
-     * returned buffer or this buffer affects each other's content, indexes, and marks.  If the
-     * specified {@code endianness} is identical to this buffer's byte order, this method can
-     * return {@code this}.  This method does not modify {@code readerIndex} or {@code writerIndex}
-     * of this buffer.
+     * 返回一个具有指定的{@code endianness}的缓冲区，该缓冲区共享该缓冲区的整个区域、索引和标记。
+     * 修改返回缓冲区或此缓冲区的内容、索引或标记会影响彼此的内容、索引和标记。
+     * 如果指定的{@code endianness}与此缓冲区的字节顺序相同，此方法可以返回{@code this}。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
-     * @deprecated use the Little Endian accessors, e.g. {@code getShortLE}, {@code getIntLE}
-     * instead of creating a buffer with swapped {@code endianness}.
+     * @deprecated 使用小端访问器，例如{@code getShortLE}， {@code getIntLE}，
+     * 而不是用交换的{@code endianness}来创建缓冲区。
      */
     @Deprecated
     public abstract ByteBuf order(ByteOrder endianness);
 
     /**
-     * Return the underlying buffer instance if this buffer is a wrapper of another buffer.
+     * 如果此缓冲区是另一个缓冲区的包装器，则返回基础缓冲区实例。
      *
-     * @return {@code null} if this buffer is not a wrapper
+     * @return 如果此缓冲区不是包装器，则为{@code null}
      */
     public abstract ByteBuf unwrap();
 
     /**
-     * Returns {@code true} if and only if this buffer is backed by an
-     * NIO direct buffer.
+     * 当且仅当此缓冲区由NIO直接缓冲区支持时，返回{@code true}。
      */
     public abstract boolean isDirect();
 
     /**
-     * Returns {@code true} if and only if this buffer is read-only.
+     * 当且仅当此缓冲区为只读时，返回{@code true}。
      */
     public abstract boolean isReadOnly();
 
     /**
-     * Returns a read-only version of this buffer.
+     * 返回此缓冲区的只读版本。
      */
     public abstract ByteBuf asReadOnly();
 
     /**
-     * Returns the {@code readerIndex} of this buffer.
+     * 返回该缓冲区的{@code readerIndex}。
      */
     public abstract int readerIndex();
 
     /**
-     * Sets the {@code readerIndex} of this buffer.
+     * 设置此缓冲区的{@code readerIndex}。
      *
      * @throws IndexOutOfBoundsException
-     *         if the specified {@code readerIndex} is
-     *            less than {@code 0} or
-     *            greater than {@code this.writerIndex}
+     *         如果指定的{@code readerIndex}小于{@code 0}或大于{@code this.writerIndex}
      */
     public abstract ByteBuf readerIndex(int readerIndex);
 
     /**
-     * Returns the {@code writerIndex} of this buffer.
+     * 返回该缓冲区的{@code writerIndex}。
      */
     public abstract int writerIndex();
 
     /**
-     * Sets the {@code writerIndex} of this buffer.
+     * 设置此缓冲区的{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code writerIndex} is
@@ -350,47 +311,38 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf writerIndex(int writerIndex);
 
     /**
-     * Sets the {@code readerIndex} and {@code writerIndex} of this buffer
-     * in one shot.  This method is useful when you have to worry about the
-     * invocation order of {@link #readerIndex(int)} and {@link #writerIndex(int)}
-     * methods.  For example, the following code will fail:
+     * 一次设置这个bufferindex的{@code readerIndex}和{@code writerIndex}。
+     * 当你不得不担心{@link #readerIndex(int)}和{@link #writerIndex(int)}方法的调用顺序时，
+     * 这个方法非常有用。例如，下面的代码将失败:
      *
      * <pre>
-     * // Create a buffer whose readerIndex, writerIndex and capacity are
-     * // 0, 0 and 8 respectively.
+     * 创建一个缓冲区，其readerIndex、writerIndex和容量分别为0、0和8。
      * {@link ByteBuf} buf = {@link Unpooled}.buffer(8);
      *
-     * // IndexOutOfBoundsException is thrown because the specified
-     * // readerIndex (2) cannot be greater than the current writerIndex (0).
+     * 由于指定的readerIndex(2)不能大于当前的writerIndex(0)，因此抛出indextofboundsexception。
      * buf.readerIndex(2);
      * buf.writerIndex(4);
      * </pre>
      *
-     * The following code will also fail:
+     * 下面的代码也会失败:
      *
      * <pre>
-     * // Create a buffer whose readerIndex, writerIndex and capacity are
-     * // 0, 8 and 8 respectively.
+     * 创建一个缓冲区，其readerIndex、writerIndex和容量分别为0、8和8。
      * {@link ByteBuf} buf = {@link Unpooled}.wrappedBuffer(new byte[8]);
      *
-     * // readerIndex becomes 8.
+     * readerIndex成为8。
      * buf.readLong();
      *
-     * // IndexOutOfBoundsException is thrown because the specified
-     * // writerIndex (4) cannot be less than the current readerIndex (8).
+     * 抛出IndexOutOfBoundsException，因为指定的writerIndex(4)不能小于当前的readerIndex(8)。
      * buf.writerIndex(4);
      * buf.readerIndex(2);
      * </pre>
      *
-     * By contrast, this method guarantees that it never
-     * throws an {@link IndexOutOfBoundsException} as long as the specified
-     * indexes meet basic constraints, regardless what the current index
-     * values of the buffer are:
+     * 相反，该方法保证只要指定的索引满足基本约束条件，无论当前缓冲区的索引值是多少，
+     * 都不会抛出{@link IndexOutOfBoundsException}:
      *
      * <pre>
-     * // No matter what the current state of the buffer is, the following
-     * // call always succeeds as long as the capacity of the buffer is not
-     * // less than 4.
+     * 不管缓冲区的当前状态是什么，只要缓冲区的容量不小于4，下面的调用总是成功的。
      * buf.setIndex(2, 4);
      * </pre>
      *
@@ -403,79 +355,65 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setIndex(int readerIndex, int writerIndex);
 
     /**
-     * Returns the number of readable bytes which is equal to
-     * {@code (this.writerIndex - this.readerIndex)}.
+     * 返回可读字节数，该字节数等于{@code (this)。writerIndex - this.readerIndex)}。
      */
     public abstract int readableBytes();
 
     /**
-     * Returns the number of writable bytes which is equal to
-     * {@code (this.capacity - this.writerIndex)}.
+     * 返回可写字节数，该字节数等于{@code (this.capacity- this.writerIndex)}。
      */
     public abstract int writableBytes();
 
     /**
-     * Returns the maximum possible number of writable bytes, which is equal to
-     * {@code (this.maxCapacity - this.writerIndex)}.
+     * 返回可写字节的最大可能数目，等于{@code (this)。maxCapacity - this.writerIndex)}。
      */
     public abstract int maxWritableBytes();
 
     /**
-     * Returns the maximum number of bytes which can be written for certain without involving
-     * an internal reallocation or data-copy. The returned value will be &ge; {@link #writableBytes()}
-     * and &le; {@link #maxWritableBytes()}.
+     * 返回可以确定写入的最大字节数，而不涉及内部重新分配或数据复制。返回值为
+     * &ge;{@link #writableBytes()}和&le;{@link # maxWritableBytes()}。
      */
     public int maxFastWritableBytes() {
         return writableBytes();
     }
 
     /**
-     * Returns {@code true}
-     * if and only if {@code (this.writerIndex - this.readerIndex)} is greater
-     * than {@code 0}.
+     * 返回{@code true}当且仅当{@code (this。writerIndex - this.readerIndex)}大于{@code 0}。
      */
     public abstract boolean isReadable();
 
     /**
-     * Returns {@code true} if and only if this buffer contains equal to or more than the specified number of elements.
+     * 返回{@code true}，当且仅当此缓冲区包含等于或超过指定数量的元素时。
      */
     public abstract boolean isReadable(int size);
 
     /**
-     * Returns {@code true}
-     * if and only if {@code (this.capacity - this.writerIndex)} is greater
-     * than {@code 0}.
+     * 返回{@code true}当且仅当{@code (this。capacity - this.writerIndex)}大于{@code 0}。
      */
     public abstract boolean isWritable();
 
     /**
-     * Returns {@code true} if and only if this buffer has enough room to allow writing the specified number of
-     * elements.
+     * 当且仅当缓冲区有足够的空间允许写入指定数量的元素时，返回{@code true}。
      */
     public abstract boolean isWritable(int size);
 
     /**
-     * Sets the {@code readerIndex} and {@code writerIndex} of this buffer to
-     * {@code 0}.
-     * This method is identical to {@link #setIndex(int, int) setIndex(0, 0)}.
+     * 将此缓冲区的{@code readerIndex}和{@code writerIndex}设置为{@code 0}。
+     * 这个方法与{@link #setIndex(int, int) setIndex(0,0)}相同。
      * <p>
-     * Please note that the behavior of this method is different
-     * from that of NIO buffer, which sets the {@code limit} to
-     * the {@code capacity} of the buffer.
+     * 请注意，此方法的行为与NIO缓冲区不同，后者将缓冲区的{@code limit}设置为{@code容量}。
      */
     public abstract ByteBuf clear();
 
     /**
-     * Marks the current {@code readerIndex} in this buffer.  You can
-     * reposition the current {@code readerIndex} to the marked
-     * {@code readerIndex} by calling {@link #resetReaderIndex()}.
-     * The initial value of the marked {@code readerIndex} is {@code 0}.
+     * 标记缓冲区中的当前{@code readerIndex}。通过调用{@link #resetReaderIndex()}，
+     * 可以将当前的{@code readerIndex}重新定位为标记的{@code readerIndex}。
+     * 标记的{@code readerIndex}的初始值是{@code 0}。
      */
     public abstract ByteBuf markReaderIndex();
 
     /**
-     * Repositions the current {@code readerIndex} to the marked
-     * {@code readerIndex} in this buffer.
+     * 将当前的{@code readerIndex}重新定位到该缓冲区中标记的{@code readerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the current {@code writerIndex} is less than the marked
@@ -484,16 +422,13 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf resetReaderIndex();
 
     /**
-     * Marks the current {@code writerIndex} in this buffer.  You can
-     * reposition the current {@code writerIndex} to the marked
-     * {@code writerIndex} by calling {@link #resetWriterIndex()}.
-     * The initial value of the marked {@code writerIndex} is {@code 0}.
+     * 标记缓冲区中的当前{@code writerIndex}。通过调用{@link #resetWriterIndex()}，
+     * 可以将当前的{@code writerIndex}重新定位到标记的{@code writerIndex}。标记的{@code writerIndex}的初始值是{@code 0}。
      */
     public abstract ByteBuf markWriterIndex();
 
     /**
-     * Repositions the current {@code writerIndex} to the marked
-     * {@code writerIndex} in this buffer.
+     * 将当前的{@code writerIndex}重新定位到该缓冲区中标记的{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the current {@code readerIndex} is greater than the marked
@@ -502,28 +437,23 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf resetWriterIndex();
 
     /**
-     * Discards the bytes between the 0th index and {@code readerIndex}.
-     * It moves the bytes between {@code readerIndex} and {@code writerIndex}
-     * to the 0th index, and sets {@code readerIndex} and {@code writerIndex}
-     * to {@code 0} and {@code oldWriterIndex - oldReaderIndex} respectively.
+     * 丢弃第0个索引和{@code readerIndex}之间的字节。
+     * 它将{@code readerIndex}和{@code writerIndex}之间的字节移动到第0个索引，
+     * 并将{@code readerIndex}和{@code writerIndex}分别设置为{@code oldWriterIndex - oldReaderIndex}。
      * <p>
      * Please refer to the class documentation for more detailed explanation.
      */
     public abstract ByteBuf discardReadBytes();
 
     /**
-     * Similar to {@link ByteBuf#discardReadBytes()} except that this method might discard
-     * some, all, or none of read bytes depending on its internal implementation to reduce
-     * overall memory bandwidth consumption at the cost of potentially additional memory
-     * consumption.
+     * 类似于{@link ByteBuf#discardReadBytes()}，除了这个方法可能会丢弃一些、全部或不丢弃读字节，这取决于它的内部实现，
+     * 以减少总体内存带宽消耗为代价，可能会增加内存消耗。
      */
     public abstract ByteBuf discardSomeReadBytes();
 
     /**
-     * Expands the buffer {@link #capacity()} to make sure the number of
-     * {@linkplain #writableBytes() writable bytes} is equal to or greater than the
-     * specified value.  If there are enough writable bytes in this buffer, this method
-     * returns with no side effect.
+     * 扩展缓冲区{@link #capacity()}以确保{@linkplain #writableBytes() 可写字节}的数量等于或大于指定的值。
+     * 如果缓冲区中有足够的可写字节，此方法返回而没有副作用。
      *
      * @param minWritableBytes
      *        the expected minimum number of writable bytes
@@ -534,9 +464,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf ensureWritable(int minWritableBytes);
 
     /**
-     * Expands the buffer {@link #capacity()} to make sure the number of
-     * {@linkplain #writableBytes() writable bytes} is equal to or greater than the
-     * specified value. Unlike {@link #ensureWritable(int)}, this method returns a status code.
+     * 扩展缓冲区{@link #capacity()}以确保{@linkplain #writableBytes() 可写字节}的数量等于或大于指定的值。
+     * 与{@link #ensureWritable(int)}不同，此方法返回状态代码。
      *
      * @param minWritableBytes
      *        the expected minimum number of writable bytes
@@ -555,9 +484,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int ensureWritable(int minWritableBytes, boolean force);
 
     /**
-     * Gets a boolean at the specified absolute (@code index) in this buffer.
-     * This method does not modify the {@code readerIndex} or {@code writerIndex}
-     * of this buffer.
+     * 获取此缓冲区中指定的绝对(@code index)处的布尔值。此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -566,9 +493,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract boolean getBoolean(int index);
 
     /**
-     * Gets a byte at the specified absolute {@code index} in this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的字节。此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -577,9 +502,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract byte  getByte(int index);
 
     /**
-     * Gets an unsigned byte at the specified absolute {@code index} in this
-     * buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的无符号字节。此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -588,9 +511,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short getUnsignedByte(int index);
 
     /**
-     * Gets a 16-bit short integer at the specified absolute {@code index} in
-     * this buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取位于此缓冲区中指定的绝对{@code index}处的16位短整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -599,9 +521,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short getShort(int index);
 
     /**
-     * Gets a 16-bit short integer at the specified absolute {@code index} in
-     * this buffer in Little Endian Byte Order. This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的16位短整数，该索引以小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -610,9 +531,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short getShortLE(int index);
 
     /**
-     * Gets an unsigned 16-bit short integer at the specified absolute
-     * {@code index} in this buffer.  This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取位于此缓冲区中指定的绝对{@code index}处的无符号16位短整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -621,10 +541,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int getUnsignedShort(int index);
 
     /**
-     * Gets an unsigned 16-bit short integer at the specified absolute
-     * {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的无符号16位短整数，以小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -633,9 +551,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int getUnsignedShortLE(int index);
 
     /**
-     * Gets a 24-bit medium integer at the specified absolute {@code index} in
-     * this buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 在此缓冲区中指定的绝对{@code index}处获取一个24位的中等整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -644,9 +561,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   getMedium(int index);
 
     /**
-     * Gets a 24-bit medium integer at the specified absolute {@code index} in
-     * this buffer in the Little Endian Byte Order. This method does not
-     * modify {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的24位中整数，该绝对整数按小尾数字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -655,9 +571,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int getMediumLE(int index);
 
     /**
-     * Gets an unsigned 24-bit medium integer at the specified absolute
-     * {@code index} in this buffer.  This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取位于此缓冲区中指定的绝对{@code index}处的无符号24位中等整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -666,10 +581,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   getUnsignedMedium(int index);
 
     /**
-     * Gets an unsigned 24-bit medium integer at the specified absolute
-     * {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的无符号24位中整数，按小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -678,9 +591,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   getUnsignedMediumLE(int index);
 
     /**
-     * Gets a 32-bit integer at the specified absolute {@code index} in
-     * this buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的32位整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -689,9 +601,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   getInt(int index);
 
     /**
-     * Gets a 32-bit integer at the specified absolute {@code index} in
-     * this buffer with Little Endian Byte Order. This method does not
-     * modify {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的32位整数，并具有小尾数字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -700,9 +611,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   getIntLE(int index);
 
     /**
-     * Gets an unsigned 32-bit integer at the specified absolute {@code index}
-     * in this buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取位于此缓冲区中指定的绝对{@code index}处的一个32位无符号整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -711,9 +621,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  getUnsignedInt(int index);
 
     /**
-     * Gets an unsigned 32-bit integer at the specified absolute {@code index}
-     * in this buffer in Little Endian Byte Order. This method does not
-     * modify {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的无符号32位整数，按小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -722,9 +631,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  getUnsignedIntLE(int index);
 
     /**
-     * Gets a 64-bit long integer at the specified absolute {@code index} in
-     * this buffer.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的64位长整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -733,9 +641,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  getLong(int index);
 
     /**
-     * Gets a 64-bit long integer at the specified absolute {@code index} in
-     * this buffer in Little Endian Byte Order. This method does not
-     * modify {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取该缓冲区中指定的绝对{@code index}处的64位长整数，以小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -744,9 +651,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  getLongLE(int index);
 
     /**
-     * Gets a 2-byte UTF-16 character at the specified absolute
-     * {@code index} in this buffer.  This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code索引}处的2字节UTF-16字符。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -755,9 +661,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract char  getChar(int index);
 
     /**
-     * Gets a 32-bit floating point number at the specified absolute
-     * {@code index} in this buffer.  This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的32位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -766,10 +671,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract float getFloat(int index);
 
     /**
-     * Gets a 32-bit floating point number at the specified absolute
-     * {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的32位浮点数，以小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -780,9 +683,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Gets a 64-bit floating point number at the specified absolute
-     * {@code index} in this buffer.  This method does not modify
-     * {@code readerIndex} or {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code index}处的64位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -791,10 +693,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract double getDouble(int index);
 
     /**
-     * Gets a 64-bit floating point number at the specified absolute
-     * {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 获取此缓冲区中指定的绝对{@code索引}处的64位浮点数，以小端字节顺序。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -805,15 +705,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index} until the destination becomes
-     * non-writable.  This method is basically same with
-     * {@link #getBytes(int, ByteBuf, int, int)}, except that this
-     * method increases the {@code writerIndex} of the destination by the
-     * number of the transferred bytes while
-     * {@link #getBytes(int, ByteBuf, int, int)} does not.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * the source buffer (i.e. {@code this}).
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地，直到目的地变为不可写。
+     * 这个方法与{@link #getBytes(int, ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了目标的{@code writerIndex}传输的字节数，而{@link #getBytes(int, ByteBuf, int, int)}不增加。
+     * 这个方法不会修改源缓冲区的{@code readerIndex}或{@code writerIndex}(即{@code This})。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -823,14 +718,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, ByteBuf dst);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index}.  This method is basically same
-     * with {@link #getBytes(int, ByteBuf, int, int)}, except that this
-     * method increases the {@code writerIndex} of the destination by the
-     * number of the transferred bytes while
-     * {@link #getBytes(int, ByteBuf, int, int)} does not.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * the source buffer (i.e. {@code this}).
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地。
+     * 这个方法与{@link #getBytes(int, ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了目标的{@code writerIndex}传输的字节数，
+     * 而{@link #getBytes(int, ByteBuf, int, int)}不增加。
+     * 这个方法不会修改源缓冲区的{@code readerIndex}或{@code writerIndex}(即{@code This})。
      *
      * @param length the number of bytes to transfer
      *
@@ -843,10 +735,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, ByteBuf dst, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex}
-     * of both the source (i.e. {@code this}) and the destination.
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地。
+     * 此方法不会同时修改源(即{@code This})和目标的{@code readerIndex}或{@code writerIndex}。
      *
      * @param dstIndex the first index of the destination
      * @param length   the number of bytes to transfer
@@ -862,10 +752,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, ByteBuf dst, int dstIndex, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -875,10 +763,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, byte[] dst);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex}
-     * of this buffer.
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param dstIndex the first index of the destination
      * @param length   the number of bytes to transfer
@@ -894,11 +780,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, byte[] dst, int dstIndex, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the specified absolute {@code index} until the destination's position
-     * reaches its limit.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer while the destination's {@code position} will be increased.
+     * 从指定的绝对{@code索引}开始，将此缓冲区的数据传输到指定的目的地，直到目的地的位置达到极限为止。
+     * 此方法不会修改此缓冲区的{@code readerIndex}或{@code writerIndex}，而目的地的{@code position}将被增加。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -908,10 +791,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, ByteBuffer dst);
 
     /**
-     * Transfers this buffer's data to the specified stream starting at the
-     * specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 将此缓冲区的数据从指定的绝对{@code索引}开始传输到指定的流。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param length the number of bytes to transfer
      *
@@ -925,10 +806,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf getBytes(int index, OutputStream out, int length) throws IOException;
 
     /**
-     * Transfers this buffer's data to the specified channel starting at the
-     * specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 将此缓冲区的数据传输到从指定的绝对{@code索引}开始的指定通道。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param length the maximum number of bytes to transfer
      *
@@ -944,10 +823,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int getBytes(int index, GatheringByteChannel out, int length) throws IOException;
 
     /**
-     * Transfers this buffer's data starting at the specified absolute {@code index}
-     * to the specified channel starting at the given file position.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer. This method does not modify the channel's position.
+     * 将从指定的绝对{@code索引}开始的缓冲区数据传输到从给定文件位置开始的指定通道。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。此方法不会修改通道的位置。
      *
      * @param position the file position at which the transfer is to begin
      * @param length the maximum number of bytes to transfer
@@ -964,7 +841,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int getBytes(int index, FileChannel out, long position, int length) throws IOException;
 
     /**
-     * Gets a {@link CharSequence} with the given length at the given index.
+     * 获取在给定索引处具有给定长度的{@link CharSequence}。
      *
      * @param length the length to read
      * @param charset that should be used
@@ -975,10 +852,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract CharSequence getCharSequence(int index, int length, Charset charset);
 
     /**
-     * Sets the specified boolean at the specified absolute {@code index} in this
-     * buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的布尔值。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -987,10 +862,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBoolean(int index, boolean value);
 
     /**
-     * Sets the specified byte at the specified absolute {@code index} in this
-     * buffer.  The 24 high-order bits of the specified value are ignored.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定字节。指定值的24个高阶位将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -999,11 +872,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setByte(int index, int value);
 
     /**
-     * Sets the specified 16-bit short integer at the specified absolute
-     * {@code index} in this buffer.  The 16 high-order bits of the specified
-     * value are ignored.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的16位短整数。指定值的16个高阶位将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1012,11 +882,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setShort(int index, int value);
 
     /**
-     * Sets the specified 16-bit short integer at the specified absolute
-     * {@code index} in this buffer with the Little Endian Byte Order.
-     * The 16 high-order bits of the specified value are ignored.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的16位短整数。
+     * 指定值的16个高阶位将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1025,11 +893,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setShortLE(int index, int value);
 
     /**
-     * Sets the specified 24-bit medium integer at the specified absolute
-     * {@code index} in this buffer.  Please note that the most significant
-     * byte is ignored in the specified value.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的24位媒体整数。请注意，指定值中的最高有效字节将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1038,12 +903,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setMedium(int index, int value);
 
     /**
-     * Sets the specified 24-bit medium integer at the specified absolute
-     * {@code index} in this buffer in the Little Endian Byte Order.
-     * Please note that the most significant byte is ignored in the
-     * specified value.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的24位中整数。
+     * 请注意，指定值中的最高有效字节将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1052,10 +914,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setMediumLE(int index, int value);
 
     /**
-     * Sets the specified 32-bit integer at the specified absolute
-     * {@code index} in this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的32位整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1064,11 +924,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setInt(int index, int value);
 
     /**
-     * Sets the specified 32-bit integer at the specified absolute
-     * {@code index} in this buffer with Little Endian byte order
-     * .
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的32位整数
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1077,10 +934,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setIntLE(int index, int value);
 
     /**
-     * Sets the specified 64-bit long integer at the specified absolute
-     * {@code index} in this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code index}处设置指定的64位长整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1089,10 +944,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setLong(int index, long value);
 
     /**
-     * Sets the specified 64-bit long integer at the specified absolute
-     * {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的64位长整数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1101,11 +954,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setLongLE(int index, long value);
 
     /**
-     * Sets the specified 2-byte UTF-16 character at the specified absolute
-     * {@code index} in this buffer.
-     * The 16 high-order bits of the specified value are ignored.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的2字节UTF-16字符。
+     * 指定值的16个高阶位将被忽略。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1114,10 +965,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setChar(int index, int value);
 
     /**
-     * Sets the specified 32-bit floating-point number at the specified
-     * absolute {@code index} in this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的32位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1126,10 +975,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setFloat(int index, float value);
 
     /**
-     * Sets the specified 32-bit floating-point number at the specified
-     * absolute {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的32位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1140,10 +987,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Sets the specified 64-bit floating-point number at the specified
-     * absolute {@code index} in this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 在此缓冲区中指定的绝对{@code索引}处设置指定的64位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1152,10 +997,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setDouble(int index, double value);
 
     /**
-     * Sets the specified 64-bit floating-point number at the specified
-     * absolute {@code index} in this buffer in Little Endian Byte Order.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 以小端字节顺序在此缓冲区中指定的绝对{@code索引}处设置指定的64位浮点数。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1166,15 +1009,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the specified absolute {@code index} until the source buffer becomes
-     * unreadable.  This method is basically same with
-     * {@link #setBytes(int, ByteBuf, int, int)}, except that this
-     * method increases the {@code readerIndex} of the source buffer by
-     * the number of the transferred bytes while
-     * {@link #setBytes(int, ByteBuf, int, int)} does not.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * the source buffer (i.e. {@code this}).
+     * 从指定的绝对{@code索引}开始，将指定的源缓冲区的数据传输到此缓冲区，直到源缓冲区变得不可读为止。
+     * 这个方法与{@link #setBytes(int, ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了源缓冲区的{@code readerIndex}传输的字节数，
+     * 而{@link #setBytes(int, ByteBuf, int, int)}不增加。
+     * 这个方法不会修改源缓冲区的{@code readerIndex}或{@code writerIndex}(即{@code This})。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1184,14 +1023,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, ByteBuf src);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the specified absolute {@code index}.  This method is basically same
-     * with {@link #setBytes(int, ByteBuf, int, int)}, except that this
-     * method increases the {@code readerIndex} of the source buffer by
-     * the number of the transferred bytes while
-     * {@link #setBytes(int, ByteBuf, int, int)} does not.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * the source buffer (i.e. {@code this}).
+     * 从指定的绝对{@code索引}开始，将指定的源缓冲区的数据传输到此缓冲区。
+     * 这个方法与{@link #setBytes(int, ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了源缓冲区的{@code readerIndex}传输的字节数，而{@link #setBytes(int, ByteBuf, int, int)}不增加。
+     * 这个方法不会修改源缓冲区的{@code readerIndex}或{@code writerIndex}(即{@code This})。
      *
      * @param length the number of bytes to transfer
      *
@@ -1204,10 +1039,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, ByteBuf src, int length);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex}
-     * of both the source (i.e. {@code this}) and the destination.
+     * 从指定的绝对{@code索引}开始，将指定的源缓冲区的数据传输到此缓冲区。
+     * 此方法不会同时修改源(即{@code This})和目标的{@code readerIndex}或{@code writerIndex}。
      *
      * @param srcIndex the first index of the source
      * @param length   the number of bytes to transfer
@@ -1223,10 +1056,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, ByteBuf src, int srcIndex, int length);
 
     /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 将指定源数组的数据从指定的绝对{@code索引}开始传输到此缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1236,10 +1067,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, byte[] src);
 
     /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 将指定源数组的数据从指定的绝对{@code索引}开始传输到此缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0},
@@ -1251,11 +1080,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, byte[] src, int srcIndex, int length);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the specified absolute {@code index} until the source buffer's position
-     * reaches its limit.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 从指定的绝对{@code索引}开始，将指定的源缓冲区的数据传输到此缓冲区，直到源缓冲区的位置达到其限制为止。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws IndexOutOfBoundsException
      *         if the specified {@code index} is less than {@code 0} or
@@ -1265,10 +1091,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setBytes(int index, ByteBuffer src);
 
     /**
-     * Transfers the content of the specified source stream to this buffer
-     * starting at the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 从指定的绝对{@code索引}开始，将指定源流的内容传输到此缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param length the number of bytes to transfer
      *
@@ -1284,10 +1108,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int setBytes(int index, InputStream in, int length) throws IOException;
 
     /**
-     * Transfers the content of the specified source channel to this buffer
-     * starting at the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 从指定的绝对{@code索引}开始，将指定源通道的内容传输到此缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param length the maximum number of bytes to transfer
      *
@@ -1303,10 +1125,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int setBytes(int index, ScatteringByteChannel in, int length) throws IOException;
 
     /**
-     * Transfers the content of the specified source channel starting at the given file position
-     * to this buffer starting at the specified absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer. This method does not modify the channel's position.
+     * 将从给定文件位置开始的指定源通道的内容传输到从指定绝对{@code索引}开始的缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。此方法不会修改通道的位置。
      *
      * @param position the file position at which the transfer is to begin
      * @param length the maximum number of bytes to transfer
@@ -1323,10 +1143,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int setBytes(int index, FileChannel in, long position, int length) throws IOException;
 
     /**
-     * Fills this buffer with <tt>NUL (0x00)</tt> starting at the specified
-     * absolute {@code index}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 从指定的绝对{@code索引}开始，用<tt>NUL (0x00)</tt>填充该缓冲区。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @param length the number of <tt>NUL</tt>s to write to the buffer
      *
@@ -1337,8 +1155,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf setZero(int index, int length);
 
     /**
-     * Writes the specified {@link CharSequence} at the current {@code writerIndex} and increases
-     * the {@code writerIndex} by the written bytes.
+     * 在当前的{@code writerIndex}处写入指定的{@link CharSequence}，并增加{@code writerIndex}的写入字节数。
      *
      * @param index on which the sequence should be written
      * @param sequence to write
@@ -1350,8 +1167,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int setCharSequence(int index, CharSequence sequence, Charset charset);
 
     /**
-     * Gets a boolean at the current {@code readerIndex} and increases
-     * the {@code readerIndex} by {@code 1} in this buffer.
+     * 获取当前{@code readerIndex}处的布尔值，并将该缓冲区中的{@code readerIndex}增加{@code 1}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 1}
@@ -1359,8 +1175,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract boolean readBoolean();
 
     /**
-     * Gets a byte at the current {@code readerIndex} and increases
-     * the {@code readerIndex} by {@code 1} in this buffer.
+     * 获取当前{@code readerIndex}处的一个字节，并将该缓冲区中的{@code readerIndex}增加{@code 1}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 1}
@@ -1368,8 +1183,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract byte  readByte();
 
     /**
-     * Gets an unsigned byte at the current {@code readerIndex} and increases
-     * the {@code readerIndex} by {@code 1} in this buffer.
+     * 获取当前{@code readerIndex}处的无符号字节，并将该缓冲区中的{@code readerIndex}增加{@code 1}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 1}
@@ -1377,8 +1191,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short readUnsignedByte();
 
     /**
-     * Gets a 16-bit short integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 2} in this buffer.
+     * 获取当前{@code readerIndex}处的16位短整数，并在该缓冲区中将{@code readerIndex}增加{@code 2}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 2}
@@ -1386,9 +1199,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short readShort();
 
     /**
-     * Gets a 16-bit short integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 2} in this buffer.
+     * 以小尾数字节顺序获取当前{@code readerIndex}的16位短整数，并在该缓冲区中将{@code readerIndex}增加{@code 2}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 2}
@@ -1396,8 +1207,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract short readShortLE();
 
     /**
-     * Gets an unsigned 16-bit short integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 2} in this buffer.
+     * 获取当前{@code readerIndex}处的无符号16位短整数，并在该缓冲区中将{@code readerIndex}增加{@code 2}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 2}
@@ -1405,9 +1215,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readUnsignedShort();
 
     /**
-     * Gets an unsigned 16-bit short integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 2} in this buffer.
+     * 获取当前以小尾数字节顺序{@code readerIndex}为单位的无符号16位短整数，并在该缓冲区中将{@code readerIndex}增加{@code 2}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 2}
@@ -1415,8 +1223,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readUnsignedShortLE();
 
     /**
-     * Gets a 24-bit medium integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 3} in this buffer.
+     * 在当前的{@code readerIndex}处获取一个24位的中等整数，并在该缓冲区中将{@code readerIndex}增加{@code 3}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 3}
@@ -1424,9 +1231,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readMedium();
 
     /**
-     * Gets a 24-bit medium integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the
-     * {@code readerIndex} by {@code 3} in this buffer.
+     * 以小尾数字节顺序获取当前{@code readerIndex}的24位中等整数，并在该缓冲区中将{@code readerIndex}增加{@code 3}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 3}
@@ -1434,8 +1239,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readMediumLE();
 
     /**
-     * Gets an unsigned 24-bit medium integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 3} in this buffer.
+     * 获取当前{@code readerIndex}处的无符号24位中等整数，并将该缓冲区中的{@code readerIndex}增加{@code 3}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 3}
@@ -1443,9 +1247,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readUnsignedMedium();
 
     /**
-     * Gets an unsigned 24-bit medium integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 3} in this buffer.
+     * 以小尾数字节顺序获取当前{@code readerIndex}的无符号24位中等整数，并在该缓冲区中将{@code readerIndex}增加{@code 3}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 3}
@@ -1453,8 +1255,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readUnsignedMediumLE();
 
     /**
-     * Gets a 32-bit integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 4} in this buffer.
+     * 获取当前{@code readerIndex}处的32位整数，并在该缓冲区中将{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1462,9 +1263,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readInt();
 
     /**
-     * Gets a 32-bit integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 4} in this buffer.
+     * 以小尾数字节顺序获取当前{@code readerIndex}的32位整数，并在此缓冲区中将{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1472,8 +1271,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int   readIntLE();
 
     /**
-     * Gets an unsigned 32-bit integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 4} in this buffer.
+     * 获取当前{@code readerIndex}处的无符号32位整数，并在此缓冲区中将{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1481,9 +1279,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  readUnsignedInt();
 
     /**
-     * Gets an unsigned 32-bit integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 4} in this buffer.
+     * 以小尾数字节顺序获取当前{@code readerIndex}的32位无符号整数，并在此缓冲区中将{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1491,8 +1287,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  readUnsignedIntLE();
 
     /**
-     * Gets a 64-bit integer at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 8} in this buffer.
+     * 获取当前{@code readerIndex}处的一个64位整数，并在该缓冲区中将{@code readerIndex}增加{@code 8}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 8}
@@ -1500,9 +1295,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  readLong();
 
     /**
-     * Gets a 64-bit integer at the current {@code readerIndex}
-     * in the Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 8} in this buffer.
+     * 以小端字节顺序获取当前{@code readerIndex}的64位整数，并在该缓冲区中将{@code readerIndex}增加{@code 8}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 8}
@@ -1510,8 +1303,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long  readLongLE();
 
     /**
-     * Gets a 2-byte UTF-16 character at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 2} in this buffer.
+     * 获取当前{@code readerIndex}处的2字节UTF-16字符，并在该缓冲区中将{@code readerIndex}增加{@code 2}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 2}
@@ -1519,8 +1311,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract char  readChar();
 
     /**
-     * Gets a 32-bit floating point number at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 4} in this buffer.
+     * 获取当前{@code readerIndex}处的32位浮点数，并将该缓冲区中的{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1528,9 +1319,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract float readFloat();
 
     /**
-     * Gets a 32-bit floating point number at the current {@code readerIndex}
-     * in Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 4} in this buffer.
+     * 以小端字节顺序获取当前{@code readerIndex}的32位浮点数，并在该缓冲区中将{@code readerIndex}增加{@code 4}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 4}
@@ -1540,8 +1329,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Gets a 64-bit floating point number at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by {@code 8} in this buffer.
+     * 获取当前{@code readerIndex}处的一个64位浮点数，并在该缓冲区中将{@code readerIndex}增加{@code 8}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 8}
@@ -1549,9 +1337,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract double readDouble();
 
     /**
-     * Gets a 64-bit floating point number at the current {@code readerIndex}
-     * in Little Endian Byte Order and increases the {@code readerIndex}
-     * by {@code 8} in this buffer.
+     * 以小端字节顺序获取当前{@code readerIndex}的64位浮点数，并在该缓冲区中将{@code readerIndex}增加{@code 8}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code this.readableBytes} is less than {@code 8}
@@ -1561,11 +1347,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     }
 
     /**
-     * Transfers this buffer's data to a newly created buffer starting at
-     * the current {@code readerIndex} and increases the {@code readerIndex}
-     * by the number of the transferred bytes (= {@code length}).
-     * The returned buffer's {@code readerIndex} and {@code writerIndex} are
-     * {@code 0} and {@code length} respectively.
+     * 将该缓冲区的数据传输到从当前的{@code readerIndex}开始的新创建的缓冲区，
+     * 并增加{@code readerIndex}传输的字节数(= {@code length})。
+     * 返回的缓冲区的{@code readerIndex}和{@code writerIndex}分别是{@code 0}和{@code length}。
      *
      * @param length the number of bytes to transfer
      *
@@ -1577,12 +1361,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(int length);
 
     /**
-     * Returns a new slice of this buffer's sub-region starting at the current
-     * {@code readerIndex} and increases the {@code readerIndex} by the size
-     * of the new slice (= {@code length}).
+     * 从当前的{@code readerIndex}开始返回这个缓冲区的子区域的一个新片，并将{@code readerIndex}增加到新片的大小(= {@code length})。
      * <p>
-     * Also be aware that this method will NOT call {@link #retain()} and so the
-     * reference count will NOT be increased.
+     * 还要注意，这个方法不会调用{@link #retain()}，因此引用计数不会增加。
      *
      * @param length the size of the new slice
      *
@@ -1594,13 +1375,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readSlice(int length);
 
     /**
-     * Returns a new retained slice of this buffer's sub-region starting at the current
-     * {@code readerIndex} and increases the {@code readerIndex} by the size
-     * of the new slice (= {@code length}).
+     * 从当前的{@code readerIndex}开始返回缓冲区子区域的新保留片，并将{@code readerIndex}增加到新片的大小(= {@code length})。
      * <p>
-     * Note that this method returns a {@linkplain #retain() retained} buffer unlike {@link #readSlice(int)}.
-     * This method behaves similarly to {@code readSlice(...).retain()} except that this method may return
-     * a buffer implementation that produces less garbage.
+     * 注意，这个方法会返回{@linkplain #retain() retained}缓冲区，而不像{@link #readSlice(int)}那样。
+     * 这个方法的行为类似于{@code readSlice(…).retain()}，不同的是，这个方法可能会返回一个产生更少垃圾的缓冲区实现。
      *
      * @param length the size of the new slice
      *
@@ -1612,14 +1390,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readRetainedSlice(int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} until the destination becomes
-     * non-writable, and increases the {@code readerIndex} by the number of the
-     * transferred bytes.  This method is basically same with
-     * {@link #readBytes(ByteBuf, int, int)}, except that this method
-     * increases the {@code writerIndex} of the destination by the number of
-     * the transferred bytes while {@link #readBytes(ByteBuf, int, int)}
-     * does not.
+     * 将此缓冲区的数据从当前的{@code readerIndex}传输到指定的目的地，
+     * 直到目的地变为不可写，并增加{@code readerIndex}传输的字节数。
+     * 这个方法与{@link #readBytes(ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了目标的{@code writerIndex}传输的字节数，
+     * 而{@link #readBytes(ByteBuf, int, int)}没有增加。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code dst.writableBytes} is greater than
@@ -1628,13 +1403,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(ByteBuf dst);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} and increases the {@code readerIndex}
-     * by the number of the transferred bytes (= {@code length}).  This method
-     * is basically same with {@link #readBytes(ByteBuf, int, int)},
-     * except that this method increases the {@code writerIndex} of the
-     * destination by the number of the transferred bytes (= {@code length})
-     * while {@link #readBytes(ByteBuf, int, int)} does not.
+     * 将此缓冲区的数据传输到从当前的{@code readerIndex}开始的指定目的地，
+     * 并将{@code readerIndex}增加传输的字节数(= {@code length})。
+     * 这个方法和{@link #readBytes(ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了目标的{@code writerIndex}传输的字节数(= {@code length})，
+     * 而{@link #readBytes(ByteBuf, int, int)}没有增加。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code length} is greater than {@code this.readableBytes} or
@@ -1643,9 +1416,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(ByteBuf dst, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} and increases the {@code readerIndex}
-     * by the number of the transferred bytes (= {@code length}).
+     * 将此缓冲区的数据传输到从当前的{@code readerIndex}开始的指定目的地，
+     * 并将{@code readerIndex}增加传输的字节数(= {@code length})。
      *
      * @param dstIndex the first index of the destination
      * @param length   the number of bytes to transfer
@@ -1659,9 +1431,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(ByteBuf dst, int dstIndex, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} and increases the {@code readerIndex}
-     * by the number of the transferred bytes (= {@code dst.length}).
+     * 将此缓冲区的数据传输到从当前的{@code readerIndex}开始的指定目的地，
+     * 并将{@code readerIndex}增加传输字节数(= {@code dst.length})。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code dst.length} is greater than {@code this.readableBytes}
@@ -1669,9 +1440,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(byte[] dst);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} and increases the {@code readerIndex}
-     * by the number of the transferred bytes (= {@code length}).
+     * 将此缓冲区的数据传输到从当前的{@code readerIndex}开始的指定目的地，
+     * 并将{@code readerIndex}增加传输的字节数(= {@code length})。
      *
      * @param dstIndex the first index of the destination
      * @param length   the number of bytes to transfer
@@ -1684,10 +1454,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(byte[] dst, int dstIndex, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at
-     * the current {@code readerIndex} until the destination's position
-     * reaches its limit, and increases the {@code readerIndex} by the
-     * number of the transferred bytes.
+     * 将此缓冲区的数据从当前的{@code readerIndex}传输到指定的目的地，
+     * 直到目的地的位置达到极限，并将{@code readerIndex}增加传输的字节数。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code dst.remaining()} is greater than
@@ -1696,8 +1464,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(ByteBuffer dst);
 
     /**
-     * Transfers this buffer's data to the specified stream starting at the
-     * current {@code readerIndex}.
+     * 将此缓冲区的数据传输到从当前{@code readerIndex}开始的指定流。
      *
      * @param length the number of bytes to transfer
      *
@@ -1709,8 +1476,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf readBytes(OutputStream out, int length) throws IOException;
 
     /**
-     * Transfers this buffer's data to the specified stream starting at the
-     * current {@code readerIndex}.
+     * 将此缓冲区的数据传输到从当前{@code readerIndex}开始的指定流。
      *
      * @param length the maximum number of bytes to transfer
      *
@@ -1724,8 +1490,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int readBytes(GatheringByteChannel out, int length) throws IOException;
 
     /**
-     * Gets a {@link CharSequence} with the given length at the current {@code readerIndex}
-     * and increases the {@code readerIndex} by the given length.
+     * 获取当前{@code readerIndex}中给定长度的{@link CharSequence}，并将{@code readerIndex}增加给定长度。
      *
      * @param length the length to read
      * @param charset that should be used
@@ -1736,9 +1501,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract CharSequence readCharSequence(int length, Charset charset);
 
     /**
-     * Transfers this buffer's data starting at the current {@code readerIndex}
-     * to the specified channel starting at the given file position.
-     * This method does not modify the channel's position.
+     * 将从当前{@code readerIndex}开始的缓冲区数据传输到从给定文件位置开始的指定通道。
+     * 此方法不会修改通道的位置。
      *
      * @param position the file position at which the transfer is to begin
      * @param length the maximum number of bytes to transfer
@@ -1753,8 +1517,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int readBytes(FileChannel out, long position, int length) throws IOException;
 
     /**
-     * Increases the current {@code readerIndex} by the specified
-     * {@code length} in this buffer.
+     * 将当前的{@code readerIndex}增加到此缓冲区中指定的{@code length}。
      *
      * @throws IndexOutOfBoundsException
      *         if {@code length} is greater than {@code this.readableBytes}
@@ -1762,170 +1525,121 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf skipBytes(int length);
 
     /**
-     * Sets the specified boolean at the current {@code writerIndex}
-     * and increases the {@code writerIndex} by {@code 1} in this buffer.
-     * If {@code this.writableBytes} is less than {@code 1}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的布尔值，并在此缓冲区中将{@code writerIndex}增加{@code 1}。
+     * 如果{@code这个。writableBytes}小于{@code 1}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeBoolean(boolean value);
 
     /**
-     * Sets the specified byte at the current {@code writerIndex}
-     * and increases the {@code writerIndex} by {@code 1} in this buffer.
-     * The 24 high-order bits of the specified value are ignored.
-     * If {@code this.writableBytes} is less than {@code 1}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的字节，并在此缓冲区中将{@code writerIndex}增加{@code 1}。
+     * 指定值的24个高阶位将被忽略。
+     * 如果{@code这个。writableBytes}小于{@code 1}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeByte(int value);
 
     /**
-     * Sets the specified 16-bit short integer at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 2}
-     * in this buffer.  The 16 high-order bits of the specified value are ignored.
-     * If {@code this.writableBytes} is less than {@code 2}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的16位短整数，并在此缓冲区中将{@code writerIndex}增加{@code 2}。
+     * 指定值的16个高阶位将被忽略。
+     * 如果{@code这个。writableBytes}小于{@code 2}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeShort(int value);
 
     /**
-     * Sets the specified 16-bit short integer in the Little Endian Byte
-     * Order at the current {@code writerIndex} and increases the
-     * {@code writerIndex} by {@code 2} in this buffer.
-     * The 16 high-order bits of the specified value are ignored.
-     * If {@code this.writableBytes} is less than {@code 2}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}以小尾数字节顺序设置指定的16位短整数，并在该缓冲区中将{@code writerIndex}增加{@code 2}。
+     * 指定值的16个高阶位将被忽略。
+     * 如果{@code这个。writableBytes}小于{@code 2}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeShortLE(int value);
 
     /**
-     * Sets the specified 24-bit medium integer at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 3}
-     * in this buffer.
-     * If {@code this.writableBytes} is less than {@code 3}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的24位中整数，并在此缓冲区中将{@code writerIndex}增加{@code 3}。
+     * 如果{@code这个。writableBytes}小于{@code 3}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeMedium(int value);
 
     /**
-     * Sets the specified 24-bit medium integer at the current
-     * {@code writerIndex} in the Little Endian Byte Order and
-     * increases the {@code writerIndex} by {@code 3} in this
-     * buffer.
-     * If {@code this.writableBytes} is less than {@code 3}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 以小端字节顺序在当前{@code writerIndex}处设置指定的24位中整数，并在此缓冲区中将{@code writerIndex}增加{@code 3}。
+     * 如果{@code这个。writableBytes}小于{@code 3}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeMediumLE(int value);
 
     /**
-     * Sets the specified 32-bit integer at the current {@code writerIndex}
-     * and increases the {@code writerIndex} by {@code 4} in this buffer.
-     * If {@code this.writableBytes} is less than {@code 4}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的32位整数，并在此缓冲区中将{@code writerIndex}增加{@code 4}。
+     * 如果{@code这个。writableBytes}小于{@code 4}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeInt(int value);
 
     /**
-     * Sets the specified 32-bit integer at the current {@code writerIndex}
-     * in the Little Endian Byte Order and increases the {@code writerIndex}
-     * by {@code 4} in this buffer.
-     * If {@code this.writableBytes} is less than {@code 4}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 以小尾数字节顺序在当前的{@code writerIndex}处设置指定的32位整数，并在此缓冲区中将{@code writerIndex}增加{@code 4}。
+     * 如果{@code这个。writableBytes}小于{@code 4}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeIntLE(int value);
 
     /**
-     * Sets the specified 64-bit long integer at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 8}
-     * in this buffer.
-     * If {@code this.writableBytes} is less than {@code 8}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的64位长整数，并在此缓冲区中将{@code writerIndex}增加{@code 8}。
+     * 如果{@code这个。writableBytes}小于{@code 8}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeLong(long value);
 
     /**
-     * Sets the specified 64-bit long integer at the current
-     * {@code writerIndex} in the Little Endian Byte Order and
-     * increases the {@code writerIndex} by {@code 8}
-     * in this buffer.
-     * If {@code this.writableBytes} is less than {@code 8}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 以小端字节顺序在当前{@code writerIndex}处设置指定的64位长整数，并在此缓冲区中将{@code writerIndex}增加{@code 8}。
+     * 如果{@code这个。writableBytes}小于{@code 8}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeLongLE(long value);
 
     /**
-     * Sets the specified 2-byte UTF-16 character at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 2}
-     * in this buffer.  The 16 high-order bits of the specified value are ignored.
-     * If {@code this.writableBytes} is less than {@code 2}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的2字节UTF-16字符，并在此缓冲区中将{@code writerIndex}增加{@code 2}。、
+     * 指定值的16个高阶位将被忽略。
+     * 如果{@code这个。writableBytes}小于{@code 2}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeChar(int value);
 
     /**
-     * Sets the specified 32-bit floating point number at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 4}
-     * in this buffer.
-     * If {@code this.writableBytes} is less than {@code 4}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的32位浮点数，并在该缓冲区中将{@code writerIndex}增加{@code 4}。
+     * 如果{@code这个。writableBytes}小于{@code 4}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeFloat(float value);
 
     /**
-     * Sets the specified 32-bit floating point number at the current
-     * {@code writerIndex} in Little Endian Byte Order and increases
-     * the {@code writerIndex} by {@code 4} in this buffer.
-     * If {@code this.writableBytes} is less than {@code 4}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前位置设置指定的32位浮点数
+     * {@code writerIndex}以小端字节顺序排列，并在此缓冲区中将{@code writerIndex}增加{@code 4}。
+     * 如果{@code这个。writableBytes}小于{@code 4}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public ByteBuf writeFloatLE(float value) {
         return writeIntLE(Float.floatToRawIntBits(value));
     }
 
     /**
-     * Sets the specified 64-bit floating point number at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by {@code 8}
-     * in this buffer.
-     * If {@code this.writableBytes} is less than {@code 8}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处设置指定的64位浮点数，并在该缓冲区中将{@code writerIndex}增加{@code 8}。
+     * 如果{@code这个。writableBytes}小于{@code 8}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeDouble(double value);
 
     /**
-     * Sets the specified 64-bit floating point number at the current
-     * {@code writerIndex} in Little Endian Byte Order and increases
-     * the {@code writerIndex} by {@code 8} in this buffer.
-     * If {@code this.writableBytes} is less than {@code 8}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 以小端字节顺序设置当前{@code writerIndex}的指定64位浮点数，并在此缓冲区中将{@code writerIndex}增加{@code 8}。
+     * 如果{@code这个。writableBytes}小于{@code 8}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public ByteBuf writeDoubleLE(double value) {
         return writeLongLE(Double.doubleToRawLongBits(value));
     }
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the current {@code writerIndex} until the source buffer becomes
-     * unreadable, and increases the {@code writerIndex} by the number of
-     * the transferred bytes.  This method is basically same with
-     * {@link #writeBytes(ByteBuf, int, int)}, except that this method
-     * increases the {@code readerIndex} of the source buffer by the number of
-     * the transferred bytes while {@link #writeBytes(ByteBuf, int, int)}
-     * does not.
-     * If {@code this.writableBytes} is less than {@code src.readableBytes},
-     * {@link #ensureWritable(int)} will be called in an attempt to expand
-     * capacity to accommodate.
+     * 将指定的源缓冲区的数据从当前的{@code writerIndex}传输到这个缓冲区，直到源缓冲区变得不可读，
+     * 并将{@code writerIndex}增加传输字节数。这个方法和{@link #writeBytes(ByteBuf, int, int)}
+     * 基本相同，除了这个方法增加了源缓冲区的{@code readerIndex}的传输字节数，而{@link #writeBytes
+     * (ByteBuf, int, int)}没有增加。
+     * 如果{@code这个。writableBytes}小于{@code src。将调用readableBytes}，
+     * {@link #ensureWritable(int)}来扩展容量以适应。
      */
     public abstract ByteBuf writeBytes(ByteBuf src);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the current {@code writerIndex} and increases the {@code writerIndex}
-     * by the number of the transferred bytes (= {@code length}).  This method
-     * is basically same with {@link #writeBytes(ByteBuf, int, int)},
-     * except that this method increases the {@code readerIndex} of the source
-     * buffer by the number of the transferred bytes (= {@code length}) while
-     * {@link #writeBytes(ByteBuf, int, int)} does not.
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 从当前的{@code writerIndex}开始，将指定的源缓冲区的数据传输到该缓冲区，
+     * 并将{@code writerIndex}增加传输字节数(= {@code length})。
+     * 这个方法和{@link #writeBytes(ByteBuf, int, int)}基本相同，
+     * 除了这个方法增加了源缓冲区的{@code readerIndex}的传输字节数(= {@code length})，
+     * 而{@link #writeBytes(ByteBuf, int, int)}不增加。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param length the number of bytes to transfer
      * @throws IndexOutOfBoundsException if {@code length} is greater then {@code src.readableBytes}
@@ -1933,11 +1647,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf writeBytes(ByteBuf src, int length);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the current {@code writerIndex} and increases the {@code writerIndex}
-     * by the number of the transferred bytes (= {@code length}).
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 从当前的{@code writerIndex}开始，将指定的源缓冲区的数据传输到该缓冲区，
+     * 并将{@code writerIndex}增加传输字节数(= {@code length})。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param srcIndex the first index of the source
      * @param length   the number of bytes to transfer
@@ -1949,20 +1661,16 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf writeBytes(ByteBuf src, int srcIndex, int length);
 
     /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the current {@code writerIndex} and increases the {@code writerIndex}
-     * by the number of the transferred bytes (= {@code src.length}).
-     * If {@code this.writableBytes} is less than {@code src.length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 将指定的源数组的数据从当前的{@code writerIndex}开始传输到这个缓冲区，
+     * 并将{@code writerIndex}增加传输字节数(= {@code src.length})。
+     * 如果{@code这个。writableBytes}小于{@code src。length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      */
     public abstract ByteBuf writeBytes(byte[] src);
 
     /**
-     * Transfers the specified source array's data to this buffer starting at
-     * the current {@code writerIndex} and increases the {@code writerIndex}
-     * by the number of the transferred bytes (= {@code length}).
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 将指定的源数组的数据从当前的{@code writerIndex}开始传输到此缓冲区，
+     * 并将{@code writerIndex}增加传输字节数(= {@code length})。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param srcIndex the first index of the source
      * @param length   the number of bytes to transfer
@@ -1974,22 +1682,16 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf writeBytes(byte[] src, int srcIndex, int length);
 
     /**
-     * Transfers the specified source buffer's data to this buffer starting at
-     * the current {@code writerIndex} until the source buffer's position
-     * reaches its limit, and increases the {@code writerIndex} by the
-     * number of the transferred bytes.
-     * If {@code this.writableBytes} is less than {@code src.remaining()},
-     * {@link #ensureWritable(int)} will be called in an attempt to expand
-     * capacity to accommodate.
+     * 将指定的源缓冲区的数据传输到这个缓冲区，从当前的{@code writerIndex}开始，
+     * 直到源缓冲区的位置达到极限，并将{@code writerIndex}增加传输的字节数。
+     * 如果{@code这个。writableBytes}小于{@code src.remaining()}，
+     * {@link #ensureWritable(int)}将被调用来扩展容量以适应。
      */
     public abstract ByteBuf writeBytes(ByteBuffer src);
 
     /**
-     * Transfers the content of the specified stream to this buffer
-     * starting at the current {@code writerIndex} and increases the
-     * {@code writerIndex} by the number of the transferred bytes.
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 将指定流的内容传输到这个缓冲区，从当前的{@code writerIndex}开始，并将{@code writerIndex}增加传输的字节数。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param length the number of bytes to transfer
      *
@@ -2000,11 +1702,8 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int writeBytes(InputStream in, int length) throws IOException;
 
     /**
-     * Transfers the content of the specified channel to this buffer
-     * starting at the current {@code writerIndex} and increases the
-     * {@code writerIndex} by the number of the transferred bytes.
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 将指定通道的内容传输到这个缓冲区，从当前的{@code writerIndex}开始，并增加{@code writerIndex}传输的字节数。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param length the maximum number of bytes to transfer
      *
@@ -2016,12 +1715,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int writeBytes(ScatteringByteChannel in, int length) throws IOException;
 
     /**
-     * Transfers the content of the specified channel starting at the given file position
-     * to this buffer starting at the current {@code writerIndex} and increases the
-     * {@code writerIndex} by the number of the transferred bytes.
-     * This method does not modify the channel's position.
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 将从给定文件位置开始的指定通道的内容传输到从当前的{@code writerIndex}开始的缓冲区，并增加{@code writerIndex}传输的字节数。
+     * 此方法不会修改通道的位置。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param position the file position at which the transfer is to begin
      * @param length the maximum number of bytes to transfer
@@ -2034,22 +1730,16 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int writeBytes(FileChannel in, long position, int length) throws IOException;
 
     /**
-     * Fills this buffer with <tt>NUL (0x00)</tt> starting at the current
-     * {@code writerIndex} and increases the {@code writerIndex} by the
-     * specified {@code length}.
-     * If {@code this.writableBytes} is less than {@code length}, {@link #ensureWritable(int)}
-     * will be called in an attempt to expand capacity to accommodate.
+     * 从当前的{@code writerIndex}开始用<tt>NUL (0x00)</tt>填充该缓冲区，并将{@code writerIndex}增加到指定的{@code长度}。
+     * 如果{@code这个。writableBytes}小于{@code length}， {@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param length the number of <tt>NUL</tt>s to write to the buffer
      */
     public abstract ByteBuf writeZero(int length);
 
     /**
-     * Writes the specified {@link CharSequence} at the current {@code writerIndex} and increases
-     * the {@code writerIndex} by the written bytes.
-     * in this buffer.
-     * If {@code this.writableBytes} is not large enough to write the whole sequence,
-     * {@link #ensureWritable(int)} will be called in an attempt to expand capacity to accommodate.
+     * 在当前的{@code writerIndex}处写入指定的{@link CharSequence}，并增加{@code writerIndex}的写入字节数。在这个缓冲区。
+     * 如果{@code这个。writableBytes}不够大，不能写整个序列，{@link #ensureWritable(int)}将被调用，试图扩展容量以适应。
      *
      * @param sequence to write
      * @param charset that should be used
@@ -2058,18 +1748,13 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int writeCharSequence(CharSequence sequence, Charset charset);
 
     /**
-     * Locates the first occurrence of the specified {@code value} in this
-     * buffer. The search takes place from the specified {@code fromIndex}
-     * (inclusive) to the specified {@code toIndex} (exclusive).
+     * 查找此缓冲区中第一个指定的{@code值}。搜索从指定的{@code fromIndex}(包含)到指定的{@code toIndex}(排除)进行。
      * <p>
-     * If {@code fromIndex} is greater than {@code toIndex}, the search is
-     * performed in a reversed order from {@code fromIndex} (exclusive)
-     * down to {@code toIndex} (inclusive).
+     * 如果{@code fromIndex}大于{@code toIndex}，搜索将按照从{@code fromIndex}(排他)到{@code toIndex}(包含)的相反顺序执行。
      * <p>
-     * Note that the lower index is always included and higher always excluded.
+     * 注意，较低的索引总是被包含，较高的索引总是被排除。
      * <p>
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @return the absolute index of the first occurrence if found.
      *         {@code -1} otherwise.
@@ -2077,12 +1762,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int indexOf(int fromIndex, int toIndex, byte value);
 
     /**
-     * Locates the first occurrence of the specified {@code value} in this
-     * buffer.  The search takes place from the current {@code readerIndex}
-     * (inclusive) to the current {@code writerIndex} (exclusive).
+     * 查找此缓冲区中第一个指定的{@code值}。搜索从当前的{@code readerIndex}(包含)进行到当前的{@code writerIndex}(排除)。
      * <p>
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @return the number of bytes between the current {@code readerIndex}
      *         and the first occurrence if found. {@code -1} otherwise.
@@ -2090,12 +1772,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int bytesBefore(byte value);
 
     /**
-     * Locates the first occurrence of the specified {@code value} in this
-     * buffer.  The search starts from the current {@code readerIndex}
-     * (inclusive) and lasts for the specified {@code length}.
+     * 查找此缓冲区中第一个指定的{@code值}。搜索从当前的{@code readerIndex}(包含)开始，持续到指定的{@code length}。
      * <p>
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @return the number of bytes between the current {@code readerIndex}
      *         and the first occurrence if found. {@code -1} otherwise.
@@ -2106,12 +1785,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int bytesBefore(int length, byte value);
 
     /**
-     * Locates the first occurrence of the specified {@code value} in this
-     * buffer.  The search starts from the specified {@code index} (inclusive)
-     * and lasts for the specified {@code length}.
+     * 也可以使用一个类文字来获取{@code Class}对象的类型（或void）。
+     * 请参阅<cite>The Java&trade; Language Specification</cite>的第15.8.2节。例如
      * <p>
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 本方法不修改该缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @return the number of bytes between the specified {@code index}
      *         and the first occurrence if found. {@code -1} otherwise.
@@ -2122,7 +1799,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int bytesBefore(int index, int length, byte value);
 
     /**
-     * Iterates over the readable bytes of this buffer with the specified {@code processor} in ascending order.
+     * 使用指定的{@code处理器}按升序遍历此缓冲区的可读字节。
      *
      * @return {@code -1} if the processor iterated to or beyond the end of the readable bytes.
      *         The last-visited index If the {@link ByteProcessor#process(byte)} returned {@code false}.
@@ -2130,8 +1807,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int forEachByte(ByteProcessor processor);
 
     /**
-     * Iterates over the specified area of this buffer with the specified {@code processor} in ascending order.
-     * (i.e. {@code index}, {@code (index + 1)},  .. {@code (index + length - 1)})
+     * 使用指定的{@code处理器}按升序遍历此缓冲区的指定区域。(即{@code索引}、{@code(索引+ 1)}、..{@code(索引+长度- 1)}
      *
      * @return {@code -1} if the processor iterated to or beyond the end of the specified area.
      *         The last-visited index If the {@link ByteProcessor#process(byte)} returned {@code false}.
@@ -2139,7 +1815,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int forEachByte(int index, int length, ByteProcessor processor);
 
     /**
-     * Iterates over the readable bytes of this buffer with the specified {@code processor} in descending order.
+     * 使用指定的{@code处理器}按降序遍历此缓冲区的可读字节。
      *
      * @return {@code -1} if the processor iterated to or beyond the beginning of the readable bytes.
      *         The last-visited index If the {@link ByteProcessor#process(byte)} returned {@code false}.
@@ -2147,7 +1823,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int forEachByteDesc(ByteProcessor processor);
 
     /**
-     * Iterates over the specified area of this buffer with the specified {@code processor} in descending order.
+     * 使用指定的{@code处理器}按降序遍历此缓冲区的指定区域。
      * (i.e. {@code (index + length - 1)}, {@code (index + length - 2)}, ... {@code index})
      *
      *
@@ -2157,110 +1833,82 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int forEachByteDesc(int index, int length, ByteProcessor processor);
 
     /**
-     * Returns a copy of this buffer's readable bytes.  Modifying the content
-     * of the returned buffer or this buffer does not affect each other at all.
+     * 返回该缓冲区可读字节的副本。修改返回缓冲区或此缓冲区的内容根本不会相互影响。
      * This method is identical to {@code buf.copy(buf.readerIndex(), buf.readableBytes())}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      */
     public abstract ByteBuf copy();
 
     /**
-     * Returns a copy of this buffer's sub-region.  Modifying the content of
-     * the returned buffer or this buffer does not affect each other at all.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回该缓冲区的子区域的副本。修改返回缓冲区或此缓冲区的内容根本不会相互影响。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      */
     public abstract ByteBuf copy(int index, int length);
 
     /**
-     * Returns a slice of this buffer's readable bytes. Modifying the content
-     * of the returned buffer or this buffer affects each other's content
-     * while they maintain separate indexes and marks.  This method is
-     * identical to {@code buf.slice(buf.readerIndex(), buf.readableBytes())}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回该缓冲区可读字节的一个片段。修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 这个方法与{@code buf.slice(buf.readerIndex()， buf.readableBytes())}相同。
+     * d此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * Also be aware that this method will NOT call {@link #retain()} and so the
-     * reference count will NOT be increased.
+     * 还要注意，这个方法不会调用{@link #retain()}，因此引用计数不会增加。
      */
     public abstract ByteBuf slice();
 
     /**
-     * Returns a retained slice of this buffer's readable bytes. Modifying the content
-     * of the returned buffer or this buffer affects each other's content
-     * while they maintain separate indexes and marks.  This method is
-     * identical to {@code buf.slice(buf.readerIndex(), buf.readableBytes())}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回该缓冲区可读字节的保留片。修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 这个方法与{@code buf.slice(buf.readerIndex()， buf.readableBytes())}相同。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * Note that this method returns a {@linkplain #retain() retained} buffer unlike {@link #slice()}.
-     * This method behaves similarly to {@code slice().retain()} except that this method may return
-     * a buffer implementation that produces less garbage.
+     * 注意，这个方法会返回{@linkplain #retain() retained}缓冲区，而不像{@link #slice()}那样。
+     * 这个方法的行为类似于{@code slice().retain()}，不同的是，这个方法可能会返回一个产生更少垃圾的缓冲区实现。
      */
     public abstract ByteBuf retainedSlice();
 
     /**
-     * Returns a slice of this buffer's sub-region. Modifying the content of
-     * the returned buffer or this buffer affects each other's content while
-     * they maintain separate indexes and marks.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回该缓冲区子区域的一个片段。修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * Also be aware that this method will NOT call {@link #retain()} and so the
-     * reference count will NOT be increased.
+     * 还要注意，这个方法不会调用{@link #retain()}，因此引用计数不会增加。
      */
     public abstract ByteBuf slice(int index, int length);
 
     /**
-     * Returns a retained slice of this buffer's sub-region. Modifying the content of
-     * the returned buffer or this buffer affects each other's content while
-     * they maintain separate indexes and marks.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回此缓冲区子区域的保留片。修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * Note that this method returns a {@linkplain #retain() retained} buffer unlike {@link #slice(int, int)}.
-     * This method behaves similarly to {@code slice(...).retain()} except that this method may return
-     * a buffer implementation that produces less garbage.
+     * 注意，这个方法会返回{@linkplain #retain() retained}缓冲区，而不像{@link #slice(int, int)}那样。
+     * 这个方法的行为类似于{@code slice(…).retain()}，不同的是，这个方法可能会返回一个产生更少垃圾的缓冲区实现。
      */
     public abstract ByteBuf retainedSlice(int index, int length);
 
     /**
-     * Returns a buffer which shares the whole region of this buffer.
-     * Modifying the content of the returned buffer or this buffer affects
-     * each other's content while they maintain separate indexes and marks.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回一个缓冲区，该缓冲区共享该缓冲区的整个区域。
+     * 修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * The reader and writer marks will not be duplicated. Also be aware that this method will
-     * NOT call {@link #retain()} and so the reference count will NOT be increased.
-     * @return A buffer whose readable content is equivalent to the buffer returned by {@link #slice()}.
-     * However this buffer will share the capacity of the underlying buffer, and therefore allows access to all of the
-     * underlying content if necessary.
+     * 读者和作者的标记不会被复制。还要注意，这个方法不会调用{@link #retain()}，因此引用计数不会增加。
+     * @return 一个缓冲区，其可读内容相当于由{@link #slice()}返回的缓冲区。
+     * 然而，该缓冲区将共享底层缓冲区的容量，因此允许在必要时访问所有底层内容。
      */
     public abstract ByteBuf duplicate();
 
     /**
-     * Returns a retained buffer which shares the whole region of this buffer.
-     * Modifying the content of the returned buffer or this buffer affects
-     * each other's content while they maintain separate indexes and marks.
-     * This method is identical to {@code buf.slice(0, buf.capacity())}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+     * 返回一个保留的缓冲区，该缓冲区共享该缓冲区的整个区域。
+     * 修改返回缓冲区或此缓冲区的内容会影响彼此的内容，同时它们维护单独的索引和标记。
+     * 此方法与{@code buf相同。片(0,buf.capacity())}。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      * <p>
-     * Note that this method returns a {@linkplain #retain() retained} buffer unlike {@link #slice(int, int)}.
-     * This method behaves similarly to {@code duplicate().retain()} except that this method may return
-     * a buffer implementation that produces less garbage.
+     * 注意，这个方法会返回{@linkplain #retain() retained}缓冲区，而不像{@link #slice(int, int)}那样。
+     * 这个方法的行为类似于{@code duplicate().retain()}，不同的是，这个方法可能会返回一个产生更少垃圾的缓冲区实现。
      */
     public abstract ByteBuf retainedDuplicate();
 
     /**
-     * Returns the maximum number of NIO {@link ByteBuffer}s that consist this buffer.  Note that {@link #nioBuffers()}
-     * or {@link #nioBuffers(int, int)} might return a less number of {@link ByteBuffer}s.
+     * 返回包含此缓冲区的NIO {@link ByteBuffer}的最大数目。
+     * 注意，{@link #nioBuffers()}或{@link #nioBuffers(int, int)}可能会返回较少的{@link ByteBuffer}。
      *
-     * @return {@code -1} if this buffer has no underlying {@link ByteBuffer}.
-     *         the number of the underlying {@link ByteBuffer}s if this buffer has at least one underlying
-     *         {@link ByteBuffer}.  Note that this method does not return {@code 0} to avoid confusion.
+     * @return {@code -1} 如果此缓冲区没有底层{@link ByteBuffer}。
+     *         如果缓冲区至少有一个底层{@link ByteBuffer}，则底层{@link ByteBuffer}的数目。注意，此方法不返回{@code 0}，以免混淆。
      *
      * @see #nioBuffer()
      * @see #nioBuffer(int, int)
@@ -2270,13 +1918,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int nioBufferCount();
 
     /**
-     * Exposes this buffer's readable bytes as an NIO {@link ByteBuffer}. The returned buffer
-     * either share or contains the copied content of this buffer, while changing the position
-     * and limit of the returned NIO buffer does not affect the indexes and marks of this buffer.
-     * This method is identical to {@code buf.nioBuffer(buf.readerIndex(), buf.readableBytes())}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of this buffer.
-     * Please note that the returned NIO buffer will not see the changes of this buffer if this buffer
-     * is a dynamic buffer and it adjusted its capacity.
+     * 将该缓冲区的可读字节公开为NIO {@link ByteBuffer}。返回的缓冲区共享或包含该缓冲区的复制内容，
+     * 而更改返回的NIO缓冲区的位置和限制不会影响该缓冲区的索引和标记。
+     * 这个方法与{@code buf.nioBuffer(buf.readerIndex()， buf.readableBytes())}相同。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
+     * 请注意，如果这个缓冲区是动态缓冲区并且它调整了容量，那么返回的NIO缓冲区将不会看到这个缓冲区的变化。
      *
      * @throws UnsupportedOperationException
      *         if this buffer cannot create a {@link ByteBuffer} that shares the content with itself
@@ -2288,12 +1934,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuffer nioBuffer();
 
     /**
-     * Exposes this buffer's sub-region as an NIO {@link ByteBuffer}. The returned buffer
-     * either share or contains the copied content of this buffer, while changing the position
-     * and limit of the returned NIO buffer does not affect the indexes and marks of this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of this buffer.
-     * Please note that the returned NIO buffer will not see the changes of this buffer if this buffer
-     * is a dynamic buffer and it adjusted its capacity.
+     * 将此缓冲区的子区域公开为NIO {@link ByteBuffer}。
+     * 返回的缓冲区共享或包含该缓冲区的复制内容，而更改返回的NIO缓冲区的位置和限制不会影响该缓冲区的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
+     * 请注意，如果这个缓冲区是动态缓冲区并且它调整了容量，那么返回的NIO缓冲区将不会看到这个缓冲区的变化。
      *
      * @throws UnsupportedOperationException
      *         if this buffer cannot create a {@link ByteBuffer} that shares the content with itself
@@ -2305,17 +1949,15 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuffer nioBuffer(int index, int length);
 
     /**
-     * Internal use only: Exposes the internal NIO buffer.
+     * 仅内部使用:公开内部NIO缓冲区。
      */
     public abstract ByteBuffer internalNioBuffer(int index, int length);
 
     /**
-     * Exposes this buffer's readable bytes as an NIO {@link ByteBuffer}'s. The returned buffer
-     * either share or contains the copied content of this buffer, while changing the position
-     * and limit of the returned NIO buffer does not affect the indexes and marks of this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of this buffer.
-     * Please note that the returned NIO buffer will not see the changes of this buffer if this buffer
-     * is a dynamic buffer and it adjusted its capacity.
+     * 将此缓冲区的可读字节公开为NIO {@link ByteBuffer}的。返回的缓冲区共享或包含该缓冲区的复制内容，
+     * 而更改返回的NIO缓冲区的位置和限制不会影响该缓冲区的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
+     * 请注意，如果这个缓冲区是动态缓冲区并且它调整了容量，那么返回的NIO缓冲区将不会看到这个缓冲区的变化。
      *
      *
      * @throws UnsupportedOperationException
@@ -2328,12 +1970,9 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuffer[] nioBuffers();
 
     /**
-     * Exposes this buffer's bytes as an NIO {@link ByteBuffer}'s for the specified index and length
-     * The returned buffer either share or contains the copied content of this buffer, while changing
-     * the position and limit of the returned NIO buffer does not affect the indexes and marks of this buffer.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of this buffer. Please note that the
-     * returned NIO buffer will not see the changes of this buffer if this buffer is a dynamic
-     * buffer and it adjusted its capacity.
+     * 返回的缓冲区共享或包含复制的该缓冲区的内容，而改变返回的NIO缓冲区的位置和限制不会影响该缓冲区的索引和标记。
+     * 此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。请注意，如果这个缓冲区是动态缓冲区并且它调整了容量，
+     * 那么返回的NIO缓冲区将不会看到这个缓冲区的变化。
      *
      * @throws UnsupportedOperationException
      *         if this buffer cannot create a {@link ByteBuffer} that shares the content with itself
@@ -2345,14 +1984,13 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuffer[] nioBuffers(int index, int length);
 
     /**
-     * Returns {@code true} if and only if this buffer has a backing byte array.
-     * If this method returns true, you can safely call {@link #array()} and
-     * {@link #arrayOffset()}.
+     * 当且仅当此缓冲区有后备字节数组时，返回{@code true}。
+     * 如果这个方法返回true，您可以安全地调用{@link #array()}和{@link #arrayOffset()}。
      */
     public abstract boolean hasArray();
 
     /**
-     * Returns the backing byte array of this buffer.
+     * 返回此缓冲区的后备字节数组。
      *
      * @throws UnsupportedOperationException
      *         if there no accessible backing byte array
@@ -2360,8 +1998,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract byte[] array();
 
     /**
-     * Returns the offset of the first byte within the backing byte array of
-     * this buffer.
+     * 返回此缓冲区的后备字节数组中的第一个字节的偏移量。
      *
      * @throws UnsupportedOperationException
      *         if there no accessible backing byte array
@@ -2369,13 +2006,12 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract int arrayOffset();
 
     /**
-     * Returns {@code true} if and only if this buffer has a reference to the low-level memory address that points
-     * to the backing data.
+     * 返回{@code true}当且仅当这个缓冲区有一个指向后备数据的低级内存地址的引用。
      */
     public abstract boolean hasMemoryAddress();
 
     /**
-     * Returns the low-level memory address that point to the first byte of ths backing data.
+     * 返回指向支持数据的第一个字节的低级内存地址。
      *
      * @throws UnsupportedOperationException
      *         if this buffer does not support accessing the low-level memory address
@@ -2383,10 +2019,10 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract long memoryAddress();
 
     /**
-     * Returns {@code true} if this {@link ByteBuf} implementation is backed by a single memory region.
-     * Composite buffer implementations must return false even if they currently hold &le; 1 components.
-     * For buffers that return {@code true}, it's guaranteed that a successful call to {@link #discardReadBytes()}
-     * will increase the value of {@link #maxFastWritableBytes()} by the current {@code readerIndex}.
+     * 如果这个{@link ByteBuf}实现由单个内存区域支持，则返回{@code true}。
+     * 复合缓冲区实现必须返回false，即使它们当前持有&低于;1组件。
+     * 对于返回{@code true}的缓冲区，可以保证成功调用{@link #discardReadBytes()}将增加当前
+     * {@code readerIndex}的{@link #maxFastWritableBytes()}的值。
      * <p>
      * This method will return {@code false} by default, and a {@code false} return value does not necessarily
      * mean that the implementation is composite or that it is <i>not</i> backed by a single memory region.
@@ -2395,12 +2031,11 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
         return false;
     }
 
-    /**
-     * Decodes this buffer's readable bytes into a string with the specified
-     * character set name.  This method is identical to
-     * {@code buf.toString(buf.readerIndex(), buf.readableBytes(), charsetName)}.
-     * This method does not modify {@code readerIndex} or {@code writerIndex} of
-     * this buffer.
+    /**默认情况下，该方法将返回{@code false}，而{@code false}返回值并不一定意味着该实现是复合的，
+     * 或者它是<i>而不是</i>由单一内存区域支持的。
+     * 将此缓冲区的可读字节解码为具有指定字符集名称的字符串。这个方法与
+     * {@code buf.toString(buf.readerIndex()， buf.readableBytes()， charsetName)}
+     * 相同。此方法不修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      *
      * @throws UnsupportedCharsetException
      *         if the specified character set name is not supported by the
@@ -2409,50 +2044,40 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract String toString(Charset charset);
 
     /**
-     * Decodes this buffer's sub-region into a string with the specified
-     * character set.  This method does not modify {@code readerIndex} or
-     * {@code writerIndex} of this buffer.
+     * 将此缓冲区的子区域解码为具有指定字符集的字符串。此方法不会修改此缓冲区的{@code readerIndex}或{@code writerIndex}。
      */
     public abstract String toString(int index, int length, Charset charset);
 
     /**
-     * Returns a hash code which was calculated from the content of this
-     * buffer.  If there's a byte array which is
-     * {@linkplain #equals(Object) equal to} this array, both arrays should
-     * return the same value.
+     * 返回一个哈希码，该哈希码是从该缓冲区的内容计算出来的。
+     * 如果有一个字节数组是{@linkplain #equals(Object) =}这个数组，两个数组应该返回相同的值。
      */
     @Override
     public abstract int hashCode();
 
     /**
-     * Determines if the content of the specified buffer is identical to the
-     * content of this array.  'Identical' here means:
+     * 确定指定缓冲区的内容是否与此数组的内容相同。“相同的”在这里的意思是:
      * <ul>
-     * <li>the size of the contents of the two buffers are same and</li>
-     * <li>every single byte of the content of the two buffers are same.</li>
+     * <li>两个缓冲区的内容大小是相同的</li>
+     * <li>两个缓冲区内容的每一个字节都是相同的。</li>
      * </ul>
-     * Please note that it does not compare {@link #readerIndex()} nor
-     * {@link #writerIndex()}.  This method also returns {@code false} for
-     * {@code null} and an object which is not an instance of
-     * {@link ByteBuf} type.
+     * 请注意，它没有比较{@link #readerIndex()}和{@link #writerIndex()}。
+     * 该方法还为{@code null}和一个非{@link ByteBuf}类型实例的对象返回{@code false}。
      */
     @Override
     public abstract boolean equals(Object obj);
 
     /**
-     * Compares the content of the specified buffer to the content of this
-     * buffer. Comparison is performed in the same manner with the string
-     * comparison functions of various languages such as {@code strcmp},
-     * {@code memcmp} and {@link String#compareTo(String)}.
+     * 将指定缓冲区的内容与此缓冲区的内容进行比较。
+     * 对各种语言的字符串比较函数，如{@code strcmp}、{@code memcmp}和
+     * {@link String #compareTo(string)}，以相同的方式进行比较。
      */
     @Override
     public abstract int compareTo(ByteBuf buffer);
 
     /**
-     * Returns the string representation of this buffer.  This method does not
-     * necessarily return the whole content of the buffer but returns
-     * the values of the key properties such as {@link #readerIndex()},
-     * {@link #writerIndex()} and {@link #capacity()}.
+     * 返回此缓冲区的字符串表示形式。该方法不一定返回缓冲区的全部内容，但返回关键属性的值，
+     * 如{@link #readerIndex()}、{@link #writerIndex()}和{@link #capacity()}。
      */
     @Override
     public abstract String toString();
@@ -2470,8 +2095,7 @@ public abstract class ByteBuf implements ReferenceCounted, Comparable<ByteBuf> {
     public abstract ByteBuf touch(Object hint);
 
     /**
-     * Used internally by {@link AbstractByteBuf#ensureAccessible()} to try to guard
-     * against using the buffer after it was released (best-effort).
+     * 由{@link AbstractByteBuf#ensureAccessible()}在内部使用，以防止在缓冲区释放后使用它(尽最大努力)。
      */
     boolean isAccessible() {
         return refCnt() != 0;

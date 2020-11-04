@@ -36,23 +36,24 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 /**
- * Provides socket operations with privileges enabled. This is necessary for applications that use the
- * {@link SecurityManager} to restrict {@link SocketPermission} to their application. By asserting that these
- * operations are privileged, the operations can proceed even if some code in the calling chain lacks the appropriate
- * {@link SocketPermission}.
+ * 提供启用特权的套接字操作。这对于使用{@link SecurityManager}将{@link SocketPermission}限制到其应用程序的应用程序是必要的。
+ * 通过断言这些操作是有特权的，即使调用链中的某些代码缺少适当的{@link SocketPermission}，这些操作也可以继续进行。
  */
 public final class SocketUtils {
 
+    // 空枚举
     private static final Enumeration<Object> EMPTY = Collections.enumeration(Collections.emptyList());
 
     private SocketUtils() {
     }
 
     @SuppressWarnings("unchecked")
+    // 返回空枚举
     private static <T> Enumeration<T> empty() {
         return (Enumeration<T>) EMPTY;
     }
 
+    // 客户端连接
     public static void connect(final Socket socket, final SocketAddress remoteAddress, final int timeout)
             throws IOException {
         try {
@@ -68,6 +69,7 @@ public final class SocketUtils {
         }
     }
 
+    // 服务端绑定端口
     public static void bind(final Socket socket, final SocketAddress bindpoint) throws IOException {
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
@@ -82,6 +84,7 @@ public final class SocketUtils {
         }
     }
 
+    // channel连接
     public static boolean connect(final SocketChannel socketChannel, final SocketAddress remoteAddress)
             throws IOException {
         try {
@@ -96,6 +99,7 @@ public final class SocketUtils {
         }
     }
 
+    // java6
     @SuppressJava6Requirement(reason = "Usage guarded by java version check")
     public static void bind(final SocketChannel socketChannel, final SocketAddress address) throws IOException {
         try {
@@ -111,11 +115,13 @@ public final class SocketUtils {
         }
     }
 
+    // 接收连接
     public static SocketChannel accept(final ServerSocketChannel serverSocketChannel) throws IOException {
         try {
             return AccessController.doPrivileged(new PrivilegedExceptionAction<SocketChannel>() {
                 @Override
                 public SocketChannel run() throws IOException {
+                    // jdk channel accept
                     return serverSocketChannel.accept();
                 }
             });

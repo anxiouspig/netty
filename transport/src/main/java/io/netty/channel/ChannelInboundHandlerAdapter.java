@@ -18,26 +18,23 @@ package io.netty.channel;
 import io.netty.channel.ChannelHandlerMask.Skip;
 
 /**
- * Abstract base class for {@link ChannelInboundHandler} implementations which provide
- * implementations of all of their methods.
+ * {@link ChannelInboundHandler}实现的抽象基类，提供它们所有方法的实现。
  *
  * <p>
- * This implementation just forward the operation to the next {@link ChannelHandler} in the
- * {@link ChannelPipeline}. Sub-classes may override a method implementation to change this.
+ * 这个实现只是将操作转发给{@link ChannelPipeline}中的下一个{@link ChannelHandler}。子类可以通过重写方法实现来改变这一点。
  * </p>
  * <p>
- * Be aware that messages are not released after the {@link #channelRead(ChannelHandlerContext, Object)}
- * method returns automatically. If you are looking for a {@link ChannelInboundHandler} implementation that
- * releases the received messages automatically, please see {@link SimpleChannelInboundHandler}.
+ * 注意，在{@link #channelRead(ChannelHandlerContext, Object)}方法自动返回后，消息不会被释放。
+ * 如果您正在寻找一个自动释放接收到的消息的{@link ChannelInboundHandler}实现，请参见{@link SimpleChannelInboundHandler}。
  * </p>
  */
 public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implements ChannelInboundHandler {
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelRegistered()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelRegistered()}以转发到
+     * {@link ChannelInboundHandler}中{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写此方法来改变行为。
      */
     @Skip
     @Override
@@ -46,10 +43,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelUnregistered()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelUnregistered()}以转发到
+     * {@link ChannelInboundHandler}中{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写此方法来改变行为。
      */
     @Skip
     @Override
@@ -58,10 +55,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelActive()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelActive()}以转发到
+     * {@link ChannelInboundHandler}中{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写此方法来改变行为。
      */
     @Skip
     @Override
@@ -70,10 +67,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelInactive()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelInactive()}以转发到
+     * {@link ChannelInboundHandler}中{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写此方法来改变行为。
      */
     @Skip
     @Override
@@ -82,10 +79,9 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelRead(Object)} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelRead(Object)}转发到{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写这个方法来改变行为。
      */
     @Skip
     @Override
@@ -94,10 +90,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelReadComplete()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelReadComplete()}转发到
+     * {@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写这个方法来改变行为。
      */
     @Skip
     @Override
@@ -106,10 +102,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireUserEventTriggered(Object)} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireUserEventTriggered(Object)}转发到
+     * {@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写这个方法来改变行为。
      */
     @Skip
     @Override
@@ -118,10 +114,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireChannelWritabilityChanged()} to forward
-     * to the next {@link ChannelInboundHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireChannelWritabilityChanged()}
+     * 来转发到{@link ChannelPipeline}中的下一个{@link ChannelInboundHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写这个方法来改变行为。
      */
     @Skip
     @Override
@@ -130,10 +126,10 @@ public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implemen
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireExceptionCaught(Throwable)} to forward
-     * to the next {@link ChannelHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireExceptionCaught(Throwable)}
+     * 转发到{@link ChannelPipeline}中的下一个{@link ChannelHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写这个方法来改变行为。
      */
     @Skip
     @Override

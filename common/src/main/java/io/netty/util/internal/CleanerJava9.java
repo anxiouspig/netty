@@ -25,7 +25,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 /**
- * Provide a way to clean a ByteBuffer on Java9+.
+ * 提供一种清除Java9+上的字节缓冲区的方法。
  */
 final class CleanerJava9 implements Cleaner {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(CleanerJava9.class);

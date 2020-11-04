@@ -22,15 +22,13 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 
 /**
- * A region of a file that is sent via a {@link Channel} which supports
- * <a href="http://en.wikipedia.org/wiki/Zero-copy">zero-copy file transfer</a>.
+ * 通过支持的{@link Channel}发送的文件的一个区域
+ * <a href="http://en.wikipedia.org/wiki/Zero-copy">零拷贝文件传输</a>.
  *
- * <h3>Upgrade your JDK / JRE</h3>
+ * <h3>升级你的 JDK / JRE</h3>
  *
- * {@link FileChannel#transferTo(long, long, WritableByteChannel)} has at least
- * four known bugs in the old versions of Sun JDK and perhaps its derived ones.
- * Please upgrade your JDK to 1.6.0_18 or later version if you are going to use
- * zero-copy file transfer.
+ * 在Sun JDK的旧版本以及派生版本中，至少有四个已知的bug。
+ * 如果您打算使用零拷贝文件传输，请将JDK升级到1.6.0_18或更高版本。
  * <ul>
  * <li><a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5103988">5103988</a>
  *   - FileChannel.transferTo() should return -1 for EAGAIN instead throws IOException</li>
@@ -42,23 +40,22 @@ import java.nio.channels.WritableByteChannel;
  *   - FileChannel.transferTo(2147483647, 1, channel) causes "Value too large" exception</li>
  * </ul>
  *
- * <h3>Check your operating system and JDK / JRE</h3>
+ * <h3>检查你的操作系统和 JDK / JRE</h3>
  *
- * If your operating system (or JDK / JRE) does not support zero-copy file
- * transfer, sending a file with {@link FileRegion} might fail or yield worse
- * performance.  For example, sending a large file doesn't work well in Windows.
+ * 如果您的操作系统(或JDK / JRE)不支持零拷贝文件传输，发送一个文件{@link FileRegion}可能会失败或产生更差的性能。
+ * 例如，发送一个大文件在Windows中就不能很好地工作。
  *
- * <h3>Not all transports support it</h3>
+ * <h3>并不是所有的传输都支持它</h3>
  */
 public interface FileRegion extends ReferenceCounted {
 
     /**
-     * Returns the offset in the file where the transfer began.
+     * 返回传输开始的文件中的偏移量。
      */
     long position();
 
     /**
-     * Returns the bytes which was transferred already.
+     * 返回已经传输的字节。
      *
      * @deprecated Use {@link #transferred()} instead.
      */
@@ -66,17 +63,17 @@ public interface FileRegion extends ReferenceCounted {
     long transfered();
 
     /**
-     * Returns the bytes which was transferred already.
+     * 返回已经传输的字节。
      */
     long transferred();
 
     /**
-     * Returns the number of bytes to transfer.
+     * 返回要传输的字节数。
      */
     long count();
 
     /**
-     * Transfers the content of this file region to the specified channel.
+     * 将此文件区域的内容传输到指定的通道。
      *
      * @param target    the destination of the transfer
      * @param position  the relative offset of the file where the transfer

@@ -44,88 +44,86 @@ import java.util.List;
 import static io.netty.util.AsciiString.indexOf;
 
 /**
- * A class that holds a number of network-related constants.
+ * 保存大量与网络相关的常量的类。
  * <p/>
- * This class borrowed some of its methods from a  modified fork of the
+ * 类的修改分支借用了它的一些方法
  * <a href="http://svn.apache.org/repos/asf/harmony/enhanced/java/branches/java6/classlib/modules/luni/
- * src/main/java/org/apache/harmony/luni/util/Inet6Util.java">Inet6Util class</a> which was part of Apache Harmony.
+ * src/main/java/org/apache/harmony/luni/util/Inet6Util.java">Inet6Util class</a> ，是Apache Harmony的一部分.
  */
 public final class NetUtil {
 
     /**
-     * The {@link Inet4Address} that represents the IPv4 loopback address '127.0.0.1'
+     * 表示IPv4环回地址'127.0.0.1'的{@link Inet4Address}
      */
     public static final Inet4Address LOCALHOST4;
 
     /**
-     * The {@link Inet6Address} that represents the IPv6 loopback address '::1'
+     * 表示IPv6回送地址'::1'的{@link Inet6Address}
      */
     public static final Inet6Address LOCALHOST6;
 
     /**
-     * The {@link InetAddress} that represents the loopback address. If IPv6 stack is available, it will refer to
-     * {@link #LOCALHOST6}.  Otherwise, {@link #LOCALHOST4}.
+     * 表示回送地址的{@link InetAddress}。如果IPv6栈可用，它将引用{@link #LOCALHOST6}。否则,{@link # LOCALHOST4}。
      */
     public static final InetAddress LOCALHOST;
 
     /**
-     * The loopback {@link NetworkInterface} of the current machine
+     * 当前机器的环回{@link NetworkInterface}
      */
     public static final NetworkInterface LOOPBACK_IF;
 
     /**
-     * The SOMAXCONN value of the current machine.  If failed to get the value,  {@code 200}  is used as a
-     * default value for Windows or {@code 128} for others.
+     * 当前计算机的SOMAXCONN值。如果无法获取该值，则将{@code 200}作为Windows的默认值，或{@code 128}作为其他操作系统的默认值。
      */
     public static final int SOMAXCONN;
 
     /**
-     * This defines how many words (represented as ints) are needed to represent an IPv6 address
+     * 这定义了表示一个IPv6地址需要多少个单词(用整数表示)
      */
     private static final int IPV6_WORD_COUNT = 8;
 
     /**
-     * The maximum number of characters for an IPV6 string with no scope
+     * 没有作用域的IPV6字符串的最大字符数
      */
     private static final int IPV6_MAX_CHAR_COUNT = 39;
 
     /**
-     * Number of bytes needed to represent and IPV6 value
+     * 表示IPV6值所需的字节数
      */
     private static final int IPV6_BYTE_COUNT = 16;
 
     /**
-     * Maximum amount of value adding characters in between IPV6 separators
+     * 在IPV6分隔符之间添加字符的最大值
      */
     private static final int IPV6_MAX_CHAR_BETWEEN_SEPARATOR = 4;
 
     /**
-     * Minimum number of separators that must be present in an IPv6 string
+     * IPv6字符串中必须存在的最小分隔符数
      */
     private static final int IPV6_MIN_SEPARATORS = 2;
 
     /**
-     * Maximum number of separators that must be present in an IPv6 string
+     * IPv6字符串中必须存在的最大分隔符数
      */
     private static final int IPV6_MAX_SEPARATORS = 8;
 
     /**
-     * Maximum amount of value adding characters in between IPV4 separators
+     * 在IPV4分隔符之间添加字符值的最大数量
      */
     private static final int IPV4_MAX_CHAR_BETWEEN_SEPARATOR = 3;
 
     /**
-     * Number of separators that must be present in an IPv4 string
+     * IPv4字符串中必须存在的分隔符数量
      */
     private static final int IPV4_SEPARATORS = 3;
 
     /**
-     * {@code true} if IPv4 should be used even if the system supports both IPv4 and IPv6.
+     * {@code true}是否应该使用IPv4，即使系统同时支持IPv4和IPv6。
      */
     private static final boolean IPV4_PREFERRED = SystemPropertyUtil.getBoolean("java.net.preferIPv4Stack", false);
 
     /**
-     * {@code true} if an IPv6 address should be preferred when a host has both an IPv4 address and an IPv6 address.
+     * 当主机同时拥有IPv4地址和IPv6地址时，是否应该首选IPv6地址。
      */
     private static final boolean IPV6_ADDRESSES_PREFERRED =
             SystemPropertyUtil.getBoolean("java.net.preferIPv6Addresses", false);

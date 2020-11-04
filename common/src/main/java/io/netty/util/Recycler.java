@@ -33,9 +33,9 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
- * Light-weight object pool based on a thread-local stack.
+ * 基于线程本地栈的轻量级对象池。
  *
- * @param <T> the type of the pooled object
+ * @param <T> 被池对象的类型
  */
 public abstract class Recycler<T> {
 
@@ -167,7 +167,7 @@ public abstract class Recycler<T> {
 
     @SuppressWarnings("unchecked")
     public final T get() {
-        if (maxCapacityPerThread == 0) {
+        if (maxCapacityPerThread == 0) { // 4096
             return newObject((Handle<T>) NOOP_HANDLE);
         }
         Stack<T> stack = threadLocal.get();

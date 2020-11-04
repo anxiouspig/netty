@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link AbstractAddressResolver} that resolves {@link InetSocketAddress}.
+ * 解析{@link InetSocketAddress}的{@link AbstractAddressResolver}。
  */
 public class InetSocketAddressResolver extends AbstractAddressResolver<InetSocketAddress> {
 

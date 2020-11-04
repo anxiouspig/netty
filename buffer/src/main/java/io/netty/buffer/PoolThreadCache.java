@@ -33,15 +33,15 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Acts a Thread cache for allocations. This implementation is moduled after
- * <a href="http://people.freebsd.org/~jasone/jemalloc/bsdcan2006/jemalloc.pdf">jemalloc</a> and the descripted
- * technics of
+ * 充当分配的线程缓存。这个实现是模块化的
+ * <a href="http://people.freebsd.org/~jasone/jemalloc/bsdcan2006/jemalloc.pdf">jemalloc</a> 以及所描述的工艺
  * <a href="https://www.facebook.com/notes/facebook-engineering/scalable-memory-allocation-using-jemalloc/480222803919">
- * Scalable memory allocation using jemalloc</a>.
+ * 使用jemalloc进行可伸缩内存分配</a>.
  */
 final class PoolThreadCache {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolThreadCache.class);
+    // 整数大小减1 31
     private static final int INTEGER_SIZE_MINUS_ONE = Integer.SIZE - 1;
 
     final PoolArena<byte[]> heapArena;
@@ -146,11 +146,12 @@ final class PoolThreadCache {
 
     // val > 0
     static int log2(int val) {
+        // 2的对数
         return INTEGER_SIZE_MINUS_ONE - Integer.numberOfLeadingZeros(val);
     }
 
     /**
-     * Try to allocate a small buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
+     * 试着从缓存中分配一个小的缓冲区。如果成功返回{@code true}，否则返回@code false}
      */
     boolean allocateSmall(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int sizeIdx) {
         return allocate(cacheForSmall(area, sizeIdx), buf, reqCapacity);
@@ -166,7 +167,7 @@ final class PoolThreadCache {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private boolean allocate(MemoryRegionCache<?> cache, PooledByteBuf buf, int reqCapacity) {
         if (cache == null) {
-            // no cache found so just return false here
+            // 没有找到缓存，所以这里返回false
             return false;
         }
         boolean allocated = cache.allocate(buf, reqCapacity, this);
@@ -369,7 +370,7 @@ final class PoolThreadCache {
         }
 
         /**
-         * Allocate something out of the cache if possible and remove the entry from the cache.
+         * 如果可能，从缓存中分配一些内容并从缓存中删除条目。
          */
         public final boolean allocate(PooledByteBuf<T> buf, int reqCapacity, PoolThreadCache threadCache) {
             Entry<T> entry = queue.poll();
@@ -406,13 +407,13 @@ final class PoolThreadCache {
         }
 
         /**
-         * Free up cached {@link PoolChunk}s if not allocated frequently enough.
+         * 如果分配不够频繁，释放缓存的{@link PoolChunk}。
          */
         public final void trim() {
             int free = size - allocations;
             allocations = 0;
 
-            // We not even allocated all the number that are
+            // 我们甚至没有分配所有的数字
             if (free > 0) {
                 free(free, false);
             }

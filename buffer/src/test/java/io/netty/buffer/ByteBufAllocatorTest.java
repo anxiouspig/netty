@@ -35,7 +35,7 @@ public abstract class ByteBufAllocatorTest {
 
     private void testBuffer(boolean preferDirect) {
         ByteBufAllocator allocator = newAllocator(preferDirect);
-        ByteBuf buffer = allocator.buffer(1);
+        ByteBuf buffer = allocator.buffer(10000);
         try {
             assertBuffer(buffer, isDirectExpected(preferDirect), 1, defaultMaxCapacity());
         } finally {

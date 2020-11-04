@@ -16,29 +16,27 @@
 package io.netty.channel;
 
 /**
- * {@link ChannelHandler} which adds callbacks for state changes. This allows the user
- * to hook in to state changes easily.
+ * {@link ChannelHandler}，为状态更改添加回调。这允许用户轻松地挂钩到状态更改。
  */
 public interface ChannelInboundHandler extends ChannelHandler {
 
     /**
-     * The {@link Channel} of the {@link ChannelHandlerContext} was registered with its {@link EventLoop}
+     * 使用其{@link EventLoop}注册了{@link ChannelHandlerContext}的{@link Channel}。
      */
     void channelRegistered(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     * The {@link Channel} of the {@link ChannelHandlerContext} was unregistered from its {@link EventLoop}
+     * {@link ChannelHandlerContext}的{@link Channel}从其{@link EventLoop}中被取消注册。
      */
     void channelUnregistered(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     * The {@link Channel} of the {@link ChannelHandlerContext} is now active
+     * {@link ChannelHandlerContext}的{@link Channel}现在是活动的
      */
     void channelActive(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     * The {@link Channel} of the {@link ChannelHandlerContext} was registered is now inactive and reached its
-     * end of lifetime.
+     * 已注册的{@link ChannelHandlerContext}的{@link Channel}现在处于非活动状态，并已到达生命周期的末尾。
      */
     void channelInactive(ChannelHandlerContext ctx) throws Exception;
 
@@ -48,26 +46,24 @@ public interface ChannelInboundHandler extends ChannelHandler {
     void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception;
 
     /**
-     * Invoked when the last message read by the current read operation has been consumed by
-     * {@link #channelRead(ChannelHandlerContext, Object)}.  If {@link ChannelOption#AUTO_READ} is off, no further
-     * attempt to read an inbound data from the current {@link Channel} will be made until
-     * {@link ChannelHandlerContext#read()} is called.
+     * 当当前读取操作读取的最后一条消息被{@link #channelRead(ChannelHandlerContext, Object)}使用时调用。
+     * 如果{@link ChannelOption#AUTO_READ}是关闭的，那么在调用{@link ChannelHandlerContext#read()}之前，
+     * 不会再尝试从当前的{@link Channel}读取入站数据。
      */
     void channelReadComplete(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     * Gets called if an user event was triggered.
+     * 如果用户事件被触发，则调用。
      */
     void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception;
 
     /**
-     * Gets called once the writable state of a {@link Channel} changed. You can check the state with
-     * {@link Channel#isWritable()}.
+     * 当{@link Channel}的可写状态更改时调用。您可以使用{@link Channel#isWritable()}检查状态。
      */
     void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     * Gets called if a {@link Throwable} was thrown.
+     * 在抛出{@link Throwable}时调用。
      */
     @Override
     @SuppressWarnings("deprecation")

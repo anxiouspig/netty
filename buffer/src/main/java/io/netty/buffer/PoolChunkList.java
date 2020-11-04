@@ -38,7 +38,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     private final int freeMinThreshold;
     private final int freeMaxThreshold;
 
-    // This is only update once when create the linked like list of PoolChunkList in PoolArena constructor.
+    // 当在PoolArena构造函数中创建PoolChunkList的类似链接列表时，只更新一次。
     private PoolChunkList<T> prevList;
 
     // TODO: Test if adding padding helps under contention
@@ -52,20 +52,20 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         this.maxUsage = maxUsage;
         maxCapacity = calculateMaxCapacity(minUsage, chunkSize);
 
-        // the thresholds are aligned with PoolChunk.usage() logic:
-        // 1) basic logic: usage() = 100 - freeBytes * 100L / chunkSize
-        //    so, for example: (usage() >= maxUsage) condition can be transformed in the following way:
+        // 阈值与PoolChunk.usage()逻辑一致:
+        // 1) 基本逻辑: usage() = 100 - freeBytes * 100L / chunkSize
+        //    所以, 例如: (usage() >= maxUsage) 条件可以转换成如下方式:
         //      100 - freeBytes * 100L / chunkSize >= maxUsage
         //      freeBytes <= chunkSize * (100 - maxUsage) / 100
         //      let freeMinThreshold = chunkSize * (100 - maxUsage) / 100, then freeBytes <= freeMinThreshold
         //
-        //  2) usage() returns an int value and has a floor rounding during a calculation,
-        //     to be aligned absolute thresholds should be shifted for "the rounding step":
+        //  2) usage() 返回一个 int 值，并且在计算过程中有一个四舍五入，
+        //     为了对齐，绝对阈值应该移动“舍入步骤”:
         //       freeBytes * 100 / chunkSize < 1
-        //       the condition can be converted to: freeBytes < 1 * chunkSize / 100
-        //     this is why we have + 0.99999999 shifts. A example why just +1 shift cannot be used:
+        //       条件可以被转换为: freeBytes < 1 * chunkSize / 100
+        //     这就是为什么我们有 + 0.99999999 偏移. 一个原因是 +1 shift 不能被使用:
         //       freeBytes = 16777216 == freeMaxThreshold: 16777216, usage = 0 < minUsage: 1, chunkSize: 16777216
-        //     At the same time we want to have zero thresholds in case of (maxUsage == 100) and (minUsage == 100).
+        //     同时我们想要有0阈值， in case of (maxUsage == 100) and (minUsage == 100).
         //
         freeMinThreshold = (maxUsage == 100) ? 0 : (int) (chunkSize * (100.0 - maxUsage + 0.99999999) / 100L);
         freeMaxThreshold = (minUsage == 100) ? 0 : (int) (chunkSize * (100.0 - minUsage + 0.99999999) / 100L);

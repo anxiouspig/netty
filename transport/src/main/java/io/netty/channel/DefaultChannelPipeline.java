@@ -40,60 +40,60 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 /**
- * The default {@link ChannelPipeline} implementation.  It is usually created
- * by a {@link Channel} implementation when the {@link Channel} is created.
+ * 默认的{@link ChannelPipeline}实现。它通常是由{@link Channel}实现在创建{@link Channel}时创建的。
  */
 public class DefaultChannelPipeline implements ChannelPipeline {
 
     static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelPipeline.class);
 
-    private static final String HEAD_NAME = generateName0(HeadContext.class);
-    private static final String TAIL_NAME = generateName0(TailContext.class);
+    private static final String HEAD_NAME = generateName0(HeadContext.class);  // 头处理器名
+    private static final String TAIL_NAME = generateName0(TailContext.class); // 尾处理器名
 
+    // 线程本地变量
     private static final FastThreadLocal<Map<Class<?>, String>> nameCaches =
             new FastThreadLocal<Map<Class<?>, String>>() {
         @Override
         protected Map<Class<?>, String> initialValue() {
+            // 弱引用
             return new WeakHashMap<Class<?>, String>();
         }
     };
-
+    // 原子更新Handle
     private static final AtomicReferenceFieldUpdater<DefaultChannelPipeline, MessageSizeEstimator.Handle> ESTIMATOR =
             AtomicReferenceFieldUpdater.newUpdater(
                     DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
-    final AbstractChannelHandlerContext head;
-    final AbstractChannelHandlerContext tail;
 
-    private final Channel channel;
-    private final ChannelFuture succeededFuture;
+    final AbstractChannelHandlerContext head; // 头处理器
+    final AbstractChannelHandlerContext tail; // 尾处理器
+
+    private final Channel channel; // 绑定的channel
+    private final ChannelFuture succeededFuture; // 成功通知future
     private final VoidChannelPromise voidPromise;
     private final boolean touch = ResourceLeakDetector.isEnabled();
 
-    private Map<EventExecutorGroup, EventExecutor> childExecutors;
-    private volatile MessageSizeEstimator.Handle estimatorHandle;
-    private boolean firstRegistration = true;
+    private Map<EventExecutorGroup, EventExecutor> childExecutors; // 子执行器
+    private volatile MessageSizeEstimator.Handle estimatorHandle; // 消息大小处理器
+    private boolean firstRegistration = true; //
 
     /**
-     * This is the head of a linked list that is processed by {@link #callHandlerAddedForAllHandlers()} and so process
-     * all the pending {@link #callHandlerAdded0(AbstractChannelHandlerContext)}.
+     * 这是一个链表的头，由{@link #callHandlerAddedForAllHandlers()}处理，因此可以处理所有挂起的
+     * {@link #callHandlerAdded0(AbstractChannelHandlerContext)}。
      *
-     * We only keep the head because it is expected that the list is used infrequently and its size is small.
-     * Thus full iterations to do insertions is assumed to be a good compromised to saving memory and tail management
-     * complexity.
+     * 我们只保留头部，因为预期列表使用频率不高，而且它的大小很小。因此，执行插入的完整迭代被认为是对节省内存和尾部管理复杂性的良好折衷。
      */
-    private PendingHandlerCallback pendingHandlerCallbackHead;
+    private PendingHandlerCallback pendingHandlerCallbackHead; // 回调任务
 
     /**
-     * Set to {@code true} once the {@link AbstractChannel} is registered.Once set to {@code true} the value will never
-     * change.
+     * 一旦注册了{@link AbstractChannel}，就设置为{@code true}。一旦设置为{@code true}，该值将永远不会改变。
      */
     private boolean registered;
 
     protected DefaultChannelPipeline(Channel channel) {
-        this.channel = ObjectUtil.checkNotNull(channel, "channel");
+        this.channel = ObjectUtil.checkNotNull(channel, "channel"); // 绑定的channel
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
 
+        // 初始化
         tail = new TailContext(this);
         head = new HeadContext(this);
 
@@ -101,6 +101,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         tail.prev = head;
     }
 
+    // 估计处理器
     final MessageSizeEstimator.Handle estimatorHandle() {
         MessageSizeEstimator.Handle handle = estimatorHandle;
         if (handle == null) {
@@ -205,9 +206,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
             addLast0(newCtx);
 
-            // If the registered is false it means that the channel was not registered on an eventLoop yet.
-            // In this case we add the context to the pipeline and add a task that will call
-            // ChannelHandler.handlerAdded(...) once the channel is registered.
+            // 如果registered为false，则意味着该频道还没有被注册到eventLoop上。
+            // oldState通常是ADD_PENDING，但当使用的EventExecutor不是暴露排序保证时，
+            // 也可以是REMOVE_COMPLETE。
             if (!registered) {
                 newCtx.setAddPending();
                 callHandlerCallbackLater(newCtx, true);
@@ -455,9 +456,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         synchronized (this) {
             atomicRemoveFromHandlerList(ctx);
 
-            // If the registered is false it means that the channel was not registered on an eventloop yet.
-            // In this case we remove the context from the pipeline and add a task that will call
-            // ChannelHandler.handlerRemoved(...) once the channel is registered.
+            // 如果已注册的为false，则意味着该通道尚未在eventloop上注册。
+            // 在这种情况下，我们从管道中移除上下文，并添加一个任务，一旦通道被注册，
+            // 该任务将调用ChannelHandler.handlerRemoved(...)。
             if (!registered) {
                 callHandlerCallbackLater(ctx, false);
                 return ctx;
@@ -479,7 +480,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * Method is synchronized to make the handler removal from the double linked list atomic.
+     * 方法是同步的，使处理程序从双链接列表中删除原子。
      */
     private synchronized void atomicRemoveFromHandlerList(AbstractChannelHandlerContext ctx) {
         AbstractChannelHandlerContext prev = ctx.prev;
@@ -645,8 +646,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         assert channel.eventLoop().inEventLoop();
         if (firstRegistration) {
             firstRegistration = false;
-            // We are now registered to the EventLoop. It's time to call the callbacks for the ChannelHandlers,
-            // that were added before the registration was done.
+            // 我们现在已经注册到EventLoop了。现在是时候调用ChannelHandlers的回调了。
+            // 在登记前增加的。
             callHandlerAddedForAllHandlers();
         }
     }
@@ -1241,7 +1242,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
-    // A special catch-all handler that handles both bytes and messages.
+    // 一个特殊的总括处理程序，可以同时处理字节和消息。
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
 
         TailContext(DefaultChannelPipeline pipeline) {

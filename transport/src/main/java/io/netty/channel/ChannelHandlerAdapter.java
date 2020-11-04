@@ -22,11 +22,11 @@ import io.netty.util.internal.InternalThreadLocalMap;
 import java.util.Map;
 
 /**
- * Skeleton implementation of a {@link ChannelHandler}.
+ * {@link ChannelHandler}的框架实现。
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
-    // Not using volatile because it's used only for a sanity check.
+    // 不使用volatile，因为它只用于完整性检查。
     boolean added;
 
     /**
@@ -39,15 +39,14 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     }
 
     /**
-     * Return {@code true} if the implementation is {@link Sharable} and so can be added
-     * to different {@link ChannelPipeline}s.
+     * 如果实现是{@link Sharable}，那么返回{@code true}，这样可以添加到不同的{@link ChannelPipeline}中。
      */
     public boolean isSharable() {
         /**
-         * Cache the result of {@link Sharable} annotation detection to workaround a condition. We use a
-         * {@link ThreadLocal} and {@link WeakHashMap} to eliminate the volatile write/reads. Using different
-         * {@link WeakHashMap} instances per {@link Thread} is good enough for us and the number of
-         * {@link Thread}s are quite limited anyway.
+         * 缓存{@link Sharable}注释检测的结果以解决一个条件。
+         * 我们使用{@link ThreadLocal}和{@link WeakHashMap}来消除易失性的写/读。
+         * 每个{@link线程}使用不同的{@link WeakHashMap}实例对我们来说已经足够好了，
+         * 而且无论如何{@link线程}的数量是相当有限的。
          *
          * See <a href="https://github.com/netty/netty/issues/2289">#2289</a>.
          */
@@ -62,7 +61,7 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     }
 
     /**
-     * Do nothing by default, sub-classes may override this method.
+     * 默认情况下，子类可以重写此方法。
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -70,7 +69,7 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     }
 
     /**
-     * Do nothing by default, sub-classes may override this method.
+     * 默认情况下，子类可以重写此方法。
      */
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
@@ -78,10 +77,9 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     }
 
     /**
-     * Calls {@link ChannelHandlerContext#fireExceptionCaught(Throwable)} to forward
-     * to the next {@link ChannelHandler} in the {@link ChannelPipeline}.
+     * 调用{@link ChannelHandlerContext#fireExceptionCaught(Throwable)}转发到{@link ChannelPipeline}中的下一个{@link ChannelHandler}。
      *
-     * Sub-classes may override this method to change behavior.
+     * 子类可以重写此方法来改变行为。
      *
      * @deprecated is part of {@link ChannelInboundHandler}
      */

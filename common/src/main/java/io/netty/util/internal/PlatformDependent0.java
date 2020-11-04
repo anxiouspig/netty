@@ -468,8 +468,8 @@ final class PlatformDependent0 {
     }
 
     static ByteBuffer allocateDirectNoCleaner(int capacity) {
-        // Calling malloc with capacity of 0 may return a null ptr or a memory address that can be used.
-        // Just use 1 to make it safe to use in all cases:
+        // 调用容量为0的malloc可能会返回一个空ptr或一个可用的内存地址。
+        // 只要用1就可以保证在所有情况下都安全使用:
         // See: http://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html
         return newDirectBuffer(UNSAFE.allocateMemory(Math.max(1, capacity)), capacity);
     }
@@ -488,6 +488,7 @@ final class PlatformDependent0 {
         }
     }
 
+    // 直接缓存
     static ByteBuffer newDirectBuffer(long address, int capacity) {
         ObjectUtil.checkPositiveOrZero(capacity, "capacity");
 

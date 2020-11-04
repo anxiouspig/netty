@@ -32,32 +32,32 @@ import static io.netty.util.internal.MacAddressUtil.defaultMachineId;
 import static io.netty.util.internal.MacAddressUtil.parseMAC;
 
 /**
- * The default {@link ChannelId} implementation.
+ * 默认 {@link ChannelId} 实现.
  */
 public final class DefaultChannelId implements ChannelId {
 
     private static final long serialVersionUID = 3884076183504074063L;
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelId.class);
-    private static final byte[] MACHINE_ID;
-    private static final int PROCESS_ID_LEN = 4;
-    private static final int PROCESS_ID;
-    private static final int SEQUENCE_LEN = 4;
-    private static final int TIMESTAMP_LEN = 8;
-    private static final int RANDOM_LEN = 4;
+    private static final byte[] MACHINE_ID; // macid
+    private static final int PROCESS_ID_LEN = 4; // 进程id长度
+    private static final int PROCESS_ID; // 进程id
+    private static final int SEQUENCE_LEN = 4; // 序列长度
+    private static final int TIMESTAMP_LEN = 8; // 时间戳长度
+    private static final int RANDOM_LEN = 4; // 随机数长度
 
     private static final AtomicInteger nextSequence = new AtomicInteger();
 
     /**
-     * Returns a new {@link DefaultChannelId} instance.
+     * 返回一个新的 {@link DefaultChannelId} 实例.
      */
     public static DefaultChannelId newInstance() {
         return new DefaultChannelId();
     }
 
     static {
-        int processId = -1;
-        String customProcessId = SystemPropertyUtil.get("io.netty.processId");
+        int processId = -1; // 进程id
+        String customProcessId = SystemPropertyUtil.get("io.netty.processId"); // 用户自定义进程id
         if (customProcessId != null) {
             try {
                 processId = Integer.parseInt(customProcessId);
@@ -74,6 +74,7 @@ public final class DefaultChannelId implements ChannelId {
         }
 
         if (processId < 0) {
+            // 默认进程id
             processId = defaultProcessId();
             if (logger.isDebugEnabled()) {
                 logger.debug("-Dio.netty.processId: {} (auto-detected)", processId);
@@ -82,8 +83,8 @@ public final class DefaultChannelId implements ChannelId {
 
         PROCESS_ID = processId;
 
-        byte[] machineId = null;
-        String customMachineId = SystemPropertyUtil.get("io.netty.machineId");
+        byte[] machineId = null; // macId
+        String customMachineId = SystemPropertyUtil.get("io.netty.machineId"); // 自定义mac id
         if (customMachineId != null) {
             try {
                 machineId = parseMAC(customMachineId);
@@ -106,11 +107,13 @@ public final class DefaultChannelId implements ChannelId {
     }
 
     private static int defaultProcessId() {
+        // 类加载器
         ClassLoader loader = null;
         String value;
         try {
+            // 类加载器
             loader = PlatformDependent.getClassLoader(DefaultChannelId.class);
-            // Invoke java.lang.management.ManagementFactory.getRuntimeMXBean().getName()
+            // 调用 java.lang.management.ManagementFactory.getRuntimeMXBean().getName()
             Class<?> mgmtFactoryType = Class.forName("java.lang.management.ManagementFactory", true, loader);
             Class<?> runtimeMxBeanType = Class.forName("java.lang.management.RuntimeMXBean", true, loader);
 
@@ -159,6 +162,7 @@ public final class DefaultChannelId implements ChannelId {
     private transient String longValue;
 
     private DefaultChannelId() {
+        // 保存id的数组
         data = new byte[MACHINE_ID.length + PROCESS_ID_LEN + SEQUENCE_LEN + TIMESTAMP_LEN + RANDOM_LEN];
         int i = 0;
 

@@ -21,13 +21,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 
 /**
- * Default {@link MessageSizeEstimator} implementation which supports the estimation of the size of
- * {@link ByteBuf}, {@link ByteBufHolder} and {@link FileRegion}.
+ * 默认的{@link MessageSizeEstimator}实现，支持估计{@link ByteBuf}， {@link ByteBufHolder}和{@link FileRegion}的大小。
  */
 public final class DefaultMessageSizeEstimator implements MessageSizeEstimator {
 
     private static final class HandleImpl implements Handle {
-        private final int unknownSize;
+        private final int unknownSize; // 未知大小
 
         private HandleImpl(int unknownSize) {
             this.unknownSize = unknownSize;
@@ -35,6 +34,7 @@ public final class DefaultMessageSizeEstimator implements MessageSizeEstimator {
 
         @Override
         public int size(Object msg) {
+            // 可读字节大小
             if (msg instanceof ByteBuf) {
                 return ((ByteBuf) msg).readableBytes();
             }
@@ -49,14 +49,14 @@ public final class DefaultMessageSizeEstimator implements MessageSizeEstimator {
     }
 
     /**
-     * Return the default implementation which returns {@code 8} for unknown messages.
+     * 返回默认实现，对于未知消息返回{@code 8}。
      */
     public static final MessageSizeEstimator DEFAULT = new DefaultMessageSizeEstimator(8);
 
     private final Handle handle;
 
     /**
-     * Create a new instance
+     * 创建一个新实例
      *
      * @param unknownSize       The size which is returned for unknown messages.
      */

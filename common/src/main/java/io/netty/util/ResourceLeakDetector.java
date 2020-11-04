@@ -40,55 +40,54 @@ import static io.netty.util.internal.StringUtil.EMPTY_STRING;
 import static io.netty.util.internal.StringUtil.NEWLINE;
 import static io.netty.util.internal.StringUtil.simpleClassName;
 
+// 资源漏洞检查
 public class ResourceLeakDetector<T> {
 
-    private static final String PROP_LEVEL_OLD = "io.netty.leakDetectionLevel";
+    private static final String PROP_LEVEL_OLD = "io.netty.leakDetectionLevel"; // 泄漏等级
     private static final String PROP_LEVEL = "io.netty.leakDetection.level";
-    private static final Level DEFAULT_LEVEL = Level.SIMPLE;
+    private static final Level DEFAULT_LEVEL = Level.SIMPLE; // 默认等级
 
     private static final String PROP_TARGET_RECORDS = "io.netty.leakDetection.targetRecords";
     private static final int DEFAULT_TARGET_RECORDS = 4;
 
     private static final String PROP_SAMPLING_INTERVAL = "io.netty.leakDetection.samplingInterval";
     // There is a minor performance benefit in TLR if this is a power of 2.
-    private static final int DEFAULT_SAMPLING_INTERVAL = 128;
+    private static final int DEFAULT_SAMPLING_INTERVAL = 128; // 简单 时间间隔
 
     private static final int TARGET_RECORDS;
     static final int SAMPLING_INTERVAL;
 
     /**
-     * Represents the level of resource leak detection.
+     * 表示资源泄漏检测级别。
      */
     public enum Level {
         /**
-         * Disables resource leak detection.
+         * 禁用资源泄漏检测。
          */
         DISABLED,
         /**
-         * Enables simplistic sampling resource leak detection which reports there is a leak or not,
-         * at the cost of small overhead (default).
+         * 启用简单的抽样资源泄漏检测，以较小的开销为代价报告是否存在泄漏(默认情况下)。
          */
         SIMPLE,
         /**
-         * Enables advanced sampling resource leak detection which reports where the leaked object was accessed
-         * recently at the cost of high overhead.
+         * 启用高级采样资源泄漏检测，可以报告最近访问了泄漏对象的位置，但代价很高。
          */
         ADVANCED,
         /**
-         * Enables paranoid resource leak detection which reports where the leaked object was accessed recently,
-         * at the cost of the highest possible overhead (for testing purposes only).
+         * 启用多疑型资源泄漏检测，以尽可能高的开销(仅用于测试目的)为代价，报告最近访问了泄漏对象的位置。
          */
         PARANOID;
 
         /**
-         * Returns level based on string value. Accepts also string that represents ordinal number of enum.
+         * 返回基于字符串值的级别。也接受表示枚举序数的字符串。
          *
-         * @param levelStr - level string : DISABLED, SIMPLE, ADVANCED, PARANOID. Ignores case.
-         * @return corresponding level or SIMPLE level in case of no match.
+         * @param levelStr - 等级串:残疾，简单，高级，偏执。忽略了。
+         * @return 对应级别或简单级别，如果没有匹配。
          */
         static Level parseLevel(String levelStr) {
             String trimmedLevelStr = levelStr.trim();
             for (Level l : values()) {
+                // 名或序号
                 if (trimmedLevelStr.equalsIgnoreCase(l.name()) || trimmedLevelStr.equals(String.valueOf(l.ordinal()))) {
                     return l;
                 }
@@ -96,13 +95,14 @@ public class ResourceLeakDetector<T> {
             return DEFAULT_LEVEL;
         }
     }
-
+    // 等级
     private static Level level;
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ResourceLeakDetector.class);
 
     static {
         final boolean disabled;
+        // 从系统变量加载是否引用漏洞检测，默认false
         if (SystemPropertyUtil.get("io.netty.noResourceLeakDetection") != null) {
             disabled = SystemPropertyUtil.getBoolean("io.netty.noResourceLeakDetection", false);
             logger.debug("-Dio.netty.noResourceLeakDetection: {}", disabled);
@@ -112,7 +112,7 @@ public class ResourceLeakDetector<T> {
         } else {
             disabled = false;
         }
-
+        // 禁用或者默认级别
         Level defaultLevel = disabled? Level.DISABLED : DEFAULT_LEVEL;
 
         // First read old property name
@@ -141,34 +141,37 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * Returns {@code true} if resource leak detection is enabled.
+     * 如果资源泄漏检测启用，返回{@code true}。
      */
+    // 什么都不设置就是true，simple模式
     public static boolean isEnabled() {
         return getLevel().ordinal() > Level.DISABLED.ordinal();
     }
 
     /**
-     * Sets the resource leak detection level.
+     * 设置资源泄漏检测级别。
      */
     public static void setLevel(Level level) {
         ResourceLeakDetector.level = ObjectUtil.checkNotNull(level, "level");
     }
 
     /**
-     * Returns the current resource leak detection level.
+     * 返回当前资源泄漏检测级别。
      */
     public static Level getLevel() {
         return level;
     }
 
-    /** the collection of active resources */
+    /** 活动资源的集合 */
     private final Set<DefaultResourceLeak<?>> allLeaks =
             Collections.newSetFromMap(new ConcurrentHashMap<DefaultResourceLeak<?>, Boolean>());
 
     private final ReferenceQueue<Object> refQueue = new ReferenceQueue<Object>();
+    // 报告的泄露
     private final Set<String> reportedLeaks =
             Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
+    // 资源类型
     private final String resourceType;
     private final int samplingInterval;
 
@@ -191,11 +194,11 @@ public class ResourceLeakDetector<T> {
     /**
      * @deprecated Use {@link ResourceLeakDetector#ResourceLeakDetector(Class, int)}.
      * <p>
-     * This should not be used directly by users of {@link ResourceLeakDetector}.
-     * Please use {@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class)}
-     * or {@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class, int, long)}
+     * 不应该由{@link ResourceLeakDetector}的用户直接使用。
+     * 请使用{@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class)}
+     * 或者{@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class, int, long)}
      *
-     * @param maxActive This is deprecated and will be ignored.
+     * @param maxActive 这是不赞成的，将被忽略。
      */
     @Deprecated
     public ResourceLeakDetector(Class<?> resourceType, int samplingInterval, long maxActive) {
@@ -203,9 +206,9 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * This should not be used directly by users of {@link ResourceLeakDetector}.
-     * Please use {@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class)}
-     * or {@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class, int, long)}
+     * 不应该由{@link ResourceLeakDetector}的用户直接使用。
+     * 请使用{@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class)}
+     * 或者{@link ResourceLeakDetectorFactory#newResourceLeakDetector(Class, int, long)}
      */
     @SuppressWarnings("deprecation")
     public ResourceLeakDetector(Class<?> resourceType, int samplingInterval) {
@@ -220,12 +223,11 @@ public class ResourceLeakDetector<T> {
     @Deprecated
     public ResourceLeakDetector(String resourceType, int samplingInterval, long maxActive) {
         this.resourceType = ObjectUtil.checkNotNull(resourceType, "resourceType");
-        this.samplingInterval = samplingInterval;
+        this.samplingInterval = samplingInterval; // 128
     }
 
     /**
-     * Creates a new {@link ResourceLeak} which is expected to be closed via {@link ResourceLeak#close()} when the
-     * related resource is deallocated.
+     * 创建一个新的{@link ResourceLeak}，当相关资源被释放时，这个{@link ResourceLeak#close()}将被关闭。
      *
      * @return the {@link ResourceLeak} or {@code null}
      * @deprecated use {@link #track(Object)}
@@ -236,8 +238,8 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * Creates a new {@link ResourceLeakTracker} which is expected to be closed via
-     * {@link ResourceLeakTracker#close(Object)} when the related resource is deallocated.
+     * 创建一个新的{@link ResourceLeakTracker}，当相关资源被释放时，
+     * 它将通过{@link ResourceLeakTracker#close(Object)}关闭。
      *
      * @return the {@link ResourceLeakTracker} or {@code null}
      */
@@ -253,7 +255,9 @@ public class ResourceLeakDetector<T> {
             return null;
         }
 
+        // 非 多疑型资源泄漏检测
         if (level.ordinal() < Level.PARANOID.ordinal()) {
+            // 线程随机数为0，报告泄漏
             if ((PlatformDependent.threadLocalRandom().nextInt(samplingInterval)) == 0) {
                 reportLeak();
                 return new DefaultResourceLeak(obj, refQueue, allLeaks);
@@ -264,8 +268,10 @@ public class ResourceLeakDetector<T> {
         return new DefaultResourceLeak(obj, refQueue, allLeaks);
     }
 
+    // 清除
     private void clearRefQueue() {
         for (;;) {
+            // 队列取出泄漏信息
             DefaultResourceLeak ref = (DefaultResourceLeak) refQueue.poll();
             if (ref == null) {
                 break;
@@ -275,8 +281,7 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * When the return value is {@code true}, {@link #reportTracedLeak} and {@link #reportUntracedLeak}
-     * will be called once a leak is detected, otherwise not.
+     * 当返回值为{@code true}时，一旦检测到泄漏，将调用{@link #reportTracedLeak}和{@link #reportUntracedLeak}，否则不调用。
      *
      * @return {@code true} to enable leak reporting.
      */
@@ -290,7 +295,7 @@ public class ResourceLeakDetector<T> {
             return;
         }
 
-        // Detect and report previous leaks.
+        // 检测并报告以前的泄漏。
         for (;;) {
             DefaultResourceLeak ref = (DefaultResourceLeak) refQueue.poll();
             if (ref == null) {
@@ -302,6 +307,7 @@ public class ResourceLeakDetector<T> {
             }
 
             String records = ref.toString();
+
             if (reportedLeaks.add(records)) {
                 if (records.isEmpty()) {
                     reportUntracedLeak(resourceType);
@@ -313,8 +319,7 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * This method is called when a traced leak is detected. It can be overridden for tracking how many times leaks
-     * have been detected.
+     * 在检测到跟踪泄漏时调用此方法。可以覆盖它以跟踪检测到多少次泄漏。
      */
     protected void reportTracedLeak(String resourceType, String records) {
         logger.error(
@@ -324,8 +329,7 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * This method is called when an untraced leak is detected. It can be overridden for tracking how many times leaks
-     * have been detected.
+     * 当检测到未跟踪的泄漏时调用此方法。可以覆盖它以跟踪检测到多少次泄漏。
      */
     protected void reportUntracedLeak(String resourceType) {
         logger.error("LEAK: {}.release() was not called before it's garbage-collected. " +
@@ -337,22 +341,23 @@ public class ResourceLeakDetector<T> {
     }
 
     /**
-     * @deprecated This method will no longer be invoked by {@link ResourceLeakDetector}.
+     * @deprecated 这个方法将不再被{@link ResourceLeakDetector}调用。
      */
     @Deprecated
     protected void reportInstancesLeak(String resourceType) {
     }
 
     @SuppressWarnings("deprecation")
+    // 默认资源泄漏类
     private static final class DefaultResourceLeak<T>
             extends WeakReference<Object> implements ResourceLeakTracker<T>, ResourceLeak {
 
-        @SuppressWarnings("unchecked") // generics and updaters do not mix.
+        @SuppressWarnings("unchecked") // 泛型和更新器不能混合使用。
         private static final AtomicReferenceFieldUpdater<DefaultResourceLeak<?>, TraceRecord> headUpdater =
                 (AtomicReferenceFieldUpdater)
                         AtomicReferenceFieldUpdater.newUpdater(DefaultResourceLeak.class, TraceRecord.class, "head");
 
-        @SuppressWarnings("unchecked") // generics and updaters do not mix.
+        @SuppressWarnings("unchecked") // 泛型和更新器不能混合使用。
         private static final AtomicIntegerFieldUpdater<DefaultResourceLeak<?>> droppedRecordsUpdater =
                 (AtomicIntegerFieldUpdater)
                         AtomicIntegerFieldUpdater.newUpdater(DefaultResourceLeak.class, "droppedRecords");
@@ -360,9 +365,9 @@ public class ResourceLeakDetector<T> {
         @SuppressWarnings("unused")
         private volatile TraceRecord head;
         @SuppressWarnings("unused")
-        private volatile int droppedRecords;
+        private volatile int droppedRecords; // 丢弃记录数
 
-        private final Set<DefaultResourceLeak<?>> allLeaks;
+        private final Set<DefaultResourceLeak<?>> allLeaks; // 所有泄漏记录
         private final int trackedHash;
 
         DefaultResourceLeak(
@@ -373,9 +378,8 @@ public class ResourceLeakDetector<T> {
 
             assert referent != null;
 
-            // Store the hash of the tracked object to later assert it in the close(...) method.
-            // It's important that we not store a reference to the referent as this would disallow it from
-            // be collected via the WeakReference.
+            // 存储被跟踪对象的散列，以便稍后在close(…)方法中断言它。
+            // 重要的是，我们不存储对referent的引用，因为这将禁止通过WeakReference收集它。
             trackedHash = System.identityHashCode(referent);
             allLeaks.add(this);
             // Create a new Record so we always have the creation stacktrace included.
@@ -394,33 +398,27 @@ public class ResourceLeakDetector<T> {
         }
 
         /**
-         * This method works by exponentially backing off as more records are present in the stack. Each record has a
-         * 1 / 2^n chance of dropping the top most record and replacing it with itself. This has a number of convenient
-         * properties:
+         * 这种方法的工作原理是，当堆栈中出现更多的记录时，指数级后退。每条记录都有1 / 2^n的几率去掉最上面的记录，
+         * 用自己替换它。这有许多方便的属性:
          *
          * <ol>
-         * <li>  The current record is always recorded. This is due to the compare and swap dropping the top most
-         *       record, rather than the to-be-pushed record.
-         * <li>  The very last access will always be recorded. This comes as a property of 1.
-         * <li>  It is possible to retain more records than the target, based upon the probability distribution.
-         * <li>  It is easy to keep a precise record of the number of elements in the stack, since each element has to
-         *     know how tall the stack is.
+         * <li>  总是记录当前记录。这是由于比较和交换删除了最上面的记录，而不是将要推入的记录。
+         * <li>  最后一次访问将始终被记录。这是1的性质。
+         * <li>  根据概率分布，可以保留比目标多的记录。
+         * <li>  由于每个元素都必须知道堆栈有多高，因此要精确地记录堆栈中的元素数量是很容易的。
          * </ol>
          *
-         * In this particular implementation, there are also some advantages. A thread local random is used to decide
-         * if something should be recorded. This means that if there is a deterministic access pattern, it is now
-         * possible to see what other accesses occur, rather than always dropping them. Second, after
-         * {@link #TARGET_RECORDS} accesses, backoff occurs. This matches typical access patterns,
-         * where there are either a high number of accesses (i.e. a cached buffer), or low (an ephemeral buffer), but
-         * not many in between.
+         * 在这个特定的实现中，也有一些优点。线程本地随机是用来决定是否应该记录一些东西。
+         * 这意味着，如果存在确定性访问模式，现在就可以看到发生了哪些其他访问，而不是总是删除它们。
+         * 其次，在{@link #TARGET_RECORDS}访问之后，会发生回退。这与典型的访问模式相匹配，
+         * 即要么有大量的访问(即缓存缓冲区)，要么有较低的访问(即临时缓冲区)，但两者之间的访问次数不多。
          *
-         * The use of atomics avoids serializing a high number of accesses, when most of the records will be thrown
-         * away. High contention only happens when there are very few existing records, which is only likely when the
-         * object isn't shared! If this is a problem, the loop can be aborted and the record dropped, because another
-         * thread won the race.
+         * atomics的使用避免了序列化大量访问，因为大多数记录将被丢弃。
+         * 只有在现有记录非常少的情况下才会发生高争用，而这只有在对象没有共享的情况下才可能发生!如果这是一个问题，
+         * 循环将被中止，记录将被丢弃，因为另一个线程赢得了比赛。
          */
         private void record0(Object hint) {
-            // Check TARGET_RECORDS > 0 here to avoid similar check before remove from and add to lastRecords
+            // 在这里检查TARGET_RECORDS > 0，以避免在从lastRecords删除和添加到lastRecords之前进行类似的检查
             if (TARGET_RECORDS > 0) {
                 TraceRecord oldHead;
                 TraceRecord prevHead;
@@ -481,12 +479,9 @@ public class ResourceLeakDetector<T> {
         }
 
          /**
-         * Ensures that the object referenced by the given reference remains
-         * <a href="package-summary.html#reachability"><em>strongly reachable</em></a>,
-         * regardless of any prior actions of the program that might otherwise cause
-         * the object to become unreachable; thus, the referenced object is not
-         * reclaimable by garbage collection at least until after the invocation of
-         * this method.
+         * 确保给定引用引用的对象保持<a href="package-summary。
+          * 可达性"><em>强可达性</em></a>，无论程序之前的任何操作可能导致对象变得不可达;因此，至少在调用此方法之前，
+          * 被引用的对象不能被垃圾回收。
          *
          * <p> Recent versions of the JDK have a nasty habit of prematurely deciding objects are unreachable.
          * see: https://stackoverflow.com/questions/26642153/finalize-called-on-strongly-reachable-object-in-java-8
@@ -565,20 +560,22 @@ public class ResourceLeakDetector<T> {
             new AtomicReference<String[]>(EmptyArrays.EMPTY_STRINGS);
 
     public static void addExclusions(Class clz, String ... methodNames) {
+        // 方法名set
         Set<String> nameSet = new HashSet<String>(Arrays.asList(methodNames));
-        // Use loop rather than lookup. This avoids knowing the parameters, and doesn't have to handle
-        // NoSuchMethodException.
+        // 使用循环而不是查找。这样可以避免了解参数，并且不必处理NoSuchMethodException。
         for (Method method : clz.getDeclaredMethods()) {
             if (nameSet.remove(method.getName()) && nameSet.isEmpty()) {
                 break;
             }
         }
+        // 不为空，则没找到方法
         if (!nameSet.isEmpty()) {
             throw new IllegalArgumentException("Can't find '" + nameSet + "' in " + clz.getName());
         }
         String[] oldMethods;
         String[] newMethods;
         do {
+            // 空字符串
             oldMethods = excludedMethods.get();
             newMethods = Arrays.copyOf(oldMethods, oldMethods.length + 2 * methodNames.length);
             for (int i = 0; i < methodNames.length; i++) {

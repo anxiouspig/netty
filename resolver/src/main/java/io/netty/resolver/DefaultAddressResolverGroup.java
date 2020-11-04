@@ -21,7 +21,7 @@ import io.netty.util.concurrent.EventExecutor;
 import java.net.InetSocketAddress;
 
 /**
- * A {@link AddressResolverGroup} of {@link DefaultNameResolver}s.
+ * 一个{@link AddressResolverGroup}的{@link DefaultNameResolver}。
  */
 public final class DefaultAddressResolverGroup extends AddressResolverGroup<InetSocketAddress> {
 

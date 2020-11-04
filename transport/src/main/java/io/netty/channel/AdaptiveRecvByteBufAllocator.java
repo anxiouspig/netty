@@ -23,29 +23,28 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
- * The {@link RecvByteBufAllocator} that automatically increases and
- * decreases the predicted buffer size on feed back.
+ * {@link RecvByteBufAllocator}，在反馈时自动增加和减少预测的缓冲区大小。
  * <p>
- * It gradually increases the expected number of readable bytes if the previous
- * read fully filled the allocated buffer.  It gradually decreases the expected
- * number of readable bytes if the read operation was not able to fill a certain
- * amount of the allocated buffer two times consecutively.  Otherwise, it keeps
- * returning the same prediction.
+ * 如果之前的读取完全填满了分配的缓冲区，它会逐渐增加预期的可读字节数。
+ * 如果读操作不能连续两次填满分配的缓冲区的一定数量，则会逐渐减少预期的可读字节数。否则，它会一直返回相同的预测。
  */
+// 自适应收取字节缓冲分配器
 public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufAllocator {
 
-    static final int DEFAULT_MINIMUM = 64;
-    // Use an initial value that is bigger than the common MTU of 1500
-    static final int DEFAULT_INITIAL = 2048;
-    static final int DEFAULT_MAXIMUM = 65536;
+    static final int DEFAULT_MINIMUM = 64; // 默认最低
+    // 使用大于常用MTU 1500的初始值
+    static final int DEFAULT_INITIAL = 2048; // 默认初始化
+    static final int DEFAULT_MAXIMUM = 65536; // 默认最大
 
-    private static final int INDEX_INCREMENT = 4;
-    private static final int INDEX_DECREMENT = 1;
+    private static final int INDEX_INCREMENT = 4; // 增量索引
+    private static final int INDEX_DECREMENT = 1; // 减量索引
 
-    private static final int[] SIZE_TABLE;
+    private static final int[] SIZE_TABLE;// 表大小
 
     static {
+        // TODO
         List<Integer> sizeTable = new ArrayList<Integer>();
+        // 16的倍数
         for (int i = 16; i < 512; i += 16) {
             sizeTable.add(i);
         }
@@ -66,6 +65,7 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     @Deprecated
     public static final AdaptiveRecvByteBufAllocator DEFAULT = new AdaptiveRecvByteBufAllocator();
 
+    // 二分搜索法
     private static int getSizeTableIndex(final int size) {
         for (int low = 0, high = SIZE_TABLE.length - 1;;) {
             if (high < low) {
@@ -91,10 +91,10 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     }
 
     private final class HandleImpl extends MaxMessageHandle {
-        private final int minIndex;
-        private final int maxIndex;
-        private int index;
-        private int nextReceiveBufferSize;
+        private final int minIndex; // 小索引
+        private final int maxIndex; // 大索引
+        private int index; // 索引
+        private int nextReceiveBufferSize; // 下一个接受缓冲大小
         private boolean decreaseNow;
 
         HandleImpl(int minIndex, int maxIndex, int initial) {
@@ -107,10 +107,9 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
 
         @Override
         public void lastBytesRead(int bytes) {
-            // If we read as much as we asked for we should check if we need to ramp up the size of our next guess.
-            // This helps adjust more quickly when large amounts of data is pending and can avoid going back to
-            // the selector to check for more data. Going back to the selector can add significant latency for large
-            // data transfers.
+            // 如果我们读取了我们要求的数据，我们应该检查我们是否需要增加我们下一个猜测的大小。
+            // 这有助于在有大量数据挂起时更快地进行调整，并避免返回选择器检查更多数据。
+            // 返回到选择器可能会为大型数据传输增加显著的延迟。
             if (bytes == attemptedBytesRead()) {
                 record(bytes);
             }
@@ -149,20 +148,20 @@ public class AdaptiveRecvByteBufAllocator extends DefaultMaxMessagesRecvByteBufA
     private final int initial;
 
     /**
-     * Creates a new predictor with the default parameters.  With the default
-     * parameters, the expected buffer size starts from {@code 1024}, does not
-     * go down below {@code 64}, and does not go up above {@code 65536}.
+     * 使用默认参数创建一个新的预测器。
+     * 对于默认参数，预期的缓冲区大小从{@code 1024}开始
+     * ，不在{@code 64}下面，也不在{@code 65536}上面。
      */
     public AdaptiveRecvByteBufAllocator() {
         this(DEFAULT_MINIMUM, DEFAULT_INITIAL, DEFAULT_MAXIMUM);
     }
 
     /**
-     * Creates a new predictor with the specified parameters.
+     * 使用指定的参数创建新的预测器。
      *
-     * @param minimum  the inclusive lower bound of the expected buffer size
-     * @param initial  the initial buffer size when no feed back was received
-     * @param maximum  the inclusive upper bound of the expected buffer size
+     * @param minimum  预期缓冲区大小的总和下限。
+     * @param initial  没有收到反馈时的初始缓冲区大小。
+     * @param maximum  预期缓冲区大小的总括上限。
      */
     public AdaptiveRecvByteBufAllocator(int minimum, int initial, int maximum) {
         checkPositive(minimum, "minimum");

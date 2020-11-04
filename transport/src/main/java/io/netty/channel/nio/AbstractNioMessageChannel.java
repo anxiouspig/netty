@@ -55,15 +55,20 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super.doBeginRead();
     }
 
+    // 操作消息的类
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 
         private final List<Object> readBuf = new ArrayList<Object>();
 
         @Override
         public void read() {
+            // 确保在事件循环中被调用
             assert eventLoop().inEventLoop();
+            // channel配置
             final ChannelConfig config = config();
+            // pipline
             final ChannelPipeline pipeline = pipeline();
+            // 接受缓冲分配处理器
             final RecvByteBufAllocator.Handle allocHandle = unsafe().recvBufAllocHandle();
             allocHandle.reset(config);
 
@@ -72,22 +77,23 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     do {
+                        // 读
                         int localRead = doReadMessages(readBuf);
-                        if (localRead == 0) {
+                        if (localRead == 0) { // 未读到
                             break;
                         }
                         if (localRead < 0) {
                             closed = true;
                             break;
                         }
-
+                        // 计数
                         allocHandle.incMessagesRead(localRead);
-                    } while (allocHandle.continueReading());
+                    } while (allocHandle.continueReading()); // 是否继续读
                 } catch (Throwable t) {
                     exception = t;
                 }
 
-                int size = readBuf.size();
+                int size = readBuf.size(); // 读入大小
                 for (int i = 0; i < size; i ++) {
                     readPending = false;
                     pipeline.fireChannelRead(readBuf.get(i));
@@ -188,7 +194,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
     }
 
     /**
-     * Read messages into the given array and return the amount which was read.
+     * 将消息读入给定的数组，并返回读取的消息量。
      */
     protected abstract int doReadMessages(List<Object> buf) throws Exception;
 

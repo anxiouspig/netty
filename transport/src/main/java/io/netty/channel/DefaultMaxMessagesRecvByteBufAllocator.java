@@ -22,11 +22,10 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.UncheckedBooleanSupplier;
 
 /**
- * Default implementation of {@link MaxMessagesRecvByteBufAllocator} which respects {@link ChannelConfig#isAutoRead()}
- * and also prevents overflow.
+ * 默认实现{@link MaxMessagesRecvByteBufAllocator}，它尊重{@link ChannelConfig#isAutoRead()}，也防止溢出。
  */
 public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessagesRecvByteBufAllocator {
-    private volatile int maxMessagesPerRead;
+    private volatile int maxMessagesPerRead; // 每次读最大消息数
     private volatile boolean respectMaybeMoreData = true;
 
     public DefaultMaxMessagesRecvByteBufAllocator() {
@@ -50,14 +49,13 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
     }
 
     /**
-     * Determine if future instances of {@link #newHandle()} will stop reading if we think there is no more data.
+     * 确定如果我们认为没有更多的数据，{@link #newHandle()}的未来实例是否会停止读取。
      * @param respectMaybeMoreData
      * <ul>
-     *     <li>{@code true} to stop reading if we think there is no more data. This may save a system call to read from
-     *          the socket, but if data has arrived in a racy fashion we may give up our {@link #maxMessagesPerRead()}
-     *          quantum and have to wait for the selector to notify us of more data.</li>
-     *     <li>{@code false} to keep reading (up to {@link #maxMessagesPerRead()}) or until there is no data when we
-     *          attempt to read.</li>
+     *     <li>{@code true}停止读取，如果我们认为没有更多的数据。
+     *     这可能会节省一个从套接字读取数据的系统调用，但是如果数据以不正式的方式到达，
+     *     我们可能会放弃{@link #maxMessagesPerRead()}量子，并且不得不等待选择器通知我们更多的数据。</li>
+     *     <li>{@code false}继续读取(一直到{@link #maxMessagesPerRead()})，或者当我们尝试读取时，直到没有数据为止。</li>
      * </ul>
      * @return {@code this}.
      */
@@ -67,7 +65,7 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
     }
 
     /**
-     * Get if future instances of {@link #newHandle()} will stop reading if we think there is no more data.
+     * 如果我们认为没有更多的数据，获取{@link #newHandle()}的未来实例是否会停止读取。
      * @return
      * <ul>
      *     <li>{@code true} to stop reading if we think there is no more data. This may save a system call to read from
@@ -82,15 +80,16 @@ public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessa
     }
 
     /**
-     * Focuses on enforcing the maximum messages per read condition for {@link #continueReading()}.
+     * 重点介绍如何强制执行{@link #continueReading()}的每个读取条件的最大消息量。
      */
+    // 最大消息处理器
     public abstract class MaxMessageHandle implements ExtendedHandle {
-        private ChannelConfig config;
-        private int maxMessagePerRead;
-        private int totalMessages;
-        private int totalBytesRead;
-        private int attemptedBytesRead;
-        private int lastBytesRead;
+        private ChannelConfig config; // 配置
+        private int maxMessagePerRead; // 每次读的最大信息
+        private int totalMessages; // 总消息数
+        private int totalBytesRead; // 阅读的总字节
+        private int attemptedBytesRead; // 试图去读的字节
+        private int lastBytesRead; // 最后读的字节
         private final boolean respectMaybeMoreData = DefaultMaxMessagesRecvByteBufAllocator.this.respectMaybeMoreData;
         private final UncheckedBooleanSupplier defaultMaybeMoreSupplier = new UncheckedBooleanSupplier() {
             @Override

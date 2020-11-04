@@ -24,30 +24,30 @@ import java.util.List;
 public interface PoolArenaMetric extends SizeClassesMetric {
 
     /**
-     * Returns the number of thread caches backed by this arena.
+     * 返回此arena所支持的线程缓存的数目。
      */
     int numThreadCaches();
 
     /**
-     * Returns the number of tiny sub-pages for the arena.
+     * 返回arena的小子页面的数量。
      *
-     * @deprecated Tiny sub-pages have been merged into small sub-pages.
+     * @deprecated 小的子页面被合并成小的子页面。
      */
     @Deprecated
     int numTinySubpages();
 
     /**
-     * Returns the number of small sub-pages for the arena.
+     * 返回arena小子页面的数目。
      */
     int numSmallSubpages();
 
     /**
-     * Returns the number of chunk lists for the arena.
+     * 返回arena的块列表的数量。
      */
     int numChunkLists();
 
     /**
-     * Returns an unmodifiable {@link List} which holds {@link PoolSubpageMetric}s for tiny sub-pages.
+     * 返回一个不可修改的{@link List}，其中包含{@link PoolSubpageMetric}用于小的子页面。
      *
      * @deprecated Tiny sub-pages have been merged into small sub-pages.
      */
@@ -55,22 +55,22 @@ public interface PoolArenaMetric extends SizeClassesMetric {
     List<PoolSubpageMetric> tinySubpages();
 
     /**
-     * Returns an unmodifiable {@link List} which holds {@link PoolSubpageMetric}s for small sub-pages.
+     * 返回一个不可修改的{@link列表}，该列表为小的子页面保存{@link PoolSubpageMetric}。
      */
     List<PoolSubpageMetric> smallSubpages();
 
     /**
-     * Returns an unmodifiable {@link List} which holds {@link PoolChunkListMetric}s.
+     * 返回一个不可修改的{@link List}，其中包含{@link PoolChunkListMetric}。
      */
     List<PoolChunkListMetric> chunkLists();
 
     /**
-     * Return the number of allocations done via the arena. This includes all sizes.
+     * 返回通过arena完成的分配数量。这包括所有大小。
      */
     long numAllocations();
 
     /**
-     * Return the number of tiny allocations done via the arena.
+     * 返回通过arena完成的小分配的数量。
      *
      * @deprecated Tiny allocations have been merged into small allocations.
      */
@@ -78,22 +78,22 @@ public interface PoolArenaMetric extends SizeClassesMetric {
     long numTinyAllocations();
 
     /**
-     * Return the number of small allocations done via the arena.
+     * 返回通过arena完成的小分配的数量。
      */
     long numSmallAllocations();
 
     /**
-     * Return the number of normal allocations done via the arena.
+     * 返回通过arena完成的正常分配的数量。
      */
     long numNormalAllocations();
 
     /**
-     * Return the number of huge allocations done via the arena.
+     * 返回通过竞技场完成的巨大分配的数量。
      */
     long numHugeAllocations();
 
     /**
-     * Return the number of deallocations done via the arena. This includes all sizes.
+     * 返回通过arena完成的deallocations的数量。这包括所有大小。
      */
     long numDeallocations();
 

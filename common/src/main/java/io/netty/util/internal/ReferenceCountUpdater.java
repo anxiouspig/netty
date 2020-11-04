@@ -23,23 +23,23 @@ import io.netty.util.IllegalReferenceCountException;
 import io.netty.util.ReferenceCounted;
 
 /**
- * Common logic for {@link ReferenceCounted} implementations
+ * {@link ReferenceCounted}实现的通用逻辑
  */
 public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     /*
-     * Implementation notes:
+     * 实现注意事项:
      *
-     * For the updated int field:
+     * 对于更新的int字段:
      *   Even => "real" refcount is (refCnt >>> 1)
      *   Odd  => "real" refcount is 0
      *
-     * (x & y) appears to be surprisingly expensive relative to (x == y). Thus this class uses
-     * a fast-path in some places for most common low values when checking for live (even) refcounts,
-     * for example: if (rawCnt == 2 || rawCnt == 4 || (rawCnt & 1) == 0) { ...
+     * (x & y) 似乎是惊人的昂贵相对 (x == y). 因此，在检查活动(甚至)重新计数时，这个类在一些地方为最常见的低值使用快速路径，
+     * 例如: if (rawCnt == 2 || rawCnt == 4 || (rawCnt & 1) == 0) { ...
      */
 
     protected ReferenceCountUpdater() { }
 
+    // 获得字段偏移量
     public static long getUnsafeOffset(Class<? extends ReferenceCounted> clz, String fieldName) {
         try {
             if (PlatformDependent.hasUnsafe()) {
@@ -70,12 +70,12 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
         if (rawCnt == 2 || rawCnt == 4 || (rawCnt & 1) == 0) {
             return rawCnt >>> 1;
         }
-        // odd rawCnt => already deallocated
+        // 奇数 rawCnt => 已经收回
         throw new IllegalReferenceCountException(0, -decrement);
     }
 
     private int nonVolatileRawCnt(T instance) {
-        // TODO: Once we compile against later versions of Java we can replace the Unsafe usage here by varhandles.
+        // TODO: 一旦我们针对以后版本的Java进行编译，我们就可以用varhandle替换这里的不安全使用。
         final long offset = unsafeOffset();
         return offset != -1 ? PlatformDependent.getInt(instance, offset) : updater().get(instance);
     }
@@ -93,14 +93,14 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     }
 
     /**
-     * An unsafe operation that sets the reference count directly
+     * 直接设置引用计数的不安全操作
      */
     public final void setRefCnt(T instance, int refCnt) {
         updater().set(instance, refCnt > 0 ? refCnt << 1 : 1); // overflow OK here
     }
 
     /**
-     * Resets the reference count to 1
+     * 将引用计数重置为1
      */
     public final void resetRefCnt(T instance) {
         updater().set(instance, initialValue());
@@ -111,7 +111,7 @@ public abstract class ReferenceCountUpdater<T extends ReferenceCounted> {
     }
 
     public final T retain(T instance, int increment) {
-        // all changes to the raw count are 2x the "real" change - overflow is OK
+        // 对原始计数的所有更改是“实际”更改的两倍——溢出是可以的
         int rawIncrement = checkPositive(increment, "increment") << 1;
         return retain0(instance, increment, rawIncrement);
     }

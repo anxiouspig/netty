@@ -44,31 +44,36 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
  * 默认的{@link ChannelConfig}实现。
  */
 public class DefaultChannelConfig implements ChannelConfig {
+    // 可读字节预估
     private static final MessageSizeEstimator DEFAULT_MSG_SIZE_ESTIMATOR = DefaultMessageSizeEstimator.DEFAULT;
 
-    private static final int DEFAULT_CONNECT_TIMEOUT = 30000;
+    private static final int DEFAULT_CONNECT_TIMEOUT = 30000; // 默认连接超时 30s
 
     private static final AtomicIntegerFieldUpdater<DefaultChannelConfig> AUTOREAD_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(DefaultChannelConfig.class, "autoRead");
+
     private static final AtomicReferenceFieldUpdater<DefaultChannelConfig, WriteBufferWaterMark> WATERMARK_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(
                     DefaultChannelConfig.class, WriteBufferWaterMark.class, "writeBufferWaterMark");
 
     protected final Channel channel;
-
+    // 字节缓冲分配器
     private volatile ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
+    // 可回收字节缓冲分配器
     private volatile RecvByteBufAllocator rcvBufAllocator;
     private volatile MessageSizeEstimator msgSizeEstimator = DEFAULT_MSG_SIZE_ESTIMATOR;
-
+    // 连接超时时间
     private volatile int connectTimeoutMillis = DEFAULT_CONNECT_TIMEOUT;
-    private volatile int writeSpinCount = 16;
+    private volatile int writeSpinCount = 16; // 写自旋计数
     @SuppressWarnings("FieldMayBeFinal")
-    private volatile int autoRead = 1;
-    private volatile boolean autoClose = true;
+    private volatile int autoRead = 1; // 自动读
+    private volatile boolean autoClose = true; // 自动关闭
+    // 是否可写水位
     private volatile WriteBufferWaterMark writeBufferWaterMark = WriteBufferWaterMark.DEFAULT;
     private volatile boolean pinEventExecutor = true;
 
     public DefaultChannelConfig(Channel channel) {
+        // netty channel
         this(channel, new AdaptiveRecvByteBufAllocator());
     }
 
@@ -88,6 +93,7 @@ public class DefaultChannelConfig implements ChannelConfig {
                 SINGLE_EVENTEXECUTOR_PER_GROUP);
     }
 
+    // 获得可选参数
     protected Map<ChannelOption<?>, Object> getOptions(
             Map<ChannelOption<?>, Object> result, ChannelOption<?>... options) {
         if (result == null) {
@@ -255,10 +261,10 @@ public class DefaultChannelConfig implements ChannelConfig {
     @Override
     public ChannelConfig setWriteSpinCount(int writeSpinCount) {
         checkPositive(writeSpinCount, "writeSpinCount");
-        // Integer.MAX_VALUE is used as a special value in the channel implementations to indicate the channel cannot
-        // accept any more data, and results in the writeOp being set on the selector (or execute a runnable which tries
-        // to flush later because the writeSpinCount quantum has been exhausted). This strategy prevents additional
-        // conditional logic in the channel implementations, and shouldn't be noticeable in practice.
+        // Integer.MAX_VALUE 在通道实现中用作一个特殊值，以指示通道不能接受任何更多数据，
+        // 并导致在选择器上设置writeOp(或执行runnable，该runnable稍后尝试刷新，
+        // 因为writeSpinCount量子已经耗尽)。
+        // 这种策略防止了通道实现中附加的条件逻辑，并且在实践中不应该被注意到。
         if (writeSpinCount == Integer.MAX_VALUE) {
             --writeSpinCount;
         }
@@ -290,7 +296,7 @@ public class DefaultChannelConfig implements ChannelConfig {
     }
 
     /**
-     * Set the {@link RecvByteBufAllocator} which is used for the channel to allocate receive buffers.
+     * 设置用于通道分配接收缓冲区的{@link RecvByteBufAllocator}。
      * @param allocator the allocator to set.
      * @param metadata Used to set the {@link ChannelMetadata#defaultMaxMessagesPerRead()} if {@code allocator}
      * is of type {@link MaxMessagesRecvByteBufAllocator}.
@@ -321,8 +327,7 @@ public class DefaultChannelConfig implements ChannelConfig {
     }
 
     /**
-     * Is called once {@link #setAutoRead(boolean)} is called with {@code false} and {@link #isAutoRead()} was
-     * {@code true} before.
+     * 使用{@code false}调用{@link #isAutoRead()}，并且之前使用{@code true}调用{@link #isAutoRead()}。
      */
     protected void autoReadCleared() { }
 

@@ -30,10 +30,9 @@ import java.nio.channels.WritableByteChannel;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
- * Default {@link FileRegion} implementation which transfer data from a {@link FileChannel} or {@link File}.
+ * 默认的{@link FileRegion}实现从{@link FileChannel}或{@link File}传输数据。
  *
- * Be aware that the {@link FileChannel} will be automatically closed once {@link #refCnt()} returns
- * {@code 0}.
+ * 请注意，当{@link #refCnt()}返回{@code 0}时，{@link FileChannel}将自动关闭。
  */
 public class DefaultFileRegion extends AbstractReferenceCounted implements FileRegion {
 

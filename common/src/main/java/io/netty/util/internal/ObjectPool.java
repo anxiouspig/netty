@@ -18,50 +18,50 @@ package io.netty.util.internal;
 import io.netty.util.Recycler;
 
 /**
- * Light-weight object pool.
+ * 轻量级的对象池。
  *
- * @param <T> the type of the pooled object
+ * @param <T> 被池对象的类型
  */
 public abstract class ObjectPool<T> {
 
     ObjectPool() { }
 
     /**
-     * Get a {@link Object} from the {@link ObjectPool}. The returned {@link Object} may be created via
-     * {@link ObjectCreator#newObject(Handle)} if no pooled {@link Object} is ready to be reused.
+     * 从{@link ObjectPool}获得{@link对象}。
+     * 返回的{@link对象}可以通过{@link ObjectCreator#newObject(Handle)}创建，
+     * 如果没有准备好重用的池{@link对象}。
      */
     public abstract T get();
 
     /**
-     * Handle for an pooled {@link Object} that will be used to notify the {@link ObjectPool} once it can
-     * reuse the pooled {@link Object} again.
+     * 池中的{@link对象}的句柄，当{@link对象池}可以再次重用池中的{@link对象}时，
+     * 它将用于通知{@link对象池}。
      * @param <T>
      */
     public interface Handle<T> {
         /**
-         * Recycle the {@link Object} if possible and so make it ready to be reused.
+         * 如果可能的话回收{@link Object}，这样就可以让它准备好被重用。
          */
         void recycle(T self);
     }
 
     /**
-     * Creates a new Object which references the given {@link Handle} and calls {@link Handle#recycle(Object)} once
-     * it can be re-used.
+     * 创建一个新对象，该对象引用给定的{@link句柄}，
+     * 并在它可以被重用时调用{@link句柄#recycle(Object)}。
      *
-     * @param <T> the type of the pooled object
+     * @param <T> 被池对象的类型
      */
     public interface ObjectCreator<T> {
 
         /**
-         * Creates an returns a new {@link Object} that can be used and later recycled via
-         * {@link Handle#recycle(Object)}.
+         * 创建一个返回一个新的{@link对象}，它可以被使用，并在以后通过{@link句柄#recycle(Object)}回收。
          */
         T newObject(Handle<T> handle);
     }
 
     /**
-     * Creates a new {@link ObjectPool} which will use the given {@link ObjectCreator} to create the {@link Object}
-     * that should be pooled.
+     * 创建一个新的{@link ObjectPool}，
+     * 它将使用给定的{@link ObjectCreator}创建应该被池化的{@link对象}。
      */
     public static <T> ObjectPool<T> newPool(final ObjectCreator<T> creator) {
         return new RecyclerObjectPool<T>(ObjectUtil.checkNotNull(creator, "creator"));

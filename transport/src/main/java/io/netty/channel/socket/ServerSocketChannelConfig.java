@@ -25,13 +25,11 @@ import java.net.ServerSocket;
 import java.net.StandardSocketOptions;
 
 /**
- * A {@link ChannelConfig} for a {@link ServerSocketChannel}.
+ * 一个 {@link ChannelConfig} 对于 {@link ServerSocketChannel}.
  *
- * <h3>Available options</h3>
+ * <h3>可用选项</h3>
  *
- * In addition to the options provided by {@link ChannelConfig},
- * {@link ServerSocketChannelConfig} allows the following options in the
- * option map:
+ * 除了{@link ChannelConfig}提供的选项外，{@link ServerSocketChannelConfig}允许选项映射中的以下选项:
  *
  * <table border="1" cellspacing="0" cellpadding="6">
  * <tr>

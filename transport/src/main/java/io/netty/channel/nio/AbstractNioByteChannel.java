@@ -38,7 +38,7 @@ import java.nio.channels.SelectionKey;
 import static io.netty.channel.internal.ChannelUtils.WRITE_STATUS_SNDBUF_FULL;
 
 /**
- * {@link AbstractNioChannel} base class for {@link Channel}s that operate on bytes.
+ * 用于操作字节的{@link Channel}的基类。
  */
 public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);

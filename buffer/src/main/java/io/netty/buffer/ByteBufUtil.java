@@ -51,22 +51,27 @@ import static io.netty.util.internal.StringUtil.NEWLINE;
 import static io.netty.util.internal.StringUtil.isSurrogate;
 
 /**
- * A collection of utility methods that is related with handling {@link ByteBuf},
- * such as the generation of hex dump and swapping an integer's byte order.
+ * 与处理{@link ByteBuf}相关的实用程序方法集合，
+ * 比如十六进制转储的生成和整数字节顺序的交换。
  */
 public final class ByteBufUtil {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ByteBufUtil.class);
+
+    // 线程本地变量，存byte[]
     private static final FastThreadLocal<byte[]> BYTE_ARRAYS = new FastThreadLocal<byte[]>() {
         @Override
         protected byte[] initialValue() throws Exception {
             return PlatformDependent.allocateUninitializedArray(MAX_TL_ARRAY_LEN);
         }
     };
-
+    // 写入未知
     private static final byte WRITE_UTF_UNKNOWN = (byte) '?';
+    // 最大字符缓冲大小
     private static final int MAX_CHAR_BUFFER_SIZE;
+    // 线程本地缓冲大小
     private static final int THREAD_LOCAL_BUFFER_SIZE;
+    // 每个utf的字符最大字节
     private static final int MAX_BYTES_PER_CHAR_UTF8 =
             (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
 

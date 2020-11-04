@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A {@link InetNameResolver} that resolves using JDK's built-in domain name lookup mechanism.
- * Note that this resolver performs a blocking name lookup from the caller thread.
+ * 一个{@link InetNameResolver}，使用JDK内置的域名查找机制进行解析。注意，此解析器从调用者线程执行阻塞名称查找。
  */
 public class DefaultNameResolver extends InetNameResolver {
 

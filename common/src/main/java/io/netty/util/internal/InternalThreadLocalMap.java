@@ -260,6 +260,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return r;
     }
 
+    // 每个线程绑定的
     public Map<Class<?>, TypeParameterMatcher> typeParameterMatcherGetCache() {
         Map<Class<?>, TypeParameterMatcher> cache = typeParameterMatcherGetCache;
         if (cache == null) {

@@ -19,38 +19,35 @@ package io.netty.channel;
 import java.io.Serializable;
 
 /**
- * Represents the globally unique identifier of a {@link Channel}.
+ * 表示{@link Channel}的全局唯一标识符。
  * <p>
- * The identifier is generated from various sources listed in the following:
+ * 该标识符由以下列出的各种来源生成:
  * <ul>
- * <li>MAC address (EUI-48 or EUI-64) or the network adapter, preferably a globally unique one,</li>
- * <li>the current process ID,</li>
+ * <li>MAC地址(EUI-48或EUI-64)或网络适配器，最好是全球唯一的适配器，</li>
+ * <li>当前进程ID，</li>
  * <li>{@link System#currentTimeMillis()},</li>
  * <li>{@link System#nanoTime()},</li>
- * <li>a random 32-bit integer, and</li>
- * <li>a sequentially incremented 32-bit integer.</li>
+ * <li>一个随机的32位整数，和</li>
+ * <li>按顺序递增的32位整数。</li>
  * </ul>
  * </p>
  * <p>
- * The global uniqueness of the generated identifier mostly depends on the MAC address and the current process ID,
- * which are auto-detected at the class-loading time in best-effort manner.  If all attempts to acquire them fail,
- * a warning message is logged, and random values will be used instead.  Alternatively, you can specify them manually
- * via system properties:
+ * 生成的标识符的全局唯一性主要取决于MAC地址和当前进程ID，它们在类加载时以最佳方式自动检测。
+ * 如果所有获取它们的尝试都失败，则会记录一条警告消息，并使用随机值。或者，您可以通过系统属性手动指定它们:
  * <ul>
- * <li>{@code io.netty.machineId} - hexadecimal representation of 48 (or 64) bit integer,
- *     optionally separated by colon or hyphen.</li>
- * <li>{@code io.netty.processId} - an integer between 0 and 65535</li>
+ * <li>{@code io.netty.machineId} - 48(或64)位整数的十六进制表示，可选用冒号或连字符分隔。</li>
+ * <li>{@code io.netty.processId} - 0到65535之间的整数</li>
  * </ul>
  * </p>
  */
 public interface ChannelId extends Serializable, Comparable<ChannelId> {
     /**
-     * Returns the short but globally non-unique string representation of the {@link ChannelId}.
+     * 返回{@link ChannelId}的简短但全局非唯一的字符串表示形式。
      */
     String asShortText();
 
     /**
-     * Returns the long yet globally unique string representation of the {@link ChannelId}.
+     * 返回{@link ChannelId}的长但全局唯一的字符串表示形式。
      */
     String asLongText();
 }

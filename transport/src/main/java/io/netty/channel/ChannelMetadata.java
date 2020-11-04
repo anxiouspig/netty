@@ -45,7 +45,7 @@ public final class ChannelMetadata {
      * @param defaultMaxMessagesPerRead 如果使用了{@link MaxMessagesRecvByteBufAllocator}，那么这个值将被设置为
      *                                  {@link MaxMessagesRecvByteBufAllocator#maxMessagesPerRead()}。必须是{@code > 0}。
      */
-    public ChannelMetadata(boolean hasDisconnect, int defaultMaxMessagesPerRead) {
+    public ChannelMetadata(boolean hasDisconnect, int defaultMaxMessagesPerRead) { // false 16
         checkPositive(defaultMaxMessagesPerRead, "defaultMaxMessagesPerRead");
         this.hasDisconnect = hasDisconnect;
         this.defaultMaxMessagesPerRead = defaultMaxMessagesPerRead;

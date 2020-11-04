@@ -32,10 +32,11 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+// Channel处理器掩码
 final class ChannelHandlerMask {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelHandlerMask.class);
 
-    // Using to mask which methods must be called for a ChannelHandler.
+    // 用于屏蔽必须为ChannelHandler调用的方法。
     static final int MASK_EXCEPTION_CAUGHT = 1;
     static final int MASK_CHANNEL_REGISTERED = 1 << 1;
     static final int MASK_CHANNEL_UNREGISTERED = 1 << 2;
@@ -53,32 +54,37 @@ final class ChannelHandlerMask {
     static final int MASK_READ = 1 << 14;
     static final int MASK_WRITE = 1 << 15;
     static final int MASK_FLUSH = 1 << 16;
-
+    // 1，1111，1110
     static final int MASK_ONLY_INBOUND =  MASK_CHANNEL_REGISTERED |
             MASK_CHANNEL_UNREGISTERED | MASK_CHANNEL_ACTIVE | MASK_CHANNEL_INACTIVE | MASK_CHANNEL_READ |
             MASK_CHANNEL_READ_COMPLETE | MASK_USER_EVENT_TRIGGERED | MASK_CHANNEL_WRITABILITY_CHANGED;
+    // 1，1111，1111
     private static final int MASK_ALL_INBOUND = MASK_EXCEPTION_CAUGHT | MASK_ONLY_INBOUND;
+    // 1，11111110，00000000
     static final int MASK_ONLY_OUTBOUND =  MASK_BIND | MASK_CONNECT | MASK_DISCONNECT |
             MASK_CLOSE | MASK_DEREGISTER | MASK_READ | MASK_WRITE | MASK_FLUSH;
+    // 1，11111110，00000001
     private static final int MASK_ALL_OUTBOUND = MASK_EXCEPTION_CAUGHT | MASK_ONLY_OUTBOUND;
 
     private static final FastThreadLocal<Map<Class<? extends ChannelHandler>, Integer>> MASKS =
             new FastThreadLocal<Map<Class<? extends ChannelHandler>, Integer>>() {
                 @Override
                 protected Map<Class<? extends ChannelHandler>, Integer> initialValue() {
+                    // 弱引用，存类和掩码
                     return new WeakHashMap<Class<? extends ChannelHandler>, Integer>(32);
                 }
             };
 
     /**
-     * Return the {@code executionMask}.
+     * 返回执行 {@code executionMask}.
      */
     static int mask(Class<? extends ChannelHandler> clazz) {
-        // Try to obtain the mask from the cache first. If this fails calculate it and put it in the cache for fast
-        // lookup in the future.
+        // 首先尝试从缓存中获取掩码。如果失败，计算它并将其放入缓存中以便将来快速查找。
         Map<Class<? extends ChannelHandler>, Integer> cache = MASKS.get();
         Integer mask = cache.get(clazz);
+        // 没值
         if (mask == null) {
+            // 存入这个
             mask = mask0(clazz);
             cache.put(clazz, mask);
         }
@@ -86,16 +92,16 @@ final class ChannelHandlerMask {
     }
 
     /**
-     * Calculate the {@code executionMask}.
+     * 计算 {@code executionMask}.
      */
     private static int mask0(Class<? extends ChannelHandler> handlerType) {
-        int mask = MASK_EXCEPTION_CAUGHT;
+        int mask = MASK_EXCEPTION_CAUGHT; // 1
         try {
             if (ChannelInboundHandler.class.isAssignableFrom(handlerType)) {
-                mask |= MASK_ALL_INBOUND;
-
+                mask |= MASK_ALL_INBOUND; // 1，11111111
+                // 是否跳过该方法
                 if (isSkippable(handlerType, "channelRegistered", ChannelHandlerContext.class)) {
-                    mask &= ~MASK_CHANNEL_REGISTERED;
+                    mask &= ~MASK_CHANNEL_REGISTERED; // 1，11111101
                 }
                 if (isSkippable(handlerType, "channelUnregistered", ChannelHandlerContext.class)) {
                     mask &= ~MASK_CHANNEL_UNREGISTERED;
@@ -121,7 +127,7 @@ final class ChannelHandlerMask {
             }
 
             if (ChannelOutboundHandler.class.isAssignableFrom(handlerType)) {
-                mask |= MASK_ALL_OUTBOUND;
+                mask |= MASK_ALL_OUTBOUND;    // 1，11111110，00000001
 
                 if (isSkippable(handlerType, "bind", ChannelHandlerContext.class,
                         SocketAddress.class, ChannelPromise.class)) {
@@ -164,6 +170,7 @@ final class ChannelHandlerMask {
     }
 
     @SuppressWarnings("rawtypes")
+    // 是否跳过该方法
     private static boolean isSkippable(
             final Class<?> handlerType, final String methodName, final Class<?>... paramTypes) throws Exception {
         return AccessController.doPrivileged(new PrivilegedExceptionAction<Boolean>() {
@@ -171,6 +178,7 @@ final class ChannelHandlerMask {
             public Boolean run() throws Exception {
                 Method m;
                 try {
+                    // 获得方法
                     m = handlerType.getMethod(methodName, paramTypes);
                 } catch (NoSuchMethodException e) {
                     if (logger.isDebugEnabled()) {
@@ -197,6 +205,7 @@ final class ChannelHandlerMask {
      * supertype.
      * </p>
      */
+    // 跳过方法
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @interface Skip {

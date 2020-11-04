@@ -38,45 +38,45 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
- * A skeletal {@link Channel} implementation.
+ * 骨架{@link Channel}实现。
  */
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractChannel.class);
 
-    private final Channel parent;
-    private final ChannelId id;
-    private final Unsafe unsafe;
-    private final DefaultChannelPipeline pipeline;
+    private final Channel parent; // 父channel
+    private final ChannelId id; // channelId
+    private final Unsafe unsafe; // 不安全的操作
+    private final DefaultChannelPipeline pipeline; //channel绑定pipline
     private final VoidChannelPromise unsafeVoidPromise = new VoidChannelPromise(this, false);
     private final CloseFuture closeFuture = new CloseFuture(this);
 
-    private volatile SocketAddress localAddress;
-    private volatile SocketAddress remoteAddress;
-    private volatile EventLoop eventLoop;
-    private volatile boolean registered;
+    private volatile SocketAddress localAddress; // 本地地址
+    private volatile SocketAddress remoteAddress; // 远程地址
+    private volatile EventLoop eventLoop; // 处理器
+    private volatile boolean registered; // 是否注册
     private boolean closeInitiated;
     private Throwable initialCloseCause;
 
-    /** Cache for the string representation of this channel */
+    /** 缓存此通道的字符串表示形式 */
     private boolean strValActive;
     private String strVal;
 
     /**
-     * Creates a new instance.
+     * 创建一个新实例。
      *
      * @param parent
-     *        the parent of this channel. {@code null} if there's no parent.
+     *        此通道的父通道。{@code null}，如果没有父元素。
      */
     protected AbstractChannel(Channel parent) {
-        this.parent = parent;
-        id = newId();
-        unsafe = newUnsafe();
+        this.parent = parent; // 父channel
+        id = newId(); // channelId
+        unsafe = newUnsafe(); // io操作类
         pipeline = newChannelPipeline();
     }
 
     /**
-     * Creates a new instance.
+     * 创建一个实例.
      *
      * @param parent
      *        the parent of this channel. {@code null} if there's no parent.
@@ -88,21 +88,24 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         pipeline = newChannelPipeline();
     }
 
+    // 返回channel id
     @Override
     public final ChannelId id() {
         return id;
     }
 
     /**
-     * Returns a new {@link DefaultChannelId} instance. Subclasses may override this method to assign custom
-     * {@link ChannelId}s to {@link Channel}s that use the {@link AbstractChannel#AbstractChannel(Channel)} constructor.
+     * 返回一个新的{@link DefaultChannelId}实例。
+     * 子类可以重写此方法来将自定义的{@link Channel}分配给使用
+     * {@link AbstractChannel#AbstractChannel(Channel)}构造函数的{@link Channel}。
      */
+    // ChannelId
     protected ChannelId newId() {
         return DefaultChannelId.newInstance();
     }
 
     /**
-     * Returns a new {@link DefaultChannelPipeline} instance.
+     * 返回一个新的 {@link DefaultChannelPipeline} 实例.
      */
     protected DefaultChannelPipeline newChannelPipeline() {
         return new DefaultChannelPipeline(this);
@@ -145,6 +148,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return config().getAllocator();
     }
 
+    // 返回绑定的事件循环
     @Override
     public EventLoop eventLoop() {
         EventLoop eventLoop = this.eventLoop;
@@ -412,7 +416,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     * {@link Unsafe} implementation which sub-classes must extend and use.
+     * {@link Unsafe}实现，子类必须扩展和使用。
      */
     protected abstract class AbstractUnsafe implements Unsafe {
 
@@ -487,8 +491,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         private void register0(ChannelPromise promise) {
             try {
-                // check if the channel is still open as it could be closed in the mean time when the register
-                // call was outside of the eventLoop
+                // 检查通道是否仍然打开，因为当注册调用在eventLoop之外时，
+                // 它可能会被关闭。
                 if (!promise.setUncancellable() || !ensureOpen(promise)) {
                     return;
                 }
@@ -497,14 +501,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 neverRegistered = false;
                 registered = true;
 
-                // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
-                // user may already fire events through the pipeline in the ChannelFutureListener.
+                // 确保我们在实际通知承诺之前调用handlerAdded(...)。
+                // 检查通道是否仍然打开，因为当注册调用在eventLoo之外的时候，它可能会被关闭。
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);
                 pipeline.fireChannelRegistered();
-                // Only fire a channelActive if the channel has never been registered. This prevents firing
-                // multiple channel actives if the channel is deregistered and re-registered.
+                // 只有在频道从未注册过的情况下，才会启动一个channelActive。
+                // 这可以防止在频道被取消注册和重新注册的情况下发射多个频道actives。
                 if (isActive()) {
                     if (firstRegistration) {
                         pipeline.fireChannelActive();

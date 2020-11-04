@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Creates and manages {@link NameResolver}s so that each {@link EventExecutor} has its own resolver instance.
+ * 创建和管理{@link NameResolver}，以便每个{@link EventExecutor}都有自己的解析器实例。
  */
 public abstract class AddressResolverGroup<T extends SocketAddress> implements Closeable {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AddressResolverGroup.class);
 
     /**
-     * Note that we do not use a {@link ConcurrentMap} here because it is usually expensive to instantiate a resolver.
+     * 注意，我们在这里没有使用{@link ConcurrentMap}，因为实例化一个解析器通常开销很大。
      */
     private final Map<EventExecutor, AddressResolver<T>> resolvers =
             new IdentityHashMap<EventExecutor, AddressResolver<T>>();
@@ -49,42 +49,44 @@ public abstract class AddressResolverGroup<T extends SocketAddress> implements C
     protected AddressResolverGroup() { }
 
     /**
-     * Returns the {@link AddressResolver} associated with the specified {@link EventExecutor}. If there's no associated
-     * resolver found, this method creates and returns a new resolver instance created by
-     * {@link #newResolver(EventExecutor)} so that the new resolver is reused on another
-     * {@code #getResolver(EventExecutor)} call with the same {@link EventExecutor}.
+     * 返回与指定的{@link EventExecutor}关联的{@link AddressResolver}。如果没有找到关联的解析器，此方法将创建并返回一个由
+     * {@link #newResolver(EventExecutor)}创建的新解析器实例，
+     * 以便在使用相同的{@link EventExecutor}的另一个{@code #getResolver(EventExecutor)}调用时重用新的解析器。
      */
     public AddressResolver<T> getResolver(final EventExecutor executor) {
         ObjectUtil.checkNotNull(executor, "executor");
 
+        // 若执行器已关闭
         if (executor.isShuttingDown()) {
             throw new IllegalStateException("executor not accepting a task");
         }
 
         AddressResolver<T> r;
         synchronized (resolvers) {
-            r = resolvers.get(executor);
-            if (r == null) {
+            r = resolvers.get(executor); // 得到解析器
+            if (r == null) { // 若不存在
                 final AddressResolver<T> newResolver;
                 try {
+                    // 新建解析器
                     newResolver = newResolver(executor);
                 } catch (Exception e) {
                     throw new IllegalStateException("failed to create a new resolver", e);
                 }
-
+                // 添加解析器
                 resolvers.put(executor, newResolver);
 
                 final FutureListener<Object> terminationListener = new FutureListener<Object>() {
                     @Override
                     public void operationComplete(Future<Object> future) {
                         synchronized (resolvers) {
+                            // 解析完成删除
                             resolvers.remove(executor);
                             executorTerminationListeners.remove(executor);
                         }
                         newResolver.close();
                     }
                 };
-
+                // 执行完成监听
                 executorTerminationListeners.put(executor, terminationListener);
                 executor.terminationFuture().addListener(terminationListener);
 
@@ -96,12 +98,12 @@ public abstract class AddressResolverGroup<T extends SocketAddress> implements C
     }
 
     /**
-     * Invoked by {@link #getResolver(EventExecutor)} to create a new {@link AddressResolver}.
+     * 由{@link #getResolver(EventExecutor)}调用，以创建一个新的{@link AddressResolver}。
      */
     protected abstract AddressResolver<T> newResolver(EventExecutor executor) throws Exception;
 
     /**
-     * Closes all {@link NameResolver}s created by this group.
+     * 关闭该组创建的所有{@link NameResolver}。
      */
     @Override
     @SuppressWarnings({ "unchecked", "SuspiciousToArrayCall" })
@@ -117,11 +119,13 @@ public abstract class AddressResolverGroup<T extends SocketAddress> implements C
         }
 
         for (final Map.Entry<EventExecutor, GenericFutureListener<Future<Object>>> entry : listeners) {
+            // 移除监听器
             entry.getKey().terminationFuture().removeListener(entry.getValue());
         }
 
         for (final AddressResolver<T> r: rArray) {
             try {
+                // 关闭解析器
                 r.close();
             } catch (Throwable t) {
                 logger.warn("Failed to close a resolver:", t);

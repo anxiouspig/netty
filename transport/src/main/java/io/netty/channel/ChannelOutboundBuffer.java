@@ -40,10 +40,10 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import static java.lang.Math.min;
 
 /**
- * (Transport implementors only) an internal data structure used by {@link AbstractChannel} to store its pending
- * outbound write requests.
+ * (仅适用于传输实现者)一个内部数据结构，由{@link AbstractChannel}用来存储其待处理的出站写请求。
+ *
  * <p>
- * All methods must be called by a transport implementation from an I/O thread, except the following ones:
+ * 除了以下方法外，所有方法都必须由一个I/O线程的传输实现调用。
  * <ul>
  * <li>{@link #size()} and {@link #isEmpty()}</li>
  * <li>{@link #isWritable()}</li>
@@ -52,7 +52,7 @@ import static java.lang.Math.min;
  * </p>
  */
 public final class ChannelOutboundBuffer {
-    // Assuming a 64-bit JVM:
+    // 假设 a 64-bit JVM:
     //  - 16 bytes object header
     //  - 6 reference fields
     //  - 2 long fields

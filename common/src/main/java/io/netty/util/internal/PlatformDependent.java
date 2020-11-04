@@ -149,13 +149,13 @@ public final class PlatformDependent {
             };
         }
 
-        // Here is how the system property is used:
+        // 这里是如何使用系统属性:
         //
-        // * <  0  - Don't use cleaner, and inherit max direct memory from java. In this case the
-        //           "practical max direct memory" would be 2 * max memory as defined by the JDK.
-        // * == 0  - Use cleaner, Netty will not enforce max memory, and instead will defer to JDK.
-        // * >  0  - Don't use cleaner. This will limit Netty's total direct memory
-        //           (note: that JDK's direct memory limit is independent of this).
+        // * <  0  - 不要使用cleaner，而是从java继承最大直接内存。在这种情况下，“实际最大直接内存”将是JDK定义的2 *最大内存。
+        // * == 0  - 使用清洁，Netty将不会强制最大内存，而将遵从JDK。
+        // * >  0  - 不要使用清洁剂。这将限制Netty的总直接内存
+        //           (注意:JDK的直接内存限制与此无关)。
+        // 默认-1
         long maxDirectMemory = SystemPropertyUtil.getLong("io.netty.maxDirectMemory", -1);
 
         if (maxDirectMemory == 0 || !hasUnsafe() || !PlatformDependent0.hasDirectBufferNoCleanerConstructor()) {
@@ -186,7 +186,7 @@ public final class PlatformDependent {
         MAYBE_SUPER_USER = maybeSuperUser0();
 
         if (!isAndroid()) {
-            // only direct to method if we are not running on android.
+            // 只有当我们不是在android上运行时才直接到方法。
             // See https://github.com/netty/netty/issues/2604
             if (javaVersion() >= 9) {
                 CLEANER = CleanerJava9.isSupported() ? new CleanerJava9() : NOOP;
@@ -194,10 +194,11 @@ public final class PlatformDependent {
                 CLEANER = CleanerJava6.isSupported() ? new CleanerJava6() : NOOP;
             }
         } else {
+            // 安卓使用堆内存
             CLEANER = NOOP;
         }
 
-        // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
+        // 如果我们可以使用一个清洁器来释放直接缓冲区，那么默认情况下我们应该总是更喜欢直接缓冲区。
         DIRECT_BUFFER_PREFERRED = CLEANER != NOOP
                                   && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
         if (logger.isDebugEnabled()) {
@@ -354,8 +355,7 @@ public final class PlatformDependent {
     }
 
     /**
-     * Returns {@code true} if the platform has reliable low-level direct buffer access API and a user has not specified
-     * {@code -Dio.netty.noPreferDirect} option.
+     * 如果平台有可靠的低级直接缓冲区访问API，并且用户没有指定{@code -Dio.netty.noPreferDirect}选项，则返回{@code true}。
      */
     public static boolean directBufferPreferred() {
         return DIRECT_BUFFER_PREFERRED;
@@ -436,7 +436,7 @@ public final class PlatformDependent {
     }
 
     /**
-     * Creates a new fastest {@link LongCounter} implementation for the current platform.
+     * 为当前平台创建一个新的最快的{@link LongCounter}实现。
      */
     public static LongCounter newLongCounter() {
         if (javaVersion() >= 8) {
@@ -476,8 +476,7 @@ public final class PlatformDependent {
     }
 
     /**
-     * Try to deallocate the specified direct {@link ByteBuffer}. Please note this method does nothing if
-     * the current platform does not support this operation or the specified buffer is not a direct buffer.
+     * 试着释放指定的直接{@link ByteBuffer}。请注意，如果当前平台不支持此操作，或者指定的缓冲区不是直接缓冲区，则此方法不执行任何操作。
      */
     public static void freeDirectBuffer(ByteBuffer buffer) {
         CLEANER.freeDirectBuffer(buffer);
@@ -713,12 +712,12 @@ public final class PlatformDependent {
     }
 
     /**
-     * Allocate a new {@link ByteBuffer} with the given {@code capacity}. {@link ByteBuffer}s allocated with
-     * this method <strong>MUST</strong> be deallocated via {@link #freeDirectNoCleaner(ByteBuffer)}.
+     * 使用给定的{@code容量}分配一个新的{@link ByteBuffer}。
+     * 用这个方法分配的{@link ByteBuffer}必须</strong b>通过{@link #freeDirectNoCleaner(ByteBuffer)}被释放。
      */
     public static ByteBuffer allocateDirectNoCleaner(int capacity) {
         assert USE_DIRECT_BUFFER_NO_CLEANER;
-
+        // 检查内存溢出
         incrementMemoryCounter(capacity);
         try {
             return PlatformDependent0.allocateDirectNoCleaner(capacity);
@@ -730,8 +729,8 @@ public final class PlatformDependent {
     }
 
     /**
-     * Reallocate a new {@link ByteBuffer} with the given {@code capacity}. {@link ByteBuffer}s reallocated with
-     * this method <strong>MUST</strong> be deallocated via {@link #freeDirectNoCleaner(ByteBuffer)}.
+     * 使用给定的{@code容量}重新分配一个新的{@link ByteBuffer}。
+     * 使用此方法重新分配的{@link ByteBuffer} <strong>必须</strong>通过{@link #freeDirectNoCleaner(ByteBuffer)}被释放。
      */
     public static ByteBuffer reallocateDirectNoCleaner(ByteBuffer buffer, int capacity) {
         assert USE_DIRECT_BUFFER_NO_CLEANER;
@@ -748,14 +747,15 @@ public final class PlatformDependent {
     }
 
     /**
-     * This method <strong>MUST</strong> only be called for {@link ByteBuffer}s that were allocated via
-     * {@link #allocateDirectNoCleaner(int)}.
+     * 只有对通过{@link #allocateDirectNoCleaner(int)}分配的{@link ByteBuffer}调用这个方法<strong>必须</strong>。
      */
     public static void freeDirectNoCleaner(ByteBuffer buffer) {
         assert USE_DIRECT_BUFFER_NO_CLEANER;
 
         int capacity = buffer.capacity();
+        // unsafe释放内存
         PlatformDependent0.freeMemory(PlatformDependent0.directBufferAddress(buffer));
+        // 检查总量
         decrementMemoryCounter(capacity);
     }
 

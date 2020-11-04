@@ -24,26 +24,25 @@ import java.util.Deque;
 import java.util.PriorityQueue;
 
 /**
- * Description of algorithm for PageRun/PoolSubpage allocation from PoolChunk
+ * 从PoolChunk分配PageRun/PoolSubpage的算法描述
  *
- * Notation: The following terms are important to understand the code
- * > page  - a page is the smallest unit of memory chunk that can be allocated
- * > run   - a run is a collection of pages
- * > chunk - a chunk is a collection of runs
- * > in this code chunkSize = maxPages * pageSize
+ * 注释: 以下术语对于理解代码很重要
+ * > page  - 一page是内存块可以分配的最小单元
+ * > run   - run是页面的集合
+ * > chunk - 一个chunk是runs的集合
+ * > 在这个代码 chunkSize = maxPages * pageSize 块大小等于最大页数量乘以
  *
- * To begin we allocate a byte array of size = chunkSize
- * Whenever a ByteBuf of given size needs to be created we search for the first position
- * in the byte array that has enough empty space to accommodate the requested size and
- * return a (long) handle that encodes this offset information, (this memory segment is then
- * marked as reserved so it is always used by exactly one ByteBuf and no more)
+ * 首先我们分配一个字节数组的大小 = chunkSize
+ * 每当一个给定大小的 ByteBuf 需要去创建我们搜索的第一个位置的字节数组，
+ * 有足够的空间去容纳请求的大小，并返回一个 (long) 处理编码这个偏移量信息,
+ * (这个内存段被标记为保留， 所以总是恰好的被一个 ByteBuf 使用，或没有使用)
  *
- * For simplicity all sizes are normalized according to {@link PoolArena#size2SizeIdx(int)} method.
- * This ensures that when we request for memory segments of size > pageSize the normalizedCapacity
- * equals the next nearest size in {@link SizeClasses}.
+ * 为了简单起见，所有大小都按照 {@link PoolArena#size2SizeIdx(int)} 方法.（将请求大小标准化到最接近的大小类。）
+ * 这确保，当我们请求的内存段大小 > 标准化的页大小时，
+ * 等于 {@link SizeClasses} 中最近的大小.
  *
  *
- *  A chunk has the following layout:
+ *  一个块有如下布局：
  *
  *     /-----------------\
  *     | run             |
@@ -70,75 +69,74 @@ import java.util.PriorityQueue;
  *     \-----------------/
  *
  *
- * handle:
+ * 处理:
  * -------
- * a handle is a long number, the bit layout of a run looks like:
+ * 一个处理是一个long型, 一个run的比特结构类似:
  *
  * oooooooo ooooooos ssssssss ssssssue bbbbbbbb bbbbbbbb bbbbbbbb bbbbbbbb
  *
- * o: runOffset (page offset in the chunk), 15bit
- * s: size (number of pages) of this run, 15bit
- * u: isUsed?, 1bit
- * e: isSubpage?, 1bit
- * b: bitmapIdx of subpage, zero if it's not subpage, 32bit
+ * o: runOffset (块中的页偏移量), 15bit
+ * s: size (页的数量) of this run, 15bit
+ * u: 是否使用?, 1bit
+ * e: 是否是子页?, 1bit
+ * b: 子页的bitmapIdx, 如果不是子页则为0, 32bit
  *
  * runsAvailMap:
  * ------
- * a map which manages all runs (used and not in used).
- * For each run, the first runOffset and last runOffset are stored in runsAvailMap.
+ * 一个 map 管理的所有 runs (使用或不在使用).
+ * 对于每个 run, 第一个 runOffset 和最后一个 runOffset 存储在 runsAvailMap.
  * key: runOffset
  * value: handle
  *
  * runsAvail:
  * ----------
- * an array of {@link PriorityQueue}.
- * Each queue manages same size of runs.
- * Runs are sorted by offset, so that we always allocate runs with smaller offset.
+ * 一个数组 {@link PriorityQueue}.（堆）
+ * 每个队列管理着相同大小的 runs.
+ * Runs 通过 offset 排序, 这样我们可以用较小的偏移量分配 runs.
  *
  *
- * Algorithm:
+ * 算法:
  * ----------
  *
- *   As we allocate runs, we update values stored in runsAvailMap and runsAvail so that the property is maintained.
+ *   如同我们分配 runs, 我们更新存储在 runsAvailMap 中的值， 并且在 runsAvail 中维护属性.
  *
- * Initialization -
- *  In the beginning we store the initial run which is the whole chunk.
- *  The initial run:
- *  runOffset = 0
- *  size = chunkSize
- *  isUsed = no
- *  isSubpage = no
- *  bitmapIdx = 0
+ * 初始化 -
+ *  在开始，我们存储初始化的整个 chunk的 run.
+ *  这个初始化的 run:
+ *  runOffset = 0 // 偏移量
+ *  size = chunkSize // 大小
+ *  isUsed = no // 未使用
+ *  isSubpage = no // 是否子页
+ *  bitmapIdx = 0 // 指针
  *
  *
- * Algorithm: [allocateRun(size)]
+ * 算法: [allocateRun(size)] // 分配run
  * ----------
- * 1) find the first avail run using in runsAvails according to size
- * 2) if pages of run is larger than request pages then split it, and save the tailing run
- *    for later using
+ * 1) 根据大小，使用runsAvails查找第一个 avail run。
+ * 2) 如果 run 的页大小比分配给它的请求页大, 存储在run的尾部之后使用
  *
- * Algorithm: [allocateSubpage(size)]
+ * 算法: [allocateSubpage(size)] // 分配子页
  * ----------
- * 1) find a not full subpage according to size.
- *    if it already exists just return, otherwise allocate a new PoolSubpage and call init()
- *    note that this subpage object is added to subpagesPool in the PoolArena when we init() it
- * 2) call subpage.allocate()
+ * 1) 根据大小查找一个不满的子页.
+ *    如果已经存在了就返回, 否则分配一个新的 PoolSubpage ，并且调用 init()
+ *    注意，这个子页对象被添加到 subpagesPool 在 PoolArena 当我们 init() 它
+ * 2) 调用 subpage.allocate()
  *
- * Algorithm: [free(handle, length, nioBuffer)]
+ * 算法: [free(handle, length, nioBuffer)]
  * ----------
- * 1) if it is a subpage, return the slab back into this subpage
- * 2) if the subpage is not used or it is a run, then start free this run
- * 3) merge continuous avail runs
- * 4) save the merged run
+ * 1) 如果是一个子页, 将 slab 返回给 subpage
+ * 2) 如果子页未被使用或是一个 run, 那么开始释放这个 run
+ * 3) 合并连续的 avail runs
+ * 4) 保存合并的 run
  *
  */
 final class PoolChunk<T> implements PoolChunkMetric {
-
+    // oooooooo ooooooos ssssssss ssssssue bbbbbbbb bbbbbbbb bbbbbbbb bbbbbbbb
     private static final int OFFSET_BIT_LENGTH = 15;
-    private static final int SIZE_BIT_LENGTH = 15;
-    private static final int INUSED_BIT_LENGTH = 1;
-    private static final int SUBPAGE_BIT_LENGTH = 1;
-    private static final int BITMAP_IDX_BIT_LENGTH = 32;
+    private static final int SIZE_BIT_LENGTH = 15; // 比特长度
+    private static final int INUSED_BIT_LENGTH = 1; // 使用比特长度
+    private static final int SUBPAGE_BIT_LENGTH = 1;  // 子页比特长度
+    private static final int BITMAP_IDX_BIT_LENGTH = 32; //
 
     static final int IS_SUBPAGE_SHIFT = BITMAP_IDX_BIT_LENGTH;
     static final int IS_USED_SHIFT = SUBPAGE_BIT_LENGTH + IS_SUBPAGE_SHIFT;
@@ -189,16 +187,16 @@ final class PoolChunk<T> implements PoolChunkMetric {
     PoolChunk(PoolArena<T> arena, T memory, int pageSize, int pageShifts, int chunkSize, int maxPageIdx, int offset) {
         unpooled = false;
         this.arena = arena;
-        this.memory = memory;
-        this.pageSize = pageSize;
-        this.pageShifts = pageShifts;
-        this.chunkSize = chunkSize;
-        this.offset = offset;
-        freeBytes = chunkSize;
+        this.memory = memory; // 2m的ByteBuffer
+        this.pageSize = pageSize; // 1kb
+        this.pageShifts = pageShifts; // 13
+        this.chunkSize = chunkSize; // 2m
+        this.offset = offset; // 0
+        freeBytes = chunkSize; // 空闲字节2m
 
-        runsAvail = newRunsAvailqueueArray(maxPageIdx);
+        runsAvail = newRunsAvailqueueArray(maxPageIdx); // 40
         runsAvailMap = new IntObjectHashMap<Long>();
-        subpages = new PoolSubpage[chunkSize >> pageShifts];
+        subpages = new PoolSubpage[chunkSize >> pageShifts]; // 2048
 
         //insert initial run, offset = 0, pages = chunkSize / pageSize
         int pages = chunkSize >> pageShifts;
@@ -225,7 +223,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     @SuppressWarnings("unchecked")
     private static PriorityQueue<Long>[] newRunsAvailqueueArray(int size) {
-        PriorityQueue<Long>[] queueArray = new PriorityQueue[size];
+        PriorityQueue<Long>[] queueArray = new PriorityQueue[size]; // 40
         for (int i = 0; i < queueArray.length; i++) {
             queueArray[i] = new PriorityQueue<Long>();
         }
@@ -426,9 +424,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
         // This is need as we may add it back and so alter the linked-list structure.
         PoolSubpage<T> head = arena.findSubpagePoolHead(sizeIdx);
         synchronized (head) {
-            //allocate a new run
+            //allocate 一个新的 run
             int runSize = calculateRunSize(sizeIdx);
-            //runSize must be multiples of pageSize
+            //runSize 必须是页面大小的倍数
             long runHandle = allocateRun(runSize);
             if (runHandle < 0) {
                 return -1;
@@ -446,9 +444,10 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     /**
-     * Free a subpage or a run of pages When a subpage is freed from PoolSubpage, it might be added back to subpage pool
-     * of the owning PoolArena. If the subpage pool in PoolArena has at least one other PoolSubpage of given elemSize,
-     * we can completely free the owning Page so it is available for subsequent allocations
+     * 释放子页或运行的页当子页从PoolSubpage中释放时，它可能会被添加回所属PoolArena的子页池。
+     * 如果PoolArena中的子页面池至少有一个给定元素大小的其他PoolSubpage，
+     * 我们可以完全释放拥有该页面的页面，
+     * 以便它可以用于后续的分配
      *
      * @param handle handle to free
      */
@@ -460,8 +459,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
             PoolSubpage<T> subpage = subpages[runOffset(handle)];
             assert subpage != null && subpage.doNotDestroy;
 
-            // Obtain the head of the PoolSubPage pool that is owned by the PoolArena and synchronize on it.
-            // This is need as we may add it back and so alter the linked-list structure.
+            // 获取PoolArena拥有的PoolSubPage池的头，并在其上进行同步。
+            // 这是需要的，因为我们可以把它添加回去，从而改变链表结构。
             synchronized (head) {
                 if (subpage.free(head, bitmapIdx(handle))) {
                     //the subpage is still used, do not free it

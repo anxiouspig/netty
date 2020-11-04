@@ -22,57 +22,56 @@ import io.netty.util.internal.StringUtil;
 import java.nio.ByteBuffer;
 
 /**
- * Simplistic {@link ByteBufAllocator} implementation that does not pool anything.
+ * 简单的{@link ByteBufAllocator}实现，没有池任何东西。
  */
 public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
-
+    // 度量
     private final UnpooledByteBufAllocatorMetric metric = new UnpooledByteBufAllocatorMetric();
-    private final boolean disableLeakDetector;
+    private final boolean disableLeakDetector; // 是否关闭漏洞检查
     private final boolean noCleaner;
 
     /**
-     * Default instance which uses leak-detection for direct buffers.
+     * 对直接缓冲区使用泄漏检测的默认实例。
      */
+    // 非安卓使用直接内存
     public static final UnpooledByteBufAllocator DEFAULT =
             new UnpooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
     /**
-     * Create a new instance which uses leak-detection for direct buffers.
+     * 创建一个对直接缓冲区使用泄漏检测的新实例。
      *
-     * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
-     *                     a heap buffer
+     * @param preferDirect 如果{@link #buffer(int)}应该尝试分配一个直接缓冲区而不是堆缓冲区，那么{@code true}
      */
     public UnpooledByteBufAllocator(boolean preferDirect) {
         this(preferDirect, false);
     }
 
     /**
-     * Create a new instance
+     * 创建一个新实例
      *
-     * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
-     *                     a heap buffer
-     * @param disableLeakDetector {@code true} if the leak-detection should be disabled completely for this
-     *                            allocator. This can be useful if the user just want to depend on the GC to handle
-     *                            direct buffers when not explicit released.
+     * @param preferDirect 如果{@link #buffer(int)}应该尝试分配一个直接缓冲区而不是堆缓冲区，那么{@code true}
+     * @param disableLeakDetector {@code true}如果这个分配器的泄漏检测应该被完全禁用。
+     *                                        如果用户只是希望在未显式释放时依靠GC来处理直接缓冲区，那么这可能很有用。
      */
     public UnpooledByteBufAllocator(boolean preferDirect, boolean disableLeakDetector) {
         this(preferDirect, disableLeakDetector, PlatformDependent.useDirectBufferNoCleaner());
     }
 
     /**
-     * Create a new instance
+     * 创建一个新实例
      *
      * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
      *                     a heap buffer
      * @param disableLeakDetector {@code true} if the leak-detection should be disabled completely for this
      *                            allocator. This can be useful if the user just want to depend on the GC to handle
      *                            direct buffers when not explicit released.
-     * @param tryNoCleaner {@code true} if we should try to use {@link PlatformDependent#allocateDirectNoCleaner(int)}
-     *                            to allocate direct memory.
+     * @param tryNoCleaner 如果我们应该尝试使用{@link PlatformDependent# allocateDirectNoCleaner(int)}来分配直接内存，
+     *                     请使用{@code true}。
      */
     public UnpooledByteBufAllocator(boolean preferDirect, boolean disableLeakDetector, boolean tryNoCleaner) {
         super(preferDirect);
         this.disableLeakDetector = disableLeakDetector;
+        // true
         noCleaner = tryNoCleaner && PlatformDependent.hasUnsafe()
                 && PlatformDependent.hasDirectBufferNoCleanerConstructor();
     }
@@ -88,6 +87,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
         final ByteBuf buf;
         if (PlatformDependent.hasUnsafe()) {
+
             buf = noCleaner ? new InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(this, initialCapacity, maxCapacity) :
                     new InstrumentedUnpooledUnsafeDirectByteBuf(this, initialCapacity, maxCapacity);
         } else {
@@ -134,6 +134,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         metric.heapCounter.add(-amount);
     }
 
+    // 堆数组
     private static final class InstrumentedUnpooledUnsafeHeapByteBuf extends UnpooledUnsafeHeapByteBuf {
         InstrumentedUnpooledUnsafeHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
@@ -149,11 +150,12 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         @Override
         protected void freeArray(byte[] array) {
             int length = array.length;
+            // 不用释放，等待回收
             super.freeArray(array);
             ((UnpooledByteBufAllocator) alloc()).decrementHeap(length);
         }
     }
-
+    // 堆数组
     private static final class InstrumentedUnpooledHeapByteBuf extends UnpooledHeapByteBuf {
         InstrumentedUnpooledHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
@@ -183,6 +185,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
 
         @Override
         protected ByteBuffer allocateDirect(int initialCapacity) {
+            // 获取直接缓存
             ByteBuffer buffer = super.allocateDirect(initialCapacity);
             ((UnpooledByteBufAllocator) alloc()).incrementDirect(buffer.capacity());
             return buffer;
@@ -191,6 +194,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         @Override
         ByteBuffer reallocateDirect(ByteBuffer oldBuffer, int initialCapacity) {
             int capacity = oldBuffer.capacity();
+            // 从新分配直接缓存
             ByteBuffer buffer = super.reallocateDirect(oldBuffer, initialCapacity);
             ((UnpooledByteBufAllocator) alloc()).incrementDirect(buffer.capacity() - capacity);
             return buffer;
@@ -199,6 +203,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         @Override
         protected void freeDirect(ByteBuffer buffer) {
             int capacity = buffer.capacity();
+            // 释放直接缓存
             super.freeDirect(buffer);
             ((UnpooledByteBufAllocator) alloc()).decrementDirect(capacity);
         }
@@ -233,6 +238,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
 
         @Override
         protected ByteBuffer allocateDirect(int initialCapacity) {
+            // ByteBuffer来分配
             ByteBuffer buffer = super.allocateDirect(initialCapacity);
             ((UnpooledByteBufAllocator) alloc()).incrementDirect(buffer.capacity());
             return buffer;
@@ -246,7 +252,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    // 非池字节缓存分配器度量
     private static final class UnpooledByteBufAllocatorMetric implements ByteBufAllocatorMetric {
+        // 内存计数
         final LongCounter directCounter = PlatformDependent.newLongCounter();
         final LongCounter heapCounter = PlatformDependent.newLongCounter();
 

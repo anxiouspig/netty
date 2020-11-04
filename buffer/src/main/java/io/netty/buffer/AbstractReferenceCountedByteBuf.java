@@ -21,14 +21,17 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import io.netty.util.internal.ReferenceCountUpdater;
 
 /**
- * Abstract base class for {@link ByteBuf} implementations that count references.
+ * 对引用计数的{@link ByteBuf}实现的抽象基类。
  */
 public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
+    // 引用计数字段偏移量
     private static final long REFCNT_FIELD_OFFSET =
             ReferenceCountUpdater.getUnsafeOffset(AbstractReferenceCountedByteBuf.class, "refCnt");
+
     private static final AtomicIntegerFieldUpdater<AbstractReferenceCountedByteBuf> AIF_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractReferenceCountedByteBuf.class, "refCnt");
 
+    // 引用计数
     private static final ReferenceCountUpdater<AbstractReferenceCountedByteBuf> updater =
             new ReferenceCountUpdater<AbstractReferenceCountedByteBuf>() {
         @Override
@@ -41,18 +44,19 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         }
     };
 
-    // Value might not equal "real" reference count, all access should be via the updater
+    // 值可能不等于“真实的”引用计数，所有访问应该通过更新器
     @SuppressWarnings("unused")
+    // 初始化为2
     private volatile int refCnt = updater.initialValue();
 
+    // 最大容量
     protected AbstractReferenceCountedByteBuf(int maxCapacity) {
         super(maxCapacity);
     }
 
     @Override
     boolean isAccessible() {
-        // Try to do non-volatile read for performance as the ensureAccessible() is racy anyway and only provide
-        // a best-effort guard.
+        // 为了提高性能，请尝试执行非易失性读取，因为ensureAccessible()是活泼的，只能提供最好的保护。
         return updater.isLiveNonVolatile(this);
     }
 
@@ -62,14 +66,14 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
     }
 
     /**
-     * An unsafe operation intended for use by a subclass that sets the reference count of the buffer directly
+     * 打算由子类使用的直接设置缓冲区引用计数的不安全操作
      */
     protected final void setRefCnt(int refCnt) {
         updater.setRefCnt(this, refCnt);
     }
 
     /**
-     * An unsafe operation intended for use by a subclass that resets the reference count of the buffer to 1
+     * 一种不安全的操作，用于将缓冲区的引用计数重置为1的子类使用
      */
     protected final void resetRefCnt() {
         updater.resetRefCnt(this);
@@ -113,7 +117,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
     }
 
     /**
-     * Called once {@link #refCnt()} is equals 0.
+     * 当{@link #refCnt()} = 0时调用。
      */
     protected abstract void deallocate();
 }

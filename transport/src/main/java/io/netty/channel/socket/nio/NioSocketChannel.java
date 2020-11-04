@@ -52,7 +52,7 @@ import java.util.concurrent.Executor;
 import static io.netty.channel.internal.ChannelUtils.MAX_BYTES_PER_GATHERING_WRITE_ATTEMPTED_LOW_THRESHOLD;
 
 /**
- * {@link io.netty.channel.socket.SocketChannel} which uses NIO selector based implementation.
+ * {@link io.netty.channel.socket.SocketChannel}， 它使用基于NIO选择器的实现。
  */
 public class NioSocketChannel extends AbstractNioByteChannel implements io.netty.channel.socket.SocketChannel {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioSocketChannel.class);

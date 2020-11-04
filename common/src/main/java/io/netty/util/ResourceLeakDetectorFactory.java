@@ -25,15 +25,17 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.lang.reflect.Constructor;
 
 /**
- * This static factory should be used to load {@link ResourceLeakDetector}s as needed
+ * 这个静态工厂应该用于根据需要加载{@link ResourceLeakDetector}
  */
+// 资源泄露检查工厂
 public abstract class ResourceLeakDetectorFactory {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ResourceLeakDetectorFactory.class);
 
+    // 单例
     private static volatile ResourceLeakDetectorFactory factoryInstance = new DefaultResourceLeakDetectorFactory();
 
     /**
-     * Get the singleton instance of this factory class.
+     * 获取这个工厂类的单例实例。
      *
      * @return the current {@link ResourceLeakDetectorFactory}
      */
@@ -42,9 +44,8 @@ public abstract class ResourceLeakDetectorFactory {
     }
 
     /**
-     * Set the factory's singleton instance. This has to be called before the static initializer of the
-     * {@link ResourceLeakDetector} is called by all the callers of this factory. That is, before initializing a
-     * Netty Bootstrap.
+     * 设置工厂的单例实例。必须在此工厂的所有调用方调用{@link ResourceLeakDetector}的静态初始化器之前调用此函数。
+     * 也就是说，在初始化一个Netty引导程序之前。
      *
      * @param factory the instance that will become the current {@link ResourceLeakDetectorFactory}'s singleton
      */
@@ -53,11 +54,11 @@ public abstract class ResourceLeakDetectorFactory {
     }
 
     /**
-     * Returns a new instance of a {@link ResourceLeakDetector} with the given resource class.
+     * 返回具有给定资源类的{@link ResourceLeakDetector}的新实例。
      *
-     * @param resource the resource class used to initialize the {@link ResourceLeakDetector}
-     * @param <T> the type of the resource class
-     * @return a new instance of {@link ResourceLeakDetector}
+     * @param resource 用于初始化{@link ResourceLeakDetector}的资源类
+     * @param <T> 资源类的类型
+     * @return {@link ResourceLeakDetector}的新实例
      */
     public final <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource) {
         return newResourceLeakDetector(resource, ResourceLeakDetector.SAMPLING_INTERVAL);
@@ -66,7 +67,7 @@ public abstract class ResourceLeakDetectorFactory {
     /**
      * @deprecated Use {@link #newResourceLeakDetector(Class, int)} instead.
      * <p>
-     * Returns a new instance of a {@link ResourceLeakDetector} with the given resource class.
+     * 返回具有给定资源类的{@link ResourceLeakDetector}的新实例。
      *
      * @param resource the resource class used to initialize the {@link ResourceLeakDetector}
      * @param samplingInterval the interval on which sampling takes place
@@ -79,12 +80,12 @@ public abstract class ResourceLeakDetectorFactory {
             Class<T> resource, int samplingInterval, long maxActive);
 
     /**
-     * Returns a new instance of a {@link ResourceLeakDetector} with the given resource class.
+     * 返回具有给定资源类的{@link ResourceLeakDetector}的新实例。
      *
-     * @param resource the resource class used to initialize the {@link ResourceLeakDetector}
-     * @param samplingInterval the interval on which sampling takes place
-     * @param <T> the type of the resource class
-     * @return a new instance of {@link ResourceLeakDetector}
+     * @param resource 用于初始化{@link ResourceLeakDetector}的资源类
+     * @param samplingInterval 抽样发生的时间间隔
+     * @param <T> 资源类的类型
+     * @return {@link ResourceLeakDetector}的新实例
      */
     @SuppressWarnings("deprecation")
     public <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource, int samplingInterval) {
@@ -93,15 +94,17 @@ public abstract class ResourceLeakDetectorFactory {
     }
 
     /**
-     * Default implementation that loads custom leak detector via system property
+     * 通过系统属性加载自定义泄漏检测器的默认实现
      */
+    // 实现
     private static final class DefaultResourceLeakDetectorFactory extends ResourceLeakDetectorFactory {
-        private final Constructor<?> obsoleteCustomClassConstructor;
-        private final Constructor<?> customClassConstructor;
+        private final Constructor<?> obsoleteCustomClassConstructor; // 过时自定义类构造器
+        private final Constructor<?> customClassConstructor; // 自定义类构造器
 
         DefaultResourceLeakDetectorFactory() {
             String customLeakDetector;
             try {
+                // 自定义资源泄露探测器
                 customLeakDetector = SystemPropertyUtil.get("io.netty.customResourceLeakDetector");
             } catch (Throwable cause) {
                 logger.error("Could not access System property: io.netty.customResourceLeakDetector", cause);
@@ -115,6 +118,7 @@ public abstract class ResourceLeakDetectorFactory {
             }
         }
 
+        // 构造器
         private static Constructor<?> obsoleteCustomClassConstructor(String customLeakDetector) {
             try {
                 final Class<?> detectorClass = Class.forName(customLeakDetector, true,
@@ -132,6 +136,7 @@ public abstract class ResourceLeakDetectorFactory {
             return null;
         }
 
+        // 构造器
         private static Constructor<?> customClassConstructor(String customLeakDetector) {
             try {
                 final Class<?> detectorClass = Class.forName(customLeakDetector, true,
@@ -151,8 +156,10 @@ public abstract class ResourceLeakDetectorFactory {
 
         @SuppressWarnings("deprecation")
         @Override
+        // 新建资源泄露探测器
         public <T> ResourceLeakDetector<T> newResourceLeakDetector(Class<T> resource, int samplingInterval,
-                                                                   long maxActive) {
+                                                                             long maxActive) {
+            // 如果用户自定义
             if (obsoleteCustomClassConstructor != null) {
                 try {
                     @SuppressWarnings("unchecked")
@@ -169,6 +176,7 @@ public abstract class ResourceLeakDetectorFactory {
                 }
             }
 
+            // 如果没有自定义
             ResourceLeakDetector<T> resourceLeakDetector = new ResourceLeakDetector<T>(resource, samplingInterval,
                                                                                        maxActive);
             logger.debug("Loaded default ResourceLeakDetector: {}", resourceLeakDetector);

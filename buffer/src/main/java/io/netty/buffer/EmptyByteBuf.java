@@ -35,18 +35,21 @@ import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 
 /**
- * An empty {@link ByteBuf} whose capacity and maximum capacity are all {@code 0}.
+ * 一个空的{@link ByteBuf}，其容量和最大容量都是{@code 0}。
  */
 public final class EmptyByteBuf extends ByteBuf {
 
-    static final int EMPTY_BYTE_BUF_HASH_CODE = 1;
+    static final int EMPTY_BYTE_BUF_HASH_CODE = 1; // 空字节hashcode
+    // 申请容量为0的空字节缓冲
     private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocateDirect(0);
-    private static final long EMPTY_BYTE_BUFFER_ADDRESS;
+    // 空字节缓冲地址
+    private static final long EMPTY_BYTE_BUFFER_ADDRESS; // 空直接内存地址
 
     static {
         long emptyByteBufferAddress = 0;
         try {
             if (PlatformDependent.hasUnsafe()) {
+                // 直接内存地址
                 emptyByteBufferAddress = PlatformDependent.directBufferAddress(EMPTY_BYTE_BUFFER);
             }
         } catch (Throwable t) {
@@ -55,8 +58,8 @@ public final class EmptyByteBuf extends ByteBuf {
         EMPTY_BYTE_BUFFER_ADDRESS = emptyByteBufferAddress;
     }
 
-    private final ByteBufAllocator alloc;
-    private final ByteOrder order;
+    private final ByteBufAllocator alloc; // 字节缓冲分配器
+    private final ByteOrder order; // 字节顺序
     private final String str;
     private EmptyByteBuf swapped;
 

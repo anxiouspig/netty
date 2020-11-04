@@ -27,10 +27,11 @@ import java.net.SocketAddress;
 import java.util.Map;
 
 /**
- * Exposes the configuration of an {@link AbstractBootstrap}.
+ * 公开{@link AbstractBootstrap}的配置。
  */
 public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>, C extends Channel> {
 
+    // 启动器
     protected final B bootstrap;
 
     protected AbstractBootstrapConfig(B bootstrap) {
@@ -38,14 +39,14 @@ public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>,
     }
 
     /**
-     * Returns the configured local address or {@code null} if non is configured yet.
+     * 返回已配置的本地地址，如果未配置，则返回{@code null}。
      */
     public final SocketAddress localAddress() {
         return bootstrap.localAddress();
     }
 
     /**
-     * Returns the configured {@link ChannelFactory} or {@code null} if non is configured yet.
+     * 返回已配置的{@link ChannelFactory}或{@code null}(如果未配置)。
      */
     @SuppressWarnings("deprecation")
     public final ChannelFactory<? extends C> channelFactory() {
@@ -53,28 +54,28 @@ public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>,
     }
 
     /**
-     * Returns the configured {@link ChannelHandler} or {@code null} if non is configured yet.
+     * 返回已配置的{@link ChannelHandler}或{@code null}(如果未配置)。
      */
     public final ChannelHandler handler() {
         return bootstrap.handler();
     }
 
     /**
-     * Returns a copy of the configured options.
+     * 返回配置选项的副本。
      */
     public final Map<ChannelOption<?>, Object> options() {
         return bootstrap.options();
     }
 
     /**
-     * Returns a copy of the configured attributes.
+     * 返回已配置属性的副本。
      */
     public final Map<AttributeKey<?>, Object> attrs() {
         return bootstrap.attrs();
     }
 
     /**
-     * Returns the configured {@link EventLoopGroup} or {@code null} if non is configured yet.
+     * 返回已配置的{@link EventLoopGroup}或{@code null}(如果还未配置)。
      */
     @SuppressWarnings("deprecation")
     public final EventLoopGroup group() {

@@ -40,12 +40,12 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     private int nextAvail;
     private int numAvail;
 
-    // TODO: Test if adding padding helps under contention
+    // TODO: 测试添加填充是否有助于解决争用问题
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
 
-    /** Special constructor that creates a linked list head */
+    /** 创建链表头的特殊构造函数 */
     PoolSubpage() {
-        chunk = null;
+        chunk = null; // 块
         pageShifts = -1;
         runOffset = -1;
         elemSize = -1;
@@ -81,7 +81,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     }
 
     /**
-     * Returns the bitmap index of the subpage allocation.
+     * 返回子页分配的位图索引。
      */
     long allocate() {
         if (numAvail == 0 || !doNotDestroy) {
@@ -102,8 +102,8 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     }
 
     /**
-     * @return {@code true} if this subpage is in use.
-     *         {@code false} if this subpage is not used by its chunk and thus it's OK to be released.
+     * @return 如果使用此子页，则使用@code true}。
+     *         {@code false}如果这个子页没有被它的块使用，因此它可以被释放。
      */
     boolean free(PoolSubpage<T> head, int bitmapIdx) {
         if (elemSize == 0) {

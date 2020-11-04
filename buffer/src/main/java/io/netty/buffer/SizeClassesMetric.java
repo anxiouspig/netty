@@ -16,40 +16,40 @@
 package io.netty.buffer;
 
 /**
- * Expose metrics for an SizeClasses.
+ * 暴露一个SizeClasses的指标.
  */
 public interface SizeClassesMetric {
 
     /**
-     * Computes size from lookup table according to sizeIdx.
+     * 根据sizeIdx计算查找表的大小。
      *
      * @return size
      */
     int sizeIdx2size(int sizeIdx);
 
     /**
-     * Computes size according to sizeIdx.
+     * 根据sizeIdx计算大小。
      *
      * @return size
      */
     int sizeIdx2sizeCompute(int sizeIdx);
 
     /**
-     * Computes size from lookup table according to pageIdx.
+     * 根据pageIdx计算查找表的大小。
      *
-     * @return size which is multiples of pageSize.
+     * @return 大小是页面大小的倍数。
      */
     long pageIdx2size(int pageIdx);
 
     /**
-     * Computes size according to pageIdx.
+     * 根据pageIdx计算大小。
      *
-     * @return size which is multiples of pageSize
+     * @return 大小是页面大小的倍数
      */
     long pageIdx2sizeCompute(int pageIdx);
 
     /**
-     * Normalizes request size up to the nearest size class.
+     * 将请求大小标准化到最接近的大小类。
      *
      * @param size request size
      *
@@ -58,7 +58,7 @@ public interface SizeClassesMetric {
     int size2SizeIdx(int size);
 
     /**
-     * Normalizes request size up to the nearest pageSize class.
+     * 将请求大小标准化到最近的pageSize类。
      *
      * @param pages multiples of pageSizes
      *
@@ -67,7 +67,7 @@ public interface SizeClassesMetric {
     int pages2pageIdx(int pages);
 
     /**
-     * Normalizes request size down to the nearest pageSize class.
+     * 将请求大小规范化为最近的pageSize类。
      *
      * @param pages multiples of pageSizes
      *
@@ -76,8 +76,7 @@ public interface SizeClassesMetric {
     int pages2pageIdxFloor(int pages);
 
     /**
-     * Normalizes usable size that would result from allocating an object with the
-     * specified size and alignment.
+     * 规范化分配具有指定大小和对齐方式的对象所产生的可用大小。
      *
      * @param size request size
      *

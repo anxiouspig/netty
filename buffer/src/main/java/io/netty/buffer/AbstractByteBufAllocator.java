@@ -24,13 +24,13 @@ import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
 
 /**
- * Skeletal {@link ByteBufAllocator} implementation to extend.
+ * 扩展骨架{@link ByteBufAllocator}实现。
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
-    static final int DEFAULT_INITIAL_CAPACITY = 256;
-    static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE;
-    static final int DEFAULT_MAX_COMPONENTS = 16;
-    static final int CALCULATE_THRESHOLD = 1048576 * 4; // 4 MiB page
+    static final int DEFAULT_INITIAL_CAPACITY = 256; // 默认初始化容量
+    static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE; // 默认最大容量
+    static final int DEFAULT_MAX_COMPONENTS = 16; // 默认最大组件大小
+    static final int CALCULATE_THRESHOLD = 1048576 * 4; // 4 MiB page 计算阈值
 
     static {
         ResourceLeakDetector.addExclusions(AbstractByteBufAllocator.class, "toLeakAwareBuffer");
@@ -80,29 +80,31 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
+    // 是否是直接内存
     private final boolean directByDefault;
     private final ByteBuf emptyBuf;
 
     /**
-     * Instance use heap buffers by default
+     * 实例默认情况下使用堆缓冲区
      */
     protected AbstractByteBufAllocator() {
         this(false);
     }
 
     /**
-     * Create new instance
+     * 创建新实例
      *
-     * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
-     *                     a heap buffer
+     * @param preferDirect 如果{@link #buffer(int)}应该尝试分配一个直接缓冲区而不是堆缓冲区，那么{@code true}
      */
     protected AbstractByteBufAllocator(boolean preferDirect) {
         directByDefault = preferDirect && PlatformDependent.hasUnsafe();
+        // 空ByteBuf
         emptyBuf = new EmptyByteBuf(this);
     }
 
     @Override
     public ByteBuf buffer() {
+        // 直接内存还是堆内存
         if (directByDefault) {
             return directBuffer();
         }
@@ -233,12 +235,12 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     }
 
     /**
-     * Create a heap {@link ByteBuf} with the given initialCapacity and maxCapacity.
+     * 使用给定的初始容量和最大容量创建一个heap {@link ByteBuf}。
      */
     protected abstract ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity);
 
     /**
-     * Create a direct {@link ByteBuf} with the given initialCapacity and maxCapacity.
+     * 使用给定的初始容量和最大容量创建一个直接{@link ByteBuf}。
      */
     protected abstract ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity);
 
@@ -248,21 +250,26 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     }
 
     @Override
+    // 计算新容量
     public int calculateNewCapacity(int minNewCapacity, int maxCapacity) {
         checkPositiveOrZero(minNewCapacity, "minNewCapacity");
+        // 新容量大于最大容量的话
         if (minNewCapacity > maxCapacity) {
             throw new IllegalArgumentException(String.format(
                     "minNewCapacity: %d (expected: not greater than maxCapacity(%d)",
                     minNewCapacity, maxCapacity));
         }
+        // 阈值
         final int threshold = CALCULATE_THRESHOLD; // 4 MiB page
 
+        // 若为阈值
         if (minNewCapacity == threshold) {
             return threshold;
         }
 
-        // If over threshold, do not double but just increase by threshold.
+        // 如果超过阈值，不要翻倍，而是按阈值增加。
         if (minNewCapacity > threshold) {
+
             int newCapacity = minNewCapacity / threshold * threshold;
             if (newCapacity > maxCapacity - threshold) {
                 newCapacity = maxCapacity;
@@ -272,7 +279,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             return newCapacity;
         }
 
-        // Not over threshold. Double up to 4 MiB, starting from 64.
+        // 不超过阈值。从64b翻倍到4M
         int newCapacity = 64;
         while (newCapacity < minNewCapacity) {
             newCapacity <<= 1;

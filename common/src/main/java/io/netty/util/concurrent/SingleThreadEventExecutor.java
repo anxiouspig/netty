@@ -214,7 +214,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     protected static Runnable pollTaskFrom(Queue<Runnable> taskQueue) {
         for (;;) {
-            // 循环取任务，无任务的话阻塞住
+            // 循环取任务
             Runnable task = taskQueue.poll(); // 取出任务
             // 不为唤醒任务的话
             if (task != WAKEUP_TASK) {
@@ -880,7 +880,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             }
         }
 
-        if (!addTaskWakesUp && immediate) { // 是否唤醒
+        if (!addTaskWakesUp && immediate) { // 是否唤醒select
             wakeup(inEventLoop);
         }
     }

@@ -18,40 +18,40 @@ package io.netty.buffer;
 import static io.netty.buffer.PoolThreadCache.*;
 
 /**
- * SizeClasses requires {@code pageShifts} to be defined prior to inclusion,
- * and it in turn defines:
+ * SizeClasses 要求在之前定义 {@code pageShifts} ,
+ * 它定义了:
  * <p>
- *   LOG2_SIZE_CLASS_GROUP: Log of size class count for each size doubling.
- *   LOG2_MAX_LOOKUP_SIZE: Log of max size class in the lookup table.
- *   sizeClasses: Complete table of [index, log2Group, log2Delta, nDelta, isMultiPageSize,
- *                 isSubPage, log2DeltaLookup] tuples.
- *     index: Size class index.
- *     log2Group: Log of group base size (no deltas added).
- *     log2Delta: Log of delta to previous size class.
- *     nDelta: Delta multiplier.
- *     isMultiPageSize: 'yes' if a multiple of the page size, 'no' otherwise.
- *     isSubPage: 'yes' if a subpage size class, 'no' otherwise.
+ *   LOG2_SIZE_CLASS_GROUP: 每个大小组的大小等级数量的对数.
+ *   LOG2_MAX_LOOKUP_SIZE:  lookup table 中的最大大小等级对数.
+ *   sizeClasses: [index, log2Group, log2Delta, nDelta, isMultiPageSize,
+ *                 isSubPage, log2DeltaLookup] 类型的全表.
+ *     index: 大小等级索引.
+ *     log2Group: 基础大小的对数组 (没有δ添加).
+ *     log2Delta: 上一个大小等级的对数δ
+ *     nDelta: δ 倍数.
+ *     isMultiPageSize: 'yes' 如果是页大小的倍数, 'no' 否则.
+ *     isSubPage: 'yes' 如果是子页大小等级, 'no' otherwise.
  *     log2DeltaLookup: Same as log2Delta if a lookup table size class, 'no'
  *                      otherwise.
  * <p>
- *   nSubpages: Number of subpages size classes.
- *   nSizes: Number of size classes.
- *   nPSizes: Number of size classes that are multiples of pageSize.
+ *   nSubpages: 子页大小等级的编号.
+ *   nSizes: 大小等级的编号.
+ *   nPSizes: 页大小倍数的大小等级编号.
  *
- *   smallMaxSizeIdx: Maximum small size class index.
+ *   smallMaxSizeIdx: 最大的小的大小等级索引.
  *
- *   lookupMaxclass: Maximum size class included in lookup table.
- *   log2NormalMinClass: Log of minimum normal size class.
+ *   lookupMaxclass: 包含在 lookup table 的大小等级.
+ *   log2NormalMinClass: 最小的标准大小等级的对数.
  * <p>
- *   The first size class and spacing are 1 << LOG2_QUANTUM.
- *   Each group has 1 << LOG2_SIZE_CLASS_GROUP of size classes.
+ *   第一个 size class 和 空间是 1 << LOG2_QUANTUM = 16 = 2B.
+ *   每个组有 1 << LOG2_SIZE_CLASS_GROUP = 4 of size classes.
  *
+ *   size计算方法
  *   size = 1 << log2Group + nDelta * (1 << log2Delta)
  *
- *   The first size class has an unusual encoding, because the size has to be
- *   split between group and delta*nDelta.
+ *   第一个 size class 有一个不同的编码, 因为大小必须在 group and delta*nDelta 中分割.
  *
- *   If pageShift = 13, sizeClasses looks like this:
+ *   If pageShift = 13, sizeClasses 类似这样:
  *
  *   (index, log2Group, log2Delta, nDelta, isMultiPageSize, isSubPage, log2DeltaLookup)
  * <p>
@@ -80,10 +80,10 @@ import static io.netty.buffer.PoolThreadCache.*;
  */
 abstract class SizeClasses implements SizeClassesMetric {
 
-    static final int LOG2_QUANTUM = 4;
+    static final int LOG2_QUANTUM = 4; // 对数量子=4
 
-    private static final int LOG2_SIZE_CLASS_GROUP = 2;
-    private static final int LOG2_MAX_LOOKUP_SIZE = 12;
+    private static final int LOG2_SIZE_CLASS_GROUP = 2; // 每个组的等级数量=4
+    private static final int LOG2_MAX_LOOKUP_SIZE = 12; //
 
     private static final int INDEX_IDX = 0;
     private static final int LOG2GROUP_IDX = 1;
@@ -96,21 +96,23 @@ abstract class SizeClasses implements SizeClassesMetric {
     private static final byte no = 0, yes = 1;
 
     protected SizeClasses(int pageSize, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
-        this.pageSize = pageSize;
-        this.pageShifts = pageShifts;
-        this.chunkSize = chunkSize;
-        this.directMemoryCacheAlignment = directMemoryCacheAlignment;
+        this.pageSize = pageSize; // 页大小，默认1kb
+        this.pageShifts = pageShifts; // 页大小二进制位 13
+        this.chunkSize = chunkSize; // 块大小，默认2m
+        this.directMemoryCacheAlignment = directMemoryCacheAlignment; // huge内存块使用 0
 
+        // 计算group的数量 21
         int group = log2(chunkSize) + 1 - LOG2_QUANTUM;
 
-        //generate size classes
+        //产生 size classes
         //[index, log2Group, log2Delta, nDelta, isMultiPageSize, isSubPage, log2DeltaLookup]
+        // 4倍，每组4个，84个等级
         sizeClasses = new short[group << LOG2_SIZE_CLASS_GROUP][7];
-        nSizes = sizeClasses();
+        nSizes = sizeClasses(); // 76个级
 
-        //generate lookup table
-        sizeIdx2sizeTab = new int[nSizes];
-        pageIdx2sizeTab = new int[nPSizes];
+        //产生 lookup table
+        sizeIdx2sizeTab = new int[nSizes]; // 76 存size
+        pageIdx2sizeTab = new int[nPSizes]; // 页倍数 存size
         idx2SizeTab(sizeIdx2sizeTab, pageIdx2sizeTab);
 
         size2idxTab = new int[lookupMaxSize >> LOG2_QUANTUM];
@@ -141,27 +143,28 @@ abstract class SizeClasses implements SizeClassesMetric {
     // spacing is 1 << LOG2_QUANTUM, so the size of array is lookupMaxclass >> LOG2_QUANTUM
     private final int[] size2idxTab;
 
+    // 大小等级
     private int sizeClasses() {
         int normalMaxSize = -1;
 
         int index = 0;
         int size = 0;
 
-        int log2Group = LOG2_QUANTUM;
-        int log2Delta = LOG2_QUANTUM;
-        int ndeltaLimit = 1 << LOG2_SIZE_CLASS_GROUP;
+        int log2Group = LOG2_QUANTUM; // 4
+        int log2Delta = LOG2_QUANTUM; // 4
+        int ndeltaLimit = 1 << LOG2_SIZE_CLASS_GROUP; // 4
 
         //First small group, nDelta start at 0.
-        //first size class is 1 << LOG2_QUANTUM
-        int nDelta = 0;
-        while (nDelta < ndeltaLimit) {
-            size = sizeClass(index++, log2Group, log2Delta, nDelta++);
+        //first size class is 1 << LOG2_QUANTUM = 16
+        int nDelta = 0; // 初始化为0
+        while (nDelta < ndeltaLimit) { // nDelta = 0，1，2，3
+            size = sizeClass(index++, log2Group, log2Delta, nDelta++); // 16，
         }
-        log2Group += LOG2_SIZE_CLASS_GROUP;
+        log2Group += LOG2_SIZE_CLASS_GROUP; // +2=6
 
-        //All remaining groups, nDelta start at 1.
-        while (size < chunkSize) {
-            nDelta = 1;
+        //所有其余的组，nDelta从1开始。
+        while (size < chunkSize) { // 64 < 2m 在块内存内分配
+            nDelta = 1; // 1，2，3，4
 
             while (nDelta <= ndeltaLimit && size < chunkSize) {
                 size = sizeClass(index++, log2Group, log2Delta, nDelta++);
@@ -179,29 +182,33 @@ abstract class SizeClasses implements SizeClassesMetric {
         return index;
     }
 
-    //calculate size class
+    //计算大小等级
     private int sizeClass(int index, int log2Group, int log2Delta, int nDelta) {
-        short isMultiPageSize;
+        // 0 4 4 0，1 4 4 1，2 4 4 2，3 4 4 3，
+        short isMultiPageSize; // 是否是子页的倍数
         if (log2Delta >= pageShifts) {
+            // pageShifts默认13
             isMultiPageSize = yes;
         } else {
-            int pageSize = 1 << pageShifts;
-            int size = (1 << log2Group) + (1 << log2Delta) * nDelta;
-
-            isMultiPageSize = size == size / pageSize * pageSize? yes : no;
+            int pageSize = 1 << pageShifts; // 8192=1kb
+            int size = (1 << log2Group) + (1 << log2Delta) * nDelta; // 16，32，48，64
+            // size是1kb的整数倍
+            isMultiPageSize = size == size / pageSize * pageSize? yes : no; // 0，0，0，0
         }
 
-        int log2Ndelta = nDelta == 0? 0 : log2(nDelta);
+        int log2Ndelta = nDelta == 0? 0 : log2(nDelta); // 0，0，1，1
 
-        byte remove = 1 << log2Ndelta < nDelta? yes : no;
+        byte remove = 1 << log2Ndelta < nDelta? yes : no; // 0，0，0，1 nDelta只有4才是no
 
-        int log2Size = log2Delta + log2Ndelta == log2Group? log2Group + 1 : log2Group;
+        // 4 + 0 == 4 ? 4 + 1 : 4
+        int log2Size = log2Delta + log2Ndelta == log2Group? log2Group + 1 : log2Group; // 5，5，4，4
         if (log2Size == log2Group) {
-            remove = yes;
+            remove = yes; // 0，0，1，1
         }
 
-        short isSubpage = log2Size < pageShifts + LOG2_SIZE_CLASS_GROUP? yes : no;
-
+        // 是不是子页 = 5 < 13 + 2 = 15
+        short isSubpage = log2Size < pageShifts + LOG2_SIZE_CLASS_GROUP? yes : no; // 1，1，1，1
+        // 4
         int log2DeltaLookup = log2Size < LOG2_MAX_LOOKUP_SIZE ||
                               log2Size == LOG2_MAX_LOOKUP_SIZE && remove == no
                 ? log2Delta : no;
@@ -214,22 +221,22 @@ abstract class SizeClasses implements SizeClassesMetric {
         sizeClasses[index] = sz;
         int size = (1 << log2Group) + (nDelta << log2Delta);
 
-        if (sz[PAGESIZE_IDX] == yes) {
+        if (sz[PAGESIZE_IDX] == yes) { // 是否是1kb的倍数
             nPSizes++;
         }
-        if (sz[SUBPAGE_IDX] == yes) {
-            nSubpages++;
-            smallMaxSizeIdx = index;
+        if (sz[SUBPAGE_IDX] == yes) { // 是否是子页
+            nSubpages++; // 子页数量
+            smallMaxSizeIdx = index; // 类级别索引
         }
         if (sz[LOG2_DELTA_LOOKUP_IDX] != no) {
-            lookupMaxSize = size;
+            lookupMaxSize = size; // 观察大小
         }
         return size;
     }
 
     private void idx2SizeTab(int[] sizeIdx2sizeTab, int[] pageIdx2sizeTab) {
         int pageIdx = 0;
-
+        // sizeIdx2sizeTab = 76，pageIdx2sizeTab = 40
         for (int i = 0; i < nSizes; i++) {
             short[] sizeClass = sizeClasses[i];
             int log2Group = sizeClass[LOG2GROUP_IDX];
@@ -237,25 +244,25 @@ abstract class SizeClasses implements SizeClassesMetric {
             int nDelta = sizeClass[NDELTA_IDX];
 
             int size = (1 << log2Group) + (nDelta << log2Delta);
-            sizeIdx2sizeTab[i] = size;
+            sizeIdx2sizeTab[i] = size; // 记录所有级大小
 
             if (sizeClass[PAGESIZE_IDX] == yes) {
-                pageIdx2sizeTab[pageIdx++] = size;
+                pageIdx2sizeTab[pageIdx++] = size; // 记录1kb倍数级的size
             }
         }
     }
-
+    // TODO
     private void size2idxTab(int[] size2idxTab) {
         int idx = 0;
         int size = 0;
-
+        // size2idxTab.length=lookupMaxSize/16=256
         for (int i = 0; size <= lookupMaxSize; i++) {
             int log2Delta = sizeClasses[i][LOG2DELTA_IDX];
             int times = 1 << log2Delta - LOG2_QUANTUM;
-
+            // [0,1,2,3,4,5,6,7,8,8,9,9,9,9,10,10,10,10,10,10,10,10...]
             while (size <= lookupMaxSize && times-- > 0) {
                 size2idxTab[idx++] = i;
-                size = idx + 1 << LOG2_QUANTUM;
+                size = idx + 1 << LOG2_QUANTUM; // idx+1<256 -> idx < 255
             }
         }
     }
@@ -373,7 +380,7 @@ abstract class SizeClasses implements SizeClassesMetric {
         return pageIdx;
     }
 
-    // Round size up to the nearest multiple of alignment.
+    // 四舍五入大小，直到对齐的最接近倍数。
     private int alignSize(int size) {
         int delta = size & directMemoryCacheAlignment - 1;
         return delta == 0? size : size + directMemoryCacheAlignment - delta;

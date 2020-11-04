@@ -20,7 +20,7 @@ import io.netty.util.internal.StringUtil;
 import java.util.List;
 
 /**
- * Exposed metric for {@link PooledByteBufAllocator}.
+ * {@link PooledByteBufAllocator}暴露度量方法.
  */
 @SuppressWarnings("deprecation")
 public final class PooledByteBufAllocatorMetric implements ByteBufAllocatorMetric {
@@ -32,42 +32,42 @@ public final class PooledByteBufAllocatorMetric implements ByteBufAllocatorMetri
     }
 
     /**
-     * Return the number of heap arenas.
+     * 返回场的数量。
      */
     public int numHeapArenas() {
         return allocator.numHeapArenas();
     }
 
     /**
-     * Return the number of direct arenas.
+     * 返回直接场的数量。
      */
     public int numDirectArenas() {
         return allocator.numDirectArenas();
     }
 
     /**
-     * Return a {@link List} of all heap {@link PoolArenaMetric}s that are provided by this pool.
+     * 返回此池提供的所有堆{@link PoolArenaMetric}的{@link List}。
      */
     public List<PoolArenaMetric> heapArenas() {
         return allocator.heapArenas();
     }
 
     /**
-     * Return a {@link List} of all direct {@link PoolArenaMetric}s that are provided by this pool.
+     * 返回此池提供的所有直接{@link PoolArenaMetric}的{@link List}。
      */
     public List<PoolArenaMetric> directArenas() {
         return allocator.directArenas();
     }
 
     /**
-     * Return the number of thread local caches used by this {@link PooledByteBufAllocator}.
+     * 返回此{@link PooledByteBufAllocator}所使用的线程本地缓存数。
      */
     public int numThreadLocalCaches() {
         return allocator.numThreadLocalCaches();
     }
 
     /**
-     * Return the size of the tiny cache.
+     * 返回小缓存的大小。
      *
      * @deprecated Tiny caches have been merged into small caches.
      */
@@ -77,21 +77,21 @@ public final class PooledByteBufAllocatorMetric implements ByteBufAllocatorMetri
     }
 
     /**
-     * Return the size of the small cache.
+     * 返回小缓存的大小。
      */
     public int smallCacheSize() {
         return allocator.smallCacheSize();
     }
 
     /**
-     * Return the size of the normal cache.
+     * 返回正常缓存的大小。
      */
     public int normalCacheSize() {
         return allocator.normalCacheSize();
     }
 
     /**
-     * Return the chunk size for an arena.
+     * 返回场的块大小。
      */
     public int chunkSize() {
         return allocator.chunkSize();

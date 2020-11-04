@@ -29,12 +29,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.netty.buffer.PoolChunk.isSubpage;
 import static java.lang.Math.max;
 
+// 池
 abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
-    static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
+    static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe(); // 是否有UnSafe
 
     enum SizeClass {
-        Small,
-        Normal
+        Small, // 小
+        Normal // 正常
     }
 
     final PooledByteBufAllocator parent;
@@ -53,9 +54,9 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     private final List<PoolChunkListMetric> chunkListMetrics;
 
-    // Metrics for allocations and deallocations
+    // 存储单元分配和分配的指标
     private long allocationsNormal;
-    // We need to use the LongCounter here as this is not guarded via synchronized block.
+    // 我们需要在这里使用LongCounter，因为它不是通过同步块来保护的。
     private final LongCounter allocationsSmall = PlatformDependent.newLongCounter();
     private final LongCounter allocationsHuge = PlatformDependent.newLongCounter();
     private final LongCounter activeBytesHuge = PlatformDependent.newLongCounter();
@@ -63,10 +64,10 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     private long deallocationsSmall;
     private long deallocationsNormal;
 
-    // We need to use the LongCounter here as this is not guarded via synchronized block.
+    // 我们需要在这里使用LongCounter，因为它不是通过同步块来保护的。
     private final LongCounter deallocationsHuge = PlatformDependent.newLongCounter();
 
-    // Number of thread caches backed by this arena.
+    // 此场支持的线程缓存数。
     final AtomicInteger numThreadCaches = new AtomicInteger();
 
     // TODO: Test if adding padding helps under contention
@@ -76,21 +77,21 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
           int pageShifts, int chunkSize, int cacheAlignment) {
         super(pageSize, pageShifts, chunkSize, cacheAlignment);
         this.parent = parent;
-        directMemoryCacheAlignment = cacheAlignment;
-        directMemoryCacheAlignmentMask = cacheAlignment - 1;
+        directMemoryCacheAlignment = cacheAlignment; // 0
+        directMemoryCacheAlignmentMask = cacheAlignment - 1; // -1
 
-        numSmallSubpagePools = nSubpages;
+        numSmallSubpagePools = nSubpages; // 39
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
-            smallSubpagePools[i] = newSubpagePoolHead();
+            smallSubpagePools[i] = newSubpagePoolHead(); // 自己与自己成链
         }
 
-        q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize);
-        q075 = new PoolChunkList<T>(this, q100, 75, 100, chunkSize);
-        q050 = new PoolChunkList<T>(this, q075, 50, 100, chunkSize);
-        q025 = new PoolChunkList<T>(this, q050, 25, 75, chunkSize);
-        q000 = new PoolChunkList<T>(this, q025, 1, 50, chunkSize);
-        qInit = new PoolChunkList<T>(this, q000, Integer.MIN_VALUE, 25, chunkSize);
+        q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize); // -IntMax 0
+        q075 = new PoolChunkList<T>(this, q100, 75, 100, chunkSize); // 0 25
+        q050 = new PoolChunkList<T>(this, q075, 50, 100, chunkSize); // 0 50
+        q025 = new PoolChunkList<T>(this, q050, 25, 75, chunkSize); // 25 75
+        q000 = new PoolChunkList<T>(this, q025, 1, 50, chunkSize); // 50 IntMax
+        qInit = new PoolChunkList<T>(this, q000, Integer.MIN_VALUE, 25, chunkSize); // 75 IntMax
 
         q100.prevList(q075);
         q075.prevList(q050);
@@ -118,7 +119,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
 
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpagePoolArray(int size) {
-        return new PoolSubpage[size];
+        return new PoolSubpage[size]; // 39
     }
 
     abstract boolean isDirect();
@@ -130,7 +131,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     }
 
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
-        final int sizeIdx = size2SizeIdx(reqCapacity);
+        final int sizeIdx = size2SizeIdx(reqCapacity); // 0
 
         if (sizeIdx <= smallMaxSizeIdx) {
             tcacheAllocateSmall(cache, buf, reqCapacity, sizeIdx);
@@ -148,13 +149,13 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
                                      final int sizeIdx) {
 
         if (cache.allocateSmall(this, buf, reqCapacity, sizeIdx)) {
-            // was able to allocate out of the cache so move on
+            // 是否能够分配出缓存，那么继续
             return;
         }
 
         /**
-         * Synchronize on the head. This is needed as {@link PoolChunk#allocateSubpage(int)} and
-         * {@link PoolChunk#free(long)} may modify the doubly linked list as well.
+         * 头部同步。这是必需的，因为{@link PoolChunk#allocateSubpage(int)}和{@link\
+         * PoolChunk#free(long)}也可能修改双重链接的列表。
          */
         final PoolSubpage<T> head = smallSubpagePools[sizeIdx];
         final boolean needsNormalAllocation;
@@ -541,7 +542,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     }
 
     static final class HeapArena extends PoolArena<byte[]> {
-
+        // 堆场
         HeapArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                   int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,
@@ -589,7 +590,7 @@ abstract class PoolArena<T> extends SizeClasses implements PoolArenaMetric {
     }
 
     static final class DirectArena extends PoolArena<ByteBuffer> {
-
+        // 直接内存场
         DirectArena(PooledByteBufAllocator parent, int pageSize, int pageShifts,
                     int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, pageShifts, chunkSize,

@@ -26,33 +26,33 @@ import java.security.PrivilegedAction;
 
 
 /**
- * Allows to free direct {@link ByteBuffer} by using Cleaner. This is encapsulated in an extra class to be able
- * to use {@link PlatformDependent0} on Android without problems.
+ * 允许释放直接{@link ByteBuffer}使用Cleaner。
+ * 它被封装在一个额外的类中，以便能够在Android上毫无问题地使用{@link PlatformDependent0}。
  *
  * For more details see <a href="https://github.com/netty/netty/issues/2604">#2604</a>.
  */
 final class CleanerJava6 implements Cleaner {
-    private static final long CLEANER_FIELD_OFFSET;
-    private static final Method CLEAN_METHOD;
-    private static final Field CLEANER_FIELD;
+    private static final long CLEANER_FIELD_OFFSET; // 字段偏移量
+    private static final Method CLEAN_METHOD; // 清理方法
+    private static final Field CLEANER_FIELD; // 清理字段
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(CleanerJava6.class);
-
     static {
-        long fieldOffset;
-        Method clean;
-        Field cleanerField;
+        long fieldOffset; // 字段偏移量
+        Method clean; // 方法
+        Field cleanerField; // 清理字段
         Throwable error = null;
+        // 直接缓存
         final ByteBuffer direct = ByteBuffer.allocateDirect(1);
         try {
             Object mayBeCleanerField = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                 @Override
                 public Object run() {
                     try {
+                        // 释放字段
                         Field cleanerField =  direct.getClass().getDeclaredField("cleaner");
                         if (!PlatformDependent.hasUnsafe()) {
-                            // We need to make it accessible if we do not use Unsafe as we will access it via
-                            // reflection.
+                            // 如果我们不使用Unsafe，我们需要使它具有可访问性，因为我们将通过反射访问它。
                             cleanerField.setAccessible(true);
                         }
                         return cleanerField;
@@ -72,6 +72,7 @@ final class CleanerJava6 implements Cleaner {
             // If we have sun.misc.Unsafe we will use it as its faster then using reflection,
             // otherwise let us try reflection as last resort.
             if (PlatformDependent.hasUnsafe()) {
+                // 偏移量
                 fieldOffset = PlatformDependent0.objectFieldOffset(cleanerField);
                 cleaner = PlatformDependent0.getObject(direct, fieldOffset);
             } else {
@@ -99,10 +100,12 @@ final class CleanerJava6 implements Cleaner {
     }
 
     static boolean isSupported() {
+        // 支持直接内存
         return CLEANER_FIELD_OFFSET != -1 || CLEANER_FIELD != null;
     }
 
     @Override
+    // 释放直接内存
     public void freeDirectBuffer(ByteBuffer buffer) {
         if (!buffer.isDirect()) {
             return;
@@ -118,6 +121,7 @@ final class CleanerJava6 implements Cleaner {
         }
     }
 
+    // 安全释放直接内存
     private static void freeDirectBufferPrivileged(final ByteBuffer buffer) {
         Throwable cause = AccessController.doPrivileged(new PrivilegedAction<Throwable>() {
             @Override
@@ -140,11 +144,12 @@ final class CleanerJava6 implements Cleaner {
         // If CLEANER_FIELD_OFFSET == -1 we need to use reflection to access the cleaner, otherwise we can use
         // sun.misc.Unsafe.
         if (CLEANER_FIELD_OFFSET == -1) {
-            cleaner = CLEANER_FIELD.get(buffer);
+            cleaner = CLEANER_FIELD.get(buffer); // 获取清理对象
         } else {
             cleaner = PlatformDependent0.getObject(buffer, CLEANER_FIELD_OFFSET);
         }
         if (cleaner != null) {
+            // 调用清理方法
             CLEAN_METHOD.invoke(cleaner);
         }
     }

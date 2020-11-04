@@ -35,7 +35,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 public final class DiscardServer {
 
     static final boolean SSL = System.getProperty("ssl") != null;
-    static final int PORT = Integer.parseInt(System.getProperty("port", "8009"));
+    static final int PORT = Integer.parseInt(System.getProperty("port", "8019"));
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
@@ -72,6 +72,8 @@ public final class DiscardServer {
             // In this example, this does not happen, but you can do that to gracefully
             // shut down your server.
             f.channel().closeFuture().sync();
+
+            System.out.println(2);
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

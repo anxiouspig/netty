@@ -18,34 +18,34 @@ package io.netty.buffer;
 import io.netty.util.ReferenceCounted;
 
 /**
- * A packet which is send or receive.
+ * 正在发送或接收的数据包。
  */
 public interface ByteBufHolder extends ReferenceCounted {
 
     /**
-     * Return the data which is held by this {@link ByteBufHolder}.
+     * 返回由这个{@link ByteBufHolder}持有的数据。
      */
     ByteBuf content();
 
     /**
-     * Creates a deep copy of this {@link ByteBufHolder}.
+     * 创建此{@link ByteBufHolder}的深层副本。
      */
     ByteBufHolder copy();
 
     /**
-     * Duplicates this {@link ByteBufHolder}. Be aware that this will not automatically call {@link #retain()}.
+     * 复制此{@link ByteBufHolder}。注意，这不会自动调用{@link #retain()}。
      */
     ByteBufHolder duplicate();
 
     /**
-     * Duplicates this {@link ByteBufHolder}. This method returns a retained duplicate unlike {@link #duplicate()}.
+     * 复制此{@link ByteBufHolder}。与{@link #duplicate()}不同，该方法返回保留的副本。
      *
      * @see ByteBuf#retainedDuplicate()
      */
     ByteBufHolder retainedDuplicate();
 
     /**
-     * Returns a new {@link ByteBufHolder} which contains the specified {@code content}.
+     * 返回一个新的{@link ByteBufHolder}，其中包含指定的{@code内容}。
      */
     ByteBufHolder replace(ByteBuf content);
 

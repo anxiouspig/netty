@@ -40,22 +40,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@link io.netty.channel.socket.ServerSocketChannel} implementation which uses
- * NIO selector based implementation to accept new connections.
+ * 一个 {@link io.netty.channel.socket.ServerSocketChannel} 的实现，它使用基于NIO选择器的实现来接受新连接。
  */
 public class NioServerSocketChannel extends AbstractNioMessageChannel
                              implements io.netty.channel.socket.ServerSocketChannel {
 
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
+    // 默认jdk selector
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioServerSocketChannel.class);
-
+    // 新建socket channel
     private static ServerSocketChannel newSocket(SelectorProvider provider) {
         try {
             /**
-             *  Use the {@link SelectorProvider} to open {@link SocketChannel} and so remove condition in
-             *  {@link SelectorProvider#provider()} which is called by each ServerSocketChannel.open() otherwise.
+             *  使用 {@link SelectorProvider} 去打开 {@link SocketChannel} 因此，删除
+             *  {@link SelectorProvider#provider()}中的条件，该条件被每个ServerSocketChannel.open()调用。
              *
              *  See <a href="https://github.com/netty/netty/issues/2308">#2308</a>.
              */
@@ -69,21 +69,21 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     private final ServerSocketChannelConfig config;
 
     /**
-     * Create a new instance
+     * 创建一个新实例
      */
     public NioServerSocketChannel() {
         this(newSocket(DEFAULT_SELECTOR_PROVIDER));
     }
 
     /**
-     * Create a new instance using the given {@link SelectorProvider}.
+     * 创建一个新实例，用给定的 {@link SelectorProvider}.
      */
     public NioServerSocketChannel(SelectorProvider provider) {
         this(newSocket(provider));
     }
 
     /**
-     * Create a new instance using the given {@link ServerSocketChannel}.
+     * 创建一个新实例，使用给定的 {@link ServerSocketChannel}.
      */
     public NioServerSocketChannel(ServerSocketChannel channel) {
         super(null, channel, SelectionKey.OP_ACCEPT);
@@ -107,8 +107,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     @Override
     public boolean isActive() {
-        // As java.nio.ServerSocketChannel.isBound() will continue to return true even after the channel was closed
-        // we will also need to check if it is open.
+        // 由于java.nio.ServerSocketChannel.isBound()将继续返回true，即使在通道关闭之后，我们还需要检查它是否打开。
         return isOpen() && javaChannel().socket().isBound();
     }
 
@@ -142,14 +141,17 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         javaChannel().close();
     }
 
+    //  将消息读入给定的数组，并返回读取的消息量。
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
+        // jdk新连接channel
         SocketChannel ch = SocketUtils.accept(javaChannel());
 
         try {
             if (ch != null) {
+                // 包装成NioSocketChannel
                 buf.add(new NioSocketChannel(this, ch));
-                return 1;
+                return 1; // 返回成功
             }
         } catch (Throwable t) {
             logger.warn("Failed to create a new channel from an accepted socket.", t);
@@ -196,8 +198,10 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         throw new UnsupportedOperationException();
     }
 
+    // 配置
     private final class NioServerSocketChannelConfig extends DefaultServerSocketChannelConfig {
         private NioServerSocketChannelConfig(NioServerSocketChannel channel, ServerSocket javaSocket) {
+            // netty的channel和java channel
             super(channel, javaSocket);
         }
 

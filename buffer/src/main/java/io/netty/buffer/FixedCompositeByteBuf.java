@@ -30,9 +30,10 @@ import java.nio.channels.ScatteringByteChannel;
 import java.util.Collections;
 
 /**
- * {@link ByteBuf} implementation which allows to wrap an array of {@link ByteBuf} in a read-only mode.
- * This is useful to write an array of {@link ByteBuf}s.
+ * 允许以只读模式包装{@link ByteBuf}数组的实现。
+ * 这对于编写{@link ByteBuf}数组很有用。
  */
+// 固定缓冲数组
 final class FixedCompositeByteBuf extends AbstractReferenceCountedByteBuf {
     private static final ByteBuf[] EMPTY = { Unpooled.EMPTY_BUFFER };
     private final int nioBufferCount;

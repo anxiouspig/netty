@@ -24,46 +24,43 @@ import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.List;
 
 /**
- * Resolves a possibility unresolved {@link SocketAddress}.
+ * 解决可能未解决的{@link SocketAddress}。
  */
 public interface AddressResolver<T extends SocketAddress> extends Closeable {
 
   /**
-   * Returns {@code true} if and only if the specified address is supported by this resolved.
+   * 当且仅当此解析支持指定的地址时，返回{@code true}。
    */
   boolean isSupported(SocketAddress address);
 
   /**
-   * Returns {@code true} if and only if the specified address has been resolved.
+   * 返回{@code true}，当且仅当指定的地址已被解析。
    *
-   * @throws UnsupportedAddressTypeException if the specified address is not supported by this resolver
+   * @throws UnsupportedAddressTypeException 如果指定的地址不被此解析器支持
    */
   boolean isResolved(SocketAddress address);
 
   /**
-   * Resolves the specified address. If the specified address is resolved already, this method does nothing
-   * but returning the original address.
+   * 解析指定的地址。如果指定的地址已经解析，此方法只返回原始地址。
    *
    * @param address the address to resolve
    *
-   * @return the {@link SocketAddress} as the result of the resolution
+   * @return 作为解析结果的{@link SocketAddress}
    */
   Future<T> resolve(SocketAddress address);
 
   /**
-   * Resolves the specified address. If the specified address is resolved already, this method does nothing
-   * but returning the original address.
+   * 解析指定的地址。如果指定的地址已经解析，此方法只返回原始地址。
    *
-   * @param address the address to resolve
-   * @param promise the {@link Promise} which will be fulfilled when the name resolution is finished
+   * @param address 要解析的地址
+   * @param promise 当名称解析完成时，{@link Promise}将被实现
    *
-   * @return the {@link SocketAddress} as the result of the resolution
+   * @return 作为解析结果的{@link SocketAddress}
    */
   Future<T> resolve(SocketAddress address, Promise<T> promise);
 
   /**
-   * Resolves the specified address. If the specified address is resolved already, this method does nothing
-   * but returning the original address.
+   * 解析指定的地址。如果指定的地址已经解析，此方法只返回原始地址。
    *
    * @param address the address to resolve
    *
@@ -72,18 +69,17 @@ public interface AddressResolver<T extends SocketAddress> extends Closeable {
   Future<List<T>> resolveAll(SocketAddress address);
 
   /**
-   * Resolves the specified address. If the specified address is resolved already, this method does nothing
-   * but returning the original address.
+   * 解析指定的地址。如果指定的地址已经解析，此方法只返回原始地址。
    *
-   * @param address the address to resolve
-   * @param promise the {@link Promise} which will be fulfilled when the name resolution is finished
+   * @param address 要解析的地址
+   * @param promise 当名称解析完成时，{@link Promise}将被实现
    *
    * @return the list of the {@link SocketAddress}es as the result of the resolution
    */
   Future<List<T>> resolveAll(SocketAddress address, Promise<List<T>> promise);
 
   /**
-   * Closes all the resources allocated and used by this resolver.
+   * 关闭此解析器分配和使用的所有资源。
    */
   @Override
   void close();

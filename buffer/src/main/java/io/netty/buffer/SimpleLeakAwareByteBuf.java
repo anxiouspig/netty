@@ -25,10 +25,11 @@ import java.nio.ByteOrder;
 class SimpleLeakAwareByteBuf extends WrappedByteBuf {
 
     /**
-     * This object's is associated with the {@link ResourceLeakTracker}. When {@link ResourceLeakTracker#close(Object)}
-     * is called this object will be used as the argument. It is also assumed that this object is used when
-     * {@link ResourceLeakDetector#track(Object)} is called to create {@link #leak}.
+     * 这个对象与{@link ResourceLeakTracker}相关联。
+     * 当{@link ResourceLeakTracker#close(Object)}被调用时，这个对象将被用作参数。
+     * 还假设在调用{@link ResourceLeakDetector#track(Object)}创建{@link #leak}时使用该对象。
      */
+    // 跟踪堆栈的ByteBuf
     private final ByteBuf trackedByteBuf;
     final ResourceLeakTracker<ByteBuf> leak;
 
@@ -116,8 +117,7 @@ class SimpleLeakAwareByteBuf extends WrappedByteBuf {
     }
 
     private void closeLeak() {
-        // Close the ResourceLeakTracker with the tracked ByteBuf as argument. This must be the same that was used when
-        // calling DefaultResourceLeak.track(...).
+        // 使用被跟踪的ByteBuf作为参数关闭ResourceLeakTracker。这必须与调用defaultresourcelek .track(…)时使用的相同。
         boolean closed = leak.close(trackedByteBuf);
         assert closed;
     }
@@ -132,17 +132,17 @@ class SimpleLeakAwareByteBuf extends WrappedByteBuf {
     }
 
     private ByteBuf unwrappedDerived(ByteBuf derived) {
-        // We only need to unwrap SwappedByteBuf implementations as these will be the only ones that may end up in
-        // the AbstractLeakAwareByteBuf implementations beside slices / duplicates and "real" buffers.
+        // 我们只需要打开SwappedByteBuf实现，因为在AbstractLeakAwareByteBuf实现中，
+        // 除了片/副本和“真正的”缓冲区之外，这些将是唯一可能出现的。
         ByteBuf unwrappedDerived = unwrapSwapped(derived);
 
         if (unwrappedDerived instanceof AbstractPooledDerivedByteBuf) {
-            // Update the parent to point to this buffer so we correctly close the ResourceLeakTracker.
+            // 更新父节点以指向此缓冲区，这样我们就可以正确地关闭ResourceLeakTracker。
             ((AbstractPooledDerivedByteBuf) unwrappedDerived).parent(this);
 
             ResourceLeakTracker<ByteBuf> newLeak = AbstractByteBuf.leakDetector.track(derived);
             if (newLeak == null) {
-                // No leak detection, just return the derived buffer.
+                // 没有泄漏检测，只是返回派生的缓冲区。
                 return derived;
             }
             return newLeakAwareByteBuf(derived, newLeak);
